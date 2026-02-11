@@ -11,6 +11,11 @@ abstract class Routes {
   static const PEDAGANG = _Paths.PAGES + _Paths.PEDAGANG;
   static const DRIVER = _Paths.PAGES + _Paths.DRIVER;
   static const USER = _Paths.PAGES + _Paths.USER;
+  static const KIOS = _Paths.PAGES + _Paths.KIOS;
+  static const KIOS_ADD = _Paths.PAGES + _Paths.KIOS_ADD;
+    static const KIOS_UPDATE = _Paths.PAGES + _Paths.KIOS_UPDATE;
+
+
 }
 
 
@@ -25,6 +30,11 @@ abstract class _Paths {
   static const DRIVER = '/driver';
   static const USER = '/user';
   static const PAGES = '';
+  static const KIOS = '/kios';
+  static const KIOS_ADD = '/pedagang/kios/create';
+  static String kiosUpdate(int id) => '/pedagang/kios/edit/$id';
+  static const KIOS_UPDATE = '/pedagang/kios/edit/:id';
+ 
 }
 
 abstract class AppRoutes {
@@ -34,10 +44,16 @@ abstract class AppRoutes {
 
   // Pedagang Routes
   static const PEDAGANG_HOME = '/pedagang/home';
+   
 
   // Driver Routes
   static const DRIVER_HOME = '/driver/home';
 
   // User Routes
   static const USER_HOME = '/user/home';
+  static const KIOS = '/kios';
+  static const KIOS_ADD = '/pedagang/kios/create';
+  static String kiosUpdate(int id) => '/pedagang/kios/edit/$id';
+  static const KIOS_UPDATE = '/pedagang/kios/edit/:id';
+ 
 }

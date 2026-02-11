@@ -1,3 +1,4 @@
+import 'package:e_pasar/app/data/models/kios_model.dart';
 import 'package:get/get.dart';
 
 import '../../pages/auth/bindings/auth_binding.dart';
@@ -119,5 +120,8 @@ class AppPages {
       page: () => const UserView(),
       binding: UserBinding(),
     ),
+    GetPage(name: 
+    _Paths.KIOS_ADD, page: () => KiosAddView)
+    
   ];
 }
