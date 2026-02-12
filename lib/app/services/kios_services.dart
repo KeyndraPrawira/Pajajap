@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:e_pasar/app/data/models/kios_model.dart';
 import 'package:e_pasar/app/utils/api.dart';
 import 'package:get/get.dart';
@@ -36,7 +38,7 @@ class KiosService extends GetxService {
     required String lokasi,
     required String jamBuka,
     required String jamTutup,
-    String? deskripsi,
+    String? deskripsi, File? fotoKios,
   }) async {
     try {
       final response = await http.post(

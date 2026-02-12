@@ -191,7 +191,7 @@ class PedagangController extends GetxController {
 
     try {
       isLoading.value = true;
-      final success = await _kiosService.updateKios(
+      final success = await _kiosService.updateKios(id: kiosId)(
         kiosId: kiosId,
         namaKios: namaKios,
         lokasi: lokasi,
