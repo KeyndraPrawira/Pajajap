@@ -1,4 +1,4 @@
-// lib/app/modules/pedagang/views/kios_add_view.dart
+// lib/app/pages/pedagang/views/kios_edit_view.dart
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -6,28 +6,44 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/pedagang_controller.dart';
 
-class KiosAddView extends StatefulWidget {
-  const KiosAddView({Key? key}) : super(key: key);
+class KiosEditView extends StatefulWidget {
+  const KiosEditView({Key? key}) : super(key: key);
 
   @override
-  State<KiosAddView> createState() => _KiosAddViewState();
+  State<KiosEditView> createState() => _KiosEditViewState();
 }
 
-class _KiosAddViewState extends State<KiosAddView> {
+class _KiosEditViewState extends State<KiosEditView> {
   final PedagangController controller = Get.find<PedagangController>();
   
   final _formKey = GlobalKey<FormState>();
-  final _namaKiosController = TextEditingController();
-  final _lokasiController = TextEditingController();
-  final _deskripsiController = TextEditingController();
-  final _jamBukaController = TextEditingController();
-  final _jamTutupController = TextEditingController();
+  late TextEditingController _namaKiosController;
+  late TextEditingController _lokasiController;
+  late TextEditingController _deskripsiController;
+  late TextEditingController _jamBukaController;
+  late TextEditingController _jamTutupController;
   
   final _selectedImage = Rxn<XFile>();
   final ImagePicker _picker = ImagePicker();
+  
+  String? _currentFotoUrl; // Untuk simpan foto yang sudah ada
 
-  
-  
+  @override
+  void initState() {
+    super.initState();
+    
+    // Load data kios yang akan diedit
+    final kios = controller.myKios.value;
+    
+    _namaKiosController = TextEditingController(text: kios?.namaKios ?? '');
+    _lokasiController = TextEditingController(text: kios?.lokasi ?? '');
+    _deskripsiController = TextEditingController(text: kios?.deskripsi ?? '');
+    _jamBukaController = TextEditingController(text: kios?.jamBuka ?? '');
+    _jamTutupController = TextEditingController(text: kios?.jamTutup ?? '');
+    
+    _currentFotoUrl = kios?.fotoKios;
+  }
+
   @override
   void dispose() {
     _namaKiosController.dispose();
@@ -43,8 +59,7 @@ class _KiosAddViewState extends State<KiosAddView> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Buat Kios Baru'),
-        automaticallyImplyLeading: false,
+        title: const Text('Edit Kios'),
         elevation: 0,
         centerTitle: true,
       ),
@@ -56,7 +71,7 @@ class _KiosAddViewState extends State<KiosAddView> {
         return SingleChildScrollView(
           child: Column(
             children: [
-              // Header dengan ilustrasi
+              // Header
               _buildHeader(),
               
               // Form Content
@@ -77,7 +92,8 @@ class _KiosAddViewState extends State<KiosAddView> {
                       _buildNamaKiosField(),
                       const SizedBox(height: 16),
                       _buildLokasiField(),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+                     
 
                       // Jam Operasional Section
                       _buildSectionTitle('Jam Operasional'),
@@ -86,7 +102,7 @@ class _KiosAddViewState extends State<KiosAddView> {
                       const SizedBox(height: 24),
 
                       // Deskripsi Section
-                      _buildSectionTitle('Deskripsi (Opsional)'),
+                      _buildSectionTitle('Deskripsi'),
                       const SizedBox(height: 12),
                       _buildDeskripsiField(),
                       const SizedBox(height: 32),
@@ -132,14 +148,14 @@ class _KiosAddViewState extends State<KiosAddView> {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.store_rounded,
-                  size: 60,
+                  Icons.edit_rounded,
+                  size: 50,
                   color: Colors.white,
                 ),
               ),
               const SizedBox(height: 16),
               const Text(
-                'Selamat Datang!',
+                'Edit Kios',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -148,7 +164,7 @@ class _KiosAddViewState extends State<KiosAddView> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Lengkapi data kios untuk memulai berjualan',
+                'Perbarui informasi kios Anda',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -189,13 +205,14 @@ class _KiosAddViewState extends State<KiosAddView> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: _selectedImage.value != null
-            ? _buildSelectedImage()
-            : _buildImagePlaceholder(),
+            ? _buildNewSelectedImage()
+            : _buildCurrentOrPlaceholderImage(),
       ),
     );
   }
 
-  Widget _buildSelectedImage() {
+  // Gambar baru yang dipilih
+  Widget _buildNewSelectedImage() {
     return Stack(
       children: [
         Container(
@@ -234,60 +251,113 @@ class _KiosAddViewState extends State<KiosAddView> {
             ],
           ),
         ),
+        // Label "Foto Baru"
+        Positioned(
+          top: 12,
+          left: 12,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'Foto Baru',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildImagePlaceholder() {
-    return InkWell(
-      onTap: _showImageSourceDialog,
-      child: Container(
-        height: 200,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: Colors.grey[300]!,
-            width: 2,
-            style: BorderStyle.solid,
+  // Gambar lama atau placeholder
+  Widget _buildCurrentOrPlaceholderImage() {
+    if (_currentFotoUrl != null && _currentFotoUrl!.isNotEmpty) {
+      // Ada foto lama
+      return Stack(
+        children: [
+          Container(
+            height: 200,
+            width: double.infinity,
+            color: Colors.grey[200],
+            child: Image.network(
+              'http://localhost:8000/storage/$_currentFotoUrl',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: 12,
+            right: 12,
+            child: _buildIconButton(
+              icon: Icons.edit,
+              color: Colors.blue,
+              onPressed: _showImageSourceDialog,
+            ),
+          ),
+        ],
+      );
+    } else {
+      // Belum ada foto
+      return InkWell(
+        onTap: _showImageSourceDialog,
+        child: Container(
+          height: 200,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.grey[300]!,
+              width: 2,
+              style: BorderStyle.solid,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Get.theme.primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add_photo_alternate_outlined,
+                  size: 48,
+                  color: Get.theme.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Tambah Foto Kios',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Klik untuk memilih foto',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Get.theme.primaryColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.add_photo_alternate_outlined,
-                size: 48,
-                color: Get.theme.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tambah Foto Kios',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Klik untuk memilih dari galeri atau kamera',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+      );
+    }
   }
 
   Widget _buildIconButton({
@@ -387,6 +457,7 @@ class _KiosAddViewState extends State<KiosAddView> {
     );
   }
 
+  
   Widget _buildJamOperasionalFields() {
     return Row(
       children: [
@@ -474,10 +545,10 @@ class _KiosAddViewState extends State<KiosAddView> {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline, size: 24),
+            Icon(Icons.save_outlined, size: 24),
             SizedBox(width: 8),
             Text(
-              'Buat Kios Sekarang',
+              'Simpan Perubahan',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -660,18 +731,18 @@ class _KiosAddViewState extends State<KiosAddView> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
-            Icon(Icons.check_circle_outline, color: Colors.blue),
+            Icon(Icons.save_outlined, color: Colors.blue),
             SizedBox(width: 12),
             Text('Konfirmasi'),
           ],
         ),
         content: const Text(
-          'Apakah data kios sudah benar?\nData dapat diubah setelah kios dibuat.',
+          'Apakah Anda yakin ingin menyimpan perubahan?',
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('Cek Lagi'),
+            child: const Text('Batal'),
           ),
           ElevatedButton(
             onPressed: () => Get.back(result: true),
@@ -680,7 +751,7 @@ class _KiosAddViewState extends State<KiosAddView> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Ya, Buat Kios'),
+            child: const Text('Ya, Simpan'),
           ),
         ],
       ),
@@ -688,7 +759,7 @@ class _KiosAddViewState extends State<KiosAddView> {
 
     if (confirmed != true) return;
 
-    // Convert XFile to bytes (works both on web and mobile)
+    // Convert XFile to bytes for upload
     Uint8List? imageBytes;
     String? imageName;
     if (_selectedImage.value != null) {
@@ -696,12 +767,16 @@ class _KiosAddViewState extends State<KiosAddView> {
       imageName = _selectedImage.value!.name;
     }
 
-    // Call controller to add kios
-    await controller.addKios(
+    final kios = controller.myKios.value;
+    
+    // Call controller to update kios
+    await controller.editKios(
+      kiosId: kios!.id!,
       namaKios: _namaKiosController.text.trim(),
       lokasi: _lokasiController.text.trim(),
       jamBuka: _jamBukaController.text.trim(),
       jamTutup: _jamTutupController.text.trim(),
+      
       deskripsi: _deskripsiController.text.trim().isNotEmpty 
           ? _deskripsiController.text.trim() 
           : null,

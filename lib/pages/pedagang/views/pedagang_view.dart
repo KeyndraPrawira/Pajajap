@@ -2,6 +2,7 @@
 import 'package:e_pasar/pages/pedagang/views/pedagang_home_view.dart';
 import 'package:e_pasar/pages/pedagang/views/pedagang_profile_view.dart';
 import 'package:e_pasar/pages/pedagang/controllers/pedagang_controller.dart';
+import 'package:e_pasar/pages/pedagang/views/produk_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,6 +22,7 @@ class PedagangView extends StatelessWidget {
             index: controller.currentIndex.value,
             children: [
               PedagangHomeView(),
+              ProdukListView(),
               PedagangProfileView()
             ],
 
@@ -37,6 +39,11 @@ class PedagangView extends StatelessWidget {
                 icon: Icon(Icons.home_outlined),
                 activeIcon: Icon(Icons.home),
                 label: 'Beranda',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.shopping_cart_outlined),
+                activeIcon: Icon(Icons.shopping_cart),
+                label: 'Produk',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),

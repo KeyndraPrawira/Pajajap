@@ -1,6 +1,8 @@
 // lib/app/modules/user/views/user_profile_view.dart
 import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/app/services/auth_services.dart';
+import 'package:e_pasar/pages/user/views/edit_profile_view.dart';
+import 'package:e_pasar/pages/user/views/set_alamat_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +16,7 @@ class UserProfileView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: const Color(0xFF0D47A1),
+        backgroundColor: const Color(0xFF0077B6),
         foregroundColor: Colors.white,
       ),
       body: ListView(
@@ -24,7 +26,11 @@ class UserProfileView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF0D47A1),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0077B6), Color(0xFF00B4D8)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -35,7 +41,7 @@ class UserProfileView extends StatelessWidget {
                   child: Icon(
                     Icons.person,
                     size: 60,
-                    color: const Color(0xFF0D47A1),
+                    color: const Color(0xFF0077B6),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -55,6 +61,14 @@ class UserProfileView extends StatelessWidget {
                     color: Colors.white70,
                   ),
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  '+62 812-3456-7890', // Placeholder for phone
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
               ],
             ),
           ),
@@ -66,7 +80,7 @@ class UserProfileView extends StatelessWidget {
             icon: Icons.person_outline,
             title: 'Edit Profile',
             onTap: () {
-              // TODO: Navigate to edit profile
+              Get.to(() => const EditProfileView());
             },
           ),
           
@@ -90,7 +104,7 @@ class UserProfileView extends StatelessWidget {
             icon: Icons.location_on_outlined,
             title: 'Alamat',
             onTap: () {
-              // TODO: Navigate to addresses
+              Get.to(() => const SetAlamatView());
             },
           ),
           
@@ -99,6 +113,15 @@ class UserProfileView extends StatelessWidget {
             title: 'Pengaturan',
             onTap: () {
               // TODO: Navigate to settings
+            },
+          ),
+          
+          _buildMenuItem(
+            icon: Icons.lock_outline,
+            title: 'Ganti Password',
+            onTap: () {
+              // TODO: Navigate to change password
+              Get.snackbar('Info', 'Fitur ganti password akan segera hadir');
             },
           ),
           
@@ -147,10 +170,14 @@ class UserProfileView extends StatelessWidget {
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: ListTile(
         leading: Icon(
           icon,
-          color: isDestructive ? Colors.red : const Color(0xFF0D47A1),
+          color: isDestructive ? Colors.red : const Color(0xFF0077B6),
         ),
         title: Text(
           title,

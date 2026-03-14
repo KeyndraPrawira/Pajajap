@@ -42,7 +42,6 @@ dependencies:
 
   get_storage: ^2.1.1         # buat simpan token & role lokal (ringan banget)
   dio: ^5.4.0                 # buat API call ke Laravel
-  google_maps_flutter: ^2.5.0 # buat maps & hitung jarak ongkir
   geolocator: ^10.1.0         # ambil lokasi user
   geocoding: ^2.1.1           # convert alamat ke lat/long
   image_picker: ^1.0.4        # upload foto produk pedagang
@@ -50,6 +49,14 @@ dependencies:
   get: ^4.7.3
   lottie: ^3.1.3
   http: ^1.1.0
+  intl: ^0.19.0 
+  timezone: ^0.9.2
+  cached_network_image: ^3.4.1
+  datalist: ^1.0.0
+  flutter_map: ^6.0.0
+  latlong2: ^0.9.0
+  permission_handler: ^11.0.0
+
 
 
 

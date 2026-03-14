@@ -1,4 +1,10 @@
-import 'package:e_pasar/app/data/models/kios_model.dart';
+import 'package:e_pasar/pages/pedagang/controllers/pedagang_controller.dart';
+import 'package:e_pasar/pages/pedagang/controllers/produk_controller.dart';
+import 'package:e_pasar/pages/pedagang/controllers/produk_form_controller.dart';
+import 'package:e_pasar/pages/pedagang/views/kios_edit_view.dart';
+import 'package:e_pasar/pages/pedagang/views/produk_add_view.dart';
+import 'package:e_pasar/pages/pedagang/views/produk_edit_view.dart';
+import 'package:e_pasar/pages/pedagang/views/produk_list_view.dart';
 import 'package:get/get.dart';
 
 import '../../pages/auth/bindings/auth_binding.dart';
@@ -11,6 +17,8 @@ import '../../pages/driver/views/driver_view.dart';
 import '../../pages/home/bindings/home_binding.dart';
 import '../../pages/home/views/home_view.dart';
 import '../../pages/pedagang/bindings/pedagang_binding.dart';
+
+import '../../pages/pedagang/views/kios_add_view.dart';
 import '../../pages/pedagang/views/pedagang_view.dart';
 import '../../pages/profile/bindings/profile_binding.dart';
 import '../../pages/profile/views/profile_view.dart';
@@ -20,6 +28,7 @@ import '../../pages/user/bindings/user_binding.dart';
 import '../../pages/user/views/user_view.dart';
 import '../middlewares/auth_middleware.dart';
 import '../middlewares/guest_middlewar.dart';
+import '../middlewares/kios_middleware.dart';
 
 part 'app_routes.dart';
 
@@ -91,7 +100,9 @@ class AppPages {
       name: AppRoutes.PEDAGANG_HOME,
       page: () => const PedagangView(),
       binding: PedagangBinding(),
-      middlewares: [AuthMiddleware(requiredRole: 'pedagang')], // Harus login dulu
+      middlewares: [
+        AuthMiddleware(requiredRole: 'pedagang')
+      ], // Harus login dulu
     ),
     GetPage(
       name: AppRoutes.DRIVER_HOME,
@@ -106,10 +117,33 @@ class AppPages {
       middlewares: [AuthMiddleware(requiredRole: 'user')],
     ),
     GetPage(
-      name: _Paths.PEDAGANG,
-      page: () => const PedagangView(),
-      binding: PedagangBinding(),
+  name: _Paths.PEDAGANG,
+  page: () => const PedagangView(),
+  binding: PedagangBinding(),
+  children: [
+    GetPage(
+      name: '/produk',
+      page: () => const ProdukListView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ProdukController>(() => ProdukController());
+      }),
     ),
+    GetPage(
+      name: '/produk/create',
+      page: () => const ProdukAddView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ProdukFormController>(() => ProdukFormController());
+      }),
+    ),
+    GetPage(
+      name: '/produk/edit/:id',
+      page: () => const ProdukEditView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ProdukFormController>(() => ProdukFormController());
+      }),
+    ),
+  ],
+),
     GetPage(
       name: _Paths.DRIVER,
       page: () => const DriverView(),
@@ -120,8 +154,12 @@ class AppPages {
       page: () => const UserView(),
       binding: UserBinding(),
     ),
-    GetPage(name: 
-    _Paths.KIOS_ADD, page: () => KiosAddView)
-    
+    GetPage(
+        name: _Paths.KIOS_ADD,
+        page: () => const KiosAddView(),
+        binding: PedagangBinding(),
+        middlewares: [KiosMiddleware()]),
   ];
+
+  static get middlewares => null;
 }

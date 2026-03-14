@@ -14,7 +14,7 @@ class UserView extends StatelessWidget {
     final controller = Get.find<UserController>();
 
     final List<Widget> pages = [
-      const UserHomeView(),
+       UserHomeView(),
       const UserProfileView(),
     ];
 

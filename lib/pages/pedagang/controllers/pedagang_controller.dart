@@ -1,17 +1,18 @@
 // lib/app/modules/pedagang/controllers/pedagang_controller.dart
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:e_pasar/app/data/models/kios_model.dart';
 import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/app/services/auth_services.dart';
-
 import 'package:e_pasar/app/services/kios_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 
 class PedagangController extends GetxController {
-  final AuthService _authService = Get.find();
-  final KiosService _kiosService = KiosService();
+  final AuthService _authService = Get.find<AuthService>();
+  final storage = GetStorage();
+  final KiosService _kiosService = Get.find<KiosService>();
+
 
   final currentIndex = 0.obs;
   
@@ -22,17 +23,24 @@ class PedagangController extends GetxController {
   var hasKios = false.obs; // Flag apakah pedagang sudah punya kios
   var userId = 0.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _loadUserData();
-    fetchKios();
-  }
+  
+    @override
+    void onInit() {
+      super.onInit();
+      _initData();
+    }
 
-  // Load user data from SharedPreferences
+    Future<void> _initData() async {
+      await _loadUserData();
+      await fetchKios();
+    }
+
+
+
+  // Load user data from GetStorage
   Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    userId.value = prefs.getInt('user_id') ?? 0;
+    userId.value = storage.read('user_id') ?? 0;
+    print('🔑 USER ID: ${userId.value}'); // Debug
   }
 
   void changePage(int index) {
@@ -42,46 +50,66 @@ class PedagangController extends GetxController {
   // ==================== KIOS FUNCTIONS ====================
 
   // Get all kios (untuk pedagang hanya dapat kios miliknya)
-  Future<void> fetchKios() async {
-    try {
-      isLoading.value = true;
-      final result = await _kiosService.getKios();
-      if (result != null && result.kios != null) {
-        kiosList.value = result.kios!;
-        _checkPedagangKios();
-      } else {
-        kiosList.value = [];
-        hasKios.value = false;
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Gagal memuat data kios: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      isLoading.value = false;
-    }
-  }
+ // Get all kios (untuk pedagang dapat kios miliknya dari /kios/me)
+Future<void> fetchKios() async {
+  try {
+    isLoading.value = true;
 
-  // Check apakah pedagang sudah punya kios
-  void _checkPedagangKios() {
-    try {
-      myKios.value = kiosList.firstWhere(
-        (kios) => kios.userId == userId.value,
-      );
+    // ✅ Panggil endpoint khusus pedagang
+    final result = await _kiosService.getMyKios();
+
+    print('📦 FETCH MY KIOS RESULT: ${result.length} kios');
+
+    if (result.isNotEmpty) {
+      kiosList.value = result;
+      myKios.value = result.first; // Pedagang cuma punya 1 kios
       hasKios.value = true;
-    } catch (e) {
+      
+      print('✅ FOUND MY KIOS: ${myKios.value?.namaKios}');
+      print('📸 FOTO KIOS PATH: ${myKios.value?.fotoKios}');
+      print('🔗 FULL URL: http://localhost:8000/storage/${myKios.value?.fotoKios}');
+    } else {
+      kiosList.value = [];
       myKios.value = null;
       hasKios.value = false;
+      print('❌ NO KIOS DATA FOR THIS PEDAGANG');
     }
+
+    print('✅ HAS KIOS: ${hasKios.value}');
+  } catch (e) {
+    print('❌ FETCH KIOS ERROR: $e');
+    hasKios.value = false;
+  } finally {
+    isLoading.value = false;
   }
+
+  // REDIRECT SETELAH FETCH SELESAI
+  if (!hasKios.value && !isLoading.value) {
+    Future.delayed(Duration.zero, () {
+      Get.offAllNamed(AppRoutes.KIOS_ADD);
+    });
+  }
+}
+  // Check apakah pedagang sudah punya kios
+ void _checkPedagangKios() {
+  if (kiosList.isNotEmpty) {
+    myKios.value = kiosList.first;
+    hasKios.value = true;
+  } else {
+    myKios.value = null;
+    hasKios.value = false;
+  }
+}
+
 
   // Redirect pedagang yang belum punya kios ke form tambah kios
   void checkAndRedirectToKiosForm() {
+    print('🚀 CHECK AND REDIRECT - hasKios: ${hasKios.value}'); // Debug
+    
     if (!hasKios.value) {
       // Redirect ke form add kios
       Future.delayed(Duration.zero, () {
+        print('➡️ REDIRECTING TO KIOS ADD'); // Debug
         Get.offAllNamed(AppRoutes.KIOS_ADD);
         Get.snackbar(
           'Informasi',
@@ -92,11 +120,15 @@ class PedagangController extends GetxController {
           colorText: Get.theme.colorScheme.onPrimary,
         );
       });
+    } else {
+      print('✅ HAS KIOS - STAY ON HOME'); // Debug
     }
   }
 
   // Check apakah pedagang bisa akses form add kios
   bool canAccessAddKiosForm() {
+    print('🔒 CAN ACCESS ADD FORM - hasKios: ${hasKios.value}'); // Debug
+    
     if (hasKios.value) {
       Get.snackbar(
         'Informasi',
@@ -105,7 +137,7 @@ class PedagangController extends GetxController {
         backgroundColor: Get.theme.colorScheme.primary,
         colorText: Get.theme.colorScheme.onPrimary,
       );
-      Get.back();
+      Get.offAllNamed(AppRoutes.PEDAGANG_HOME); // ✅ REDIRECT KE HOME, BUKAN Get.back()
       return false;
     }
     return true;
@@ -118,7 +150,8 @@ class PedagangController extends GetxController {
     required String jamBuka,
     required String jamTutup,
     String? deskripsi,
-    File? fotoKios,
+    Uint8List? fotoKiosBytes,
+    String? fotoKiosFilename,
   }) async {
     // Check if pedagang already has kios
     if (hasKios.value) {
@@ -140,20 +173,24 @@ class PedagangController extends GetxController {
         jamBuka: jamBuka,
         jamTutup: jamTutup,
         deskripsi: deskripsi,
-        fotoKios: fotoKios,
+        fotoKiosBytes: fotoKiosBytes,
+        fotoKiosFilename: fotoKiosFilename,
       );
       
       if (success) {
-        await fetchKios();
-        // Redirect ke halaman pedagang home setelah berhasil buat kios
-        Get.offAllNamed(AppRoutes.PEDAGANG_HOME);
-        Get.snackbar(
-          'Berhasil',
-          'Kios berhasil dibuat! Selamat datang di E-Pasar',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.colorScheme.primary,
-          colorText: Get.theme.colorScheme.onPrimary,
-        );
+        await fetchKios(); // Refresh data kios
+        
+        // Pastikan data sudah di-fetch sebelum redirect
+        if (hasKios.value) {
+          Get.offAllNamed(AppRoutes.PEDAGANG_HOME);
+          Get.snackbar(
+            'Berhasil',
+            'Kios berhasil dibuat! Selamat datang di E-Pasar',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Get.theme.colorScheme.primary,
+            colorText: Get.theme.colorScheme.onPrimary,
+          );
+        }
       }
     } catch (e) {
       Get.snackbar(
@@ -175,9 +212,18 @@ class PedagangController extends GetxController {
     required String jamTutup,
     String? kontak,
     String? deskripsi,
-    File? fotoKios,
+    Uint8List? fotoKiosBytes,
+    String? fotoKiosFilename,
   }) async {
     // Check if kios belongs to this pedagang
+        if (myKios.value == null) {
+          Get.snackbar(
+            'Error',
+            'Data kios belum dimuat',
+          );
+          return;
+        }
+
     if (myKios.value?.id != kiosId) {
       Get.snackbar(
         'Akses Ditolak',
@@ -191,15 +237,15 @@ class PedagangController extends GetxController {
 
     try {
       isLoading.value = true;
-      final success = await _kiosService.updateKios(id: kiosId)(
-        kiosId: kiosId,
+      final success = await _kiosService.updateKios(
+        id: kiosId,
         namaKios: namaKios,
         lokasi: lokasi,
         jamBuka: jamBuka,
         jamTutup: jamTutup,
-        kontak: kontak,
         deskripsi: deskripsi,
-        fotoKios: fotoKios,
+        fotoKiosBytes: fotoKiosBytes,
+        fotoKiosFilename: fotoKiosFilename,
       );
       
       if (success) {

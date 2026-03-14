@@ -3,56 +3,67 @@ import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/app/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:get_storage/get_storage.dart';
 
 class AuthController extends GetxController {
   final AuthService _authService = Get.find();
+  final box = GetStorage();
+  String get token => box.read('token') ?? '';
 
-  // SHARED PROPERTIES (bisa dipake login & register)
+  // TEXT CONTROLLERS
   final teleponController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final nameController = TextEditingController();
-  
-  // OBSERVABLE STATES
+
+  // STATES
   final isLoading = false.obs;
   final obscurePassword = true.obs;
   final rememberMe = false.obs;
   final agreeToPolicy = false.obs;
 
-  // ==================== TOGGLE METHODS ====================
-  
+  // ================= TOGGLE =================
+
   void togglePasswordVisibility() {
     obscurePassword.value = !obscurePassword.value;
   }
 
   void toggleRememberMe(bool? value) {
     rememberMe.value = value ?? false;
+
+    if (rememberMe.value) {
+      box.write('remember', true);
+    } else {
+      box.remove('remember');
+    }
   }
 
   void toggleAgreeToPolicy(bool? value) {
     agreeToPolicy.value = value ?? false;
   }
 
-  // ==================== LOGIN METHOD ====================
+  // ================= CHECK LOGIN =================
+
   
+
+  // ================= LOGIN =================
+
   Future<void> login() async {
-    // Validasi fields
     if (validateEmail(emailController.text) != null) {
       Get.snackbar(
         'Validasi Gagal',
-        validateEmail(emailController.text) ?? 'Email tidak valid',
+        validateEmail(emailController.text)!,
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
       );
       return;
     }
-    
+
     if (validatePassword(passwordController.text) != null) {
       Get.snackbar(
         'Validasi Gagal',
-        validatePassword(passwordController.text) ?? 'Password tidak valid',
+        validatePassword(passwordController.text)!,
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -69,26 +80,29 @@ class AuthController extends GetxController {
       );
 
       if (auth != null && auth.user != null) {
+        // SIMPAN TOKEN & ROLE
+        box.write('token', auth.token);
+        box.write('role', auth.user!.role);
+
+        emailController.clear();
+        passwordController.clear();
+
         Get.snackbar(
           'Berhasil',
           'Login berhasil! Selamat datang ${auth.user!.name}',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-          margin: const EdgeInsets.all(16),
         );
-        
-        _navigateBasedOnRole(auth.user!.role ?? '');
+
+        _navigateBasedOnRole(auth.user!.role ?? 'user');
       } else {
         Get.snackbar(
           'Login Gagal',
-          'Email atau password salah. Silakan coba lagi.',
+          'Email atau password salah',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
         );
       }
     } catch (e) {
@@ -98,55 +112,52 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
       );
     } finally {
       isLoading.value = false;
     }
   }
 
-  // ==================== REGISTER METHOD ====================
-  
+  // ================= REGISTER =================
+
   Future<void> register() async {
-    // Validasi fields
     if (validateName(nameController.text) != null) {
       Get.snackbar(
         'Validasi Gagal',
-        validateName(nameController.text) ?? 'Nama tidak valid',
+        validateName(nameController.text)!,
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
       );
       return;
     }
-    
+
     if (validateTelepon(teleponController.text) != null) {
       Get.snackbar(
         'Validasi Gagal',
-        validateTelepon(teleponController.text) ?? 'Nomor telepon tidak valid',
+        validateTelepon(teleponController.text)!,
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
       );
       return;
     }
-    
+
     if (validateEmail(emailController.text) != null) {
       Get.snackbar(
         'Validasi Gagal',
-        validateEmail(emailController.text) ?? 'Email tidak valid',
+        validateEmail(emailController.text)!,
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
       );
       return;
     }
-    
+
     if (validatePassword(passwordController.text) != null) {
       Get.snackbar(
         'Validasi Gagal',
-        validatePassword(passwordController.text) ?? 'Password tidak valid',
+        validatePassword(passwordController.text)!,
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -161,8 +172,6 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
       );
       return;
     }
@@ -178,22 +187,20 @@ class AuthController extends GetxController {
       );
 
       if (result['success'] == true) {
-        // Clear form
         nameController.clear();
         emailController.clear();
         passwordController.clear();
+        teleponController.clear();
         agreeToPolicy.value = false;
 
         Get.snackbar(
           'Berhasil',
-          'Registrasi berhasil! Silakan login dengan akun Anda',
+          'Registrasi berhasil! Silakan login',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
         );
-        
+
         Get.offNamed(AppRoutes.LOGIN);
       } else {
         Get.snackbar(
@@ -202,8 +209,6 @@ class AuthController extends GetxController {
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
         );
       }
     } catch (e) {
@@ -213,16 +218,14 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
       );
     } finally {
       isLoading.value = false;
     }
   }
 
-  // ==================== NAVIGATION ====================
-  
+  // ================= NAVIGATION =================
+
   void _navigateBasedOnRole(String role) {
     switch (role.toLowerCase()) {
       case 'pedagang':
@@ -231,7 +234,6 @@ class AuthController extends GetxController {
       case 'driver':
         Get.offAllNamed(AppRoutes.DRIVER_HOME);
         break;
-      case 'user':
       default:
         Get.offAllNamed(AppRoutes.USER_HOME);
         break;
@@ -239,18 +241,18 @@ class AuthController extends GetxController {
   }
 
   void goToRegister() {
-    // Clear form sebelum pindah (jika controller masih valid)
-    if (!emailController.text.isEmpty) emailController.clear();
-    if (!passwordController.text.isEmpty) passwordController.clear();
+    emailController.clear();
+    passwordController.clear();
     Get.offNamed(AppRoutes.REGISTER);
   }
 
   void goToLogin() {
-    // Clear form sebelum pindah (jika controller masih valid)
-    if (!nameController.text.isEmpty) nameController.clear();
-    if (!emailController.text.isEmpty) emailController.clear();
-    if (!passwordController.text.isEmpty) passwordController.clear();
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    teleponController.clear();
     agreeToPolicy.value = false;
+
     Get.offNamed(AppRoutes.LOGIN);
   }
 
@@ -261,19 +263,31 @@ class AuthController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.blue,
       colorText: Colors.white,
-      duration: const Duration(seconds: 2),
-      margin: const EdgeInsets.all(16),
     );
   }
+  void checkLogin() {
+    final token = box.read('token');
+    final role = box.read('role');
 
-  // ==================== VALIDATION ====================
+    if (token != null && token.toString().isNotEmpty) {
+      _navigateBasedOnRole(role ?? 'user');
+    } else {
+      Get.offAllNamed(AppRoutes.LOGIN);
+    }
+  }
+
+  // ================= VALIDATION =================
+
   String? validateTelepon(String? value) {
     if (value == null || value.isEmpty) {
       return 'Nomor telepon tidak boleh kosong';
     }
-    
+    if (!GetUtils.isPhoneNumber(value)) {
+      return 'Format nomor telepon tidak valid';
+    }
     return null;
   }
+
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email tidak boleh kosong';
@@ -302,5 +316,14 @@ class AuthController extends GetxController {
       return 'Nama minimal 3 karakter';
     }
     return null;
+  }
+
+  @override
+  void onClose() {
+    teleponController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    nameController.dispose();
+    super.onClose();
   }
 }
