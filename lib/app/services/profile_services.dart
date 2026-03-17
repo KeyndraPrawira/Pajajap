@@ -10,13 +10,15 @@ class ProfileService {
   static Future<Profile?> getProfile(String token) async {
 
     final res = await http.get(
-      Uri.parse('${Api.baseUrl}/profile'),
+      Uri.parse('${Api.baseUrl}/profile/me'),
       headers: Api.headersWithAuth(token),
     );
 
     if (res.statusCode == 200) {
       return profileFromJson(res.body);
+      
     }
+          print(res.body);
 
     return null;
   }
@@ -29,7 +31,7 @@ class ProfileService {
   ) async {
 
     final res = await http.put(
-      Uri.parse('${Api.baseUrl}/profile'),
+      Uri.parse('${Api.baseUrl}/profile/me'),
       headers: Api.headersWithAuth(token),
       body: jsonEncode({
         "username": username,
@@ -42,24 +44,27 @@ class ProfileService {
 
   /// set atau update alamat
   static Future<bool> setAlamat(
-    String token,
-    String alamat,
-    double latitude,
-    double longitude,
-  ) async {
+  String token,
+  String alamat,
+  double latitude,
+  double longitude,
+) async {
 
-    final res = await http.post(
-      Uri.parse('${Api.baseUrl}/profile/alamat'),
-      headers: Api.headersWithAuth(token),
-      body: jsonEncode({
-        "alamat_lengkap": alamat,
-        "latitude": latitude,
-        "longitude": longitude
-      }),
-    );
+  final res = await http.post(
+    Uri.parse('${Api.baseUrl}/profile/alamat'),
+    headers: Api.headersWithAuth(token),
+    body: jsonEncode({
+      "alamat_lengkap": alamat,
+      "latitude": latitude,
+      "longitude": longitude
+    }),
+  );
 
-    return res.statusCode == 200;
-  }
+  print(res.statusCode);
+  print(res.body);
+
+  return res.statusCode == 200;
+}
   static Future<bool> updatePassword(
   String token,
   String currentPassword,

@@ -13,6 +13,20 @@ import '../controllers/user_controller.dart';
 class UserBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<AuthController>(
+      () => AuthController(),
+    );
+    // Register PasarController
+    Get.put<PasarController>(
+      PasarController(),
+    );
+    Get.put<ProfileController>(
+      ProfileController(),
+      permanent: true,
+    );
+
+     
+
     Get.lazyPut<KeranjangController>(
       () => KeranjangController(),
     );
@@ -37,18 +51,9 @@ class UserBinding extends Bindings {
       () => UserProdukController(),
     );
 
-    // Register ProfileController
-    Get.lazyPut<ProfileController>(
-      () => ProfileController(),
-    );
+    
+   
 
-    // Register PasarController
-    Get.lazyPut<PasarController>(
-      () => PasarController(),
-    );
-
-    Get.lazyPut<AuthController>(
-      () => AuthController(),
-    );
+   
   }
 }

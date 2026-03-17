@@ -11,7 +11,7 @@ String pasarToJson(Pasar data) => json.encode(data.toJson());
 class Pasar {
     String? status;
     String? message;
-    Data? data;
+    DataPasar? data;
 
     Pasar({
         this.status,
@@ -22,7 +22,7 @@ class Pasar {
     factory Pasar.fromJson(Map<String, dynamic> json) => Pasar(
         status: json["status"],
         message: json["message"],
-        data: json["data"] == null ? null : Data.fromJson(json["data"]),
+        data: json["data"] == null ? null : DataPasar.fromJson(json["data"]),
     );
 
     Map<String, dynamic> toJson() => {
@@ -32,7 +32,7 @@ class Pasar {
     };
 }
 
-class Data {
+class DataPasar {
     int? id;
     String? namaPasar;
     String? alamat;
@@ -40,12 +40,12 @@ class Data {
     int? ongkir;
     String? kontak;
     String? deskripsi;
-    String? longitude;
-    String? latitude;
+    double? longitude;
+    double? latitude;
     DateTime? createdAt;
     DateTime? updatedAt;
 
-    Data({
+    DataPasar({
         this.id,
         this.namaPasar,
         this.alamat,
@@ -59,7 +59,7 @@ class Data {
         this.updatedAt,
     });
 
-    factory Data.fromJson(Map<String, dynamic> json) => Data(
+    factory DataPasar.fromJson(Map<String, dynamic> json) => DataPasar(
         id: json["id"],
         namaPasar: json["nama_pasar"],
         alamat: json["alamat"],
@@ -67,8 +67,8 @@ class Data {
         ongkir: json["ongkir"],
         kontak: json["kontak"],
         deskripsi: json["deskripsi"],
-        longitude: json["longitude"],
-        latitude: json["latitude"],
+        longitude: double.tryParse(json["longitude"]?.toString() ?? ""),
+        latitude: double.tryParse(json["latitude"]?.toString() ?? ""),
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
         updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
     );

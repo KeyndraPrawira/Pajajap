@@ -17,8 +17,7 @@ class KategoriService {
       Uri.parse("${Api.baseUrl}/kategori"),
       headers: Api.headersWithAuth(token!),
     );
-    print("GET KATEGORI STATUS: ${response.statusCode}");
-    print("GET KATEGORI BODY: ${response.body}");
+    
     if (response.statusCode == 200) {
       return kategoriFromJson(response.body);
     } else {

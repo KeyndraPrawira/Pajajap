@@ -103,8 +103,8 @@ class Alamat {
         id: json["id"],
         userId: json["user_id"],
         alamatLengkap: json["alamat_lengkap"],
-        longitude: json["longitude"]?.toDouble(),
-        latitude: json["latitude"]?.toDouble(),
+        longitude: double.tryParse(json["longitude"]?.toString() ?? '') ?? 0.0,
+        latitude: double.tryParse(json["latitude"]?.toString() ?? '') ?? 0.0,
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
         updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
     );

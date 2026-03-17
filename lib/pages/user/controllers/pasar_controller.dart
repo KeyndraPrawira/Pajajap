@@ -5,7 +5,7 @@ import 'package:e_pasar/app/utils/distance_utils.dart';
 import 'package:get/get.dart';
 
 class PasarController extends GetxController {
-  var pasarList = <Data>[].obs;
+  var pasarList = <DataPasar>[].obs;
   var isLoading = false.obs;
   var userLatitude = 0.0.obs;
   var userLongitude = 0.0.obs;
@@ -39,14 +39,14 @@ class PasarController extends GetxController {
   }
 
   /// Hitung jarak dari user ke pasar tertentu
-  double getDistanceToPasar(Data pasar) {
+  double getDistanceToPasar(DataPasar pasar) {
     if (pasar.latitude == null || pasar.longitude == null) {
       return 0.0;
     }
 
     try {
-      final pasarLat = double.parse(pasar.latitude!);
-      final pasarLng = double.parse(pasar.longitude!);
+      final pasarLat = pasar.latitude!.toDouble();
+      final pasarLng = pasar.longitude!.toDouble();
 
       return DistanceUtils.calculateDistance(
         userLatitude.value,
@@ -60,13 +60,13 @@ class PasarController extends GetxController {
   }
 
   /// Format jarak untuk display
-  String getFormattedDistance(Data pasar) {
+  String getFormattedDistance(DataPasar pasar) {
     final distance = getDistanceToPasar(pasar);
     return DistanceUtils.formatDistance(distance);
   }
 
   /// Estimasi waktu tempuh (dengan asumsi kecepatan motor 30 km/jam)
-  String getEstimatedTime(Data pasar) {
+  String getEstimatedTime(DataPasar pasar) {
     final distance = getDistanceToPasar(pasar);
     return DistanceUtils.estimateTravelTime(distance, 30.0); // 30 km/jam
   }

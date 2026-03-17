@@ -15,7 +15,7 @@ class UserHomeView extends GetView<UserProdukController> {
   UserHomeView({super.key});
 
   final _pageController = PageController(viewportFraction: 0.92);
-
+  
   IconData _iconForKategori(String? nama) {
     final n = (nama ?? '').toLowerCase();
     if (n.contains('sayur') || n.contains('hijau')) return Icons.eco_rounded;

@@ -5,6 +5,7 @@ import 'package:e_pasar/pages/pedagang/views/kios_edit_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_add_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_edit_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_list_view.dart';
+import 'package:e_pasar/pages/user/views/user_home_view.dart';
 import 'package:get/get.dart';
 
 import '../../pages/auth/bindings/auth_binding.dart';
@@ -154,6 +155,7 @@ class AppPages {
       page: () => const UserView(),
       binding: UserBinding(),
     ),
+   
     GetPage(
         name: _Paths.KIOS_ADD,
         page: () => const KiosAddView(),

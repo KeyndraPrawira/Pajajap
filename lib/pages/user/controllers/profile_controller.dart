@@ -1,4 +1,5 @@
 import 'package:e_pasar/app/data/models/profile_model.dart';
+import 'package:e_pasar/app/services/pasar_services.dart';
 import 'package:e_pasar/app/services/profile_services.dart';
 import 'package:e_pasar/pages/auth/controllers/auth_controller.dart';
 import 'package:e_pasar/pages/user/controllers/pasar_controller.dart';
@@ -7,9 +8,9 @@ import 'package:get/get.dart';
 
 class ProfileController extends GetxController {
 
-  var profile = Rxn<Profile>();
   var isLoading = false.obs;
-
+  var dataProfile = Rxn<DataProfile>();
+  var profile = Rxn<Profile>();
  final authC = Get.find<AuthController>();
 String get token => authC.token;
 
@@ -19,29 +20,30 @@ String get token => authC.token;
     getProfile();
   }
 
+  
+
   /// ambil data profile
-  Future<void> getProfile() async {
+ Future<void> getProfile() async {
+  try {
+    isLoading.value = true;
+    print("=== GET PROFILE ===");
 
-    try {
+    final result = await ProfileService.getProfile(token);
+    print("Result: $result");
 
-      isLoading.value = true;
-      final result = await ProfileService.getProfile(token);
-
-      if (result != null) {
-        profile.value = result;
-      }
-
-    } catch (e) {
-    Get.snackbar("Error", e.toString());
-  }
-  finally {
-
-      isLoading.value = false;
-
+    if (result != null) {
+      profile.value = result;           // ✅ Profile (wrapper)
+      dataProfile.value = result.data;  // ✅ DataProfile (isi)
+      print("Username: ${dataProfile.value?.username}");
+      print("Alamat: ${dataProfile.value?.alamat?.alamatLengkap}");
     }
-
+  } catch (e) {
+    print("ERROR: $e");
+    Get.snackbar("Error", e.toString());
+  } finally {
+    isLoading.value = false;
   }
-
+}
   /// update nama dan nomor telepon
   Future<void> updateProfile(
   String username,
