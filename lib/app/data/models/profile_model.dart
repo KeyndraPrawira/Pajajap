@@ -26,7 +26,7 @@ class Profile {
 
 class DataProfile {
     int? id;
-    String? username;
+    String? name;
     String? email;
     dynamic emailVerifiedAt;
     String? role;
@@ -39,7 +39,7 @@ class DataProfile {
 
     DataProfile({
         this.id,
-        this.username,
+        this.name,
         this.email,
         this.emailVerifiedAt,
         this.role,
@@ -53,7 +53,7 @@ class DataProfile {
 
     factory DataProfile.fromJson(Map<String, dynamic> json) => DataProfile(
         id: json["id"],
-        username: json["username"],
+        name: json["name"],
         email: json["email"],
         emailVerifiedAt: json["email_verified_at"],
         role: json["role"],
@@ -67,7 +67,7 @@ class DataProfile {
 
     Map<String, dynamic> toJson() => {
         "id": id,
-        "username": username,
+        "name": name,
         "email": email,
         "email_verified_at": emailVerifiedAt,
         "role": role,
@@ -86,6 +86,7 @@ class Alamat {
     String? alamatLengkap;
     double? longitude;
     double? latitude;
+    double? jarakKm;
     DateTime? createdAt;
     DateTime? updatedAt;
 
@@ -95,6 +96,7 @@ class Alamat {
         this.alamatLengkap,
         this.longitude,
         this.latitude,
+        this.jarakKm,
         this.createdAt,
         this.updatedAt,
     });
@@ -105,6 +107,7 @@ class Alamat {
         alamatLengkap: json["alamat_lengkap"],
         longitude: double.tryParse(json["longitude"]?.toString() ?? '') ?? 0.0,
         latitude: double.tryParse(json["latitude"]?.toString() ?? '') ?? 0.0,
+        jarakKm: double.tryParse(json["jarak_km"]?.toString() ?? '') ?? 0.0,
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
         updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
     );
@@ -115,6 +118,7 @@ class Alamat {
         "alamat_lengkap": alamatLengkap,
         "longitude": longitude,
         "latitude": latitude,
+        "jarak_km": jarakKm,
         "created_at": createdAt?.toIso8601String(),
         "updated_at": updatedAt?.toIso8601String(),
     };

@@ -17,12 +17,16 @@ abstract class Routes {
   static const PRODUK_LIST = _Paths.PAGES + _Paths.PRODUK_LIST;
   static const PRODUK_ADD = _Paths.PAGES + _Paths.PEDAGANG + _Paths.PRODUK_ADD;
   static const PRODUK_EDIT = _Paths.PAGES + _Paths.PEDAGANG + _Paths.PRODUK_EDIT;
+  static const COMPLETE_PROFILE = _Paths.PAGES + _Paths.COMPLETE_PROFILE;
+  static const CHECKOUT = _Paths.PAGES + _Paths.CHECKOUT;
+  static const MENCARI_DRIVER = _Paths.PAGES + _Paths.MENCARI_DRIVER;
 }
 
 abstract class _Paths {
   _Paths._();
   static const HOME = '/home';
   static const AUTH = '/auth';
+  static const COMPLETE_PROFILE = '/complete-profile';
   static const SPLASH_SCREEN = '/splash-screen';
   static const PROFILE = '/profile';
   static const DASHBOARD = '/dashboard';
@@ -38,12 +42,16 @@ abstract class _Paths {
   static const PRODUK_ADD = '/produk/create';
   static const PRODUK_EDIT = '/produk/edit/:id';
   static String produkEdit(int id) => '/produk/edit/$id';
+  static const CHECKOUT = '/checkout';
+  static const MENCARI_DRIVER = '/mencari-driver';
+
 }
 
 abstract class AppRoutes {
   static const SPLASH = '/';
   static const LOGIN = '/login';
   static const REGISTER = '/register';
+  static const COMPLETE_PROFILE = '/complete-profile';
 
   // Pedagang Routes
   static const PEDAGANG_HOME = '/pedagang/home';
@@ -63,4 +71,7 @@ abstract class AppRoutes {
   static const PRODUK_ADD = '/produk/create';
   static const PRODUK_EDIT = '/produk/edit/:id';
   static String produkEdit(int id) => '/produk/edit/$id';
+
+  static const CHECKOUT = '/checkout';
+  static const MENCARI_DRIVER = '/mencari-driver';
 }

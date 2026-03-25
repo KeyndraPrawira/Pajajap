@@ -1,9 +1,10 @@
 // lib/pages/auth/views/register_view.dart
-import 'package:e_pasar/pages/auth/controllers/auth_controller.dart';
+
+import 'package:e_pasar/pages/auth/controllers/register_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class RegisterView extends GetView<AuthController> {
+class RegisterView extends GetView<RegisterController> {
   const RegisterView({super.key});
 
   @override
@@ -223,13 +224,18 @@ class RegisterView extends GetView<AuthController> {
                 ),
                 const SizedBox(height: 32),
 
-                Row(
+               Row(
                   children: [
                     Expanded(
-                      child: _buildSocialButton(
-                        "Google",
-                        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
-                      ),
+                      child: Obx(() => GestureDetector(
+                        onTap: controller.isLoading.value
+                            ? null
+                            : controller.loginWithGoogle, // ← Google & Register pakai method yang sama
+                        child: _buildSocialButton(
+                          "Google",
+                          "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
+                        ),
+                      )),
                     ),
                     const SizedBox(width: 16),
                     Expanded(

@@ -21,73 +21,105 @@ class _MapPickerViewState extends State<MapPickerView> {
   final ProfileController _profileC = Get.find<ProfileController>();
   late final MapController _mapController;
   final Dio _dio = Dio();
-  
-
   late Worker _pasarWorker;
-
-@override
-void initState() {
-  super.initState();
-  _mapController = MapController();
-  _initLocationFromProfile();
-  print("Pasar list saat init: ${_pasarC.pasarList.length}");
-  print("Profile alamat saat init: ${_profileC.dataProfile.value?.alamat?.alamatLengkap}");
-
-  // Kalau sudah ada langsung hitung
-  if (_pasarC.pasarList.isNotEmpty) {
-    _hitungOngkir();
-  } else {
-    // Tunggu data pasar masuk
-    _pasarWorker = ever(_pasarC.pasarList, (_) {
-      if (mounted) {
-        setState(() {});
-        _hitungOngkir();
-      }
-    });
-  }
-}
-
-@override
-void dispose() {
-  _mapController.dispose();
-  if (_pasarC.pasarList.isEmpty) _pasarWorker.dispose();
-  super.dispose();
-}
-
-void _initLocationFromProfile() {
-  final alamat = _profileC.dataProfile.value?.alamat; // ✅ dataProfile sudah benar karena kamu isi keduanya
-  if (alamat?.latitude != null && alamat?.longitude != null) {
-    _selectedLocation = LatLng(alamat!.latitude!, alamat.longitude!);
-    _getAddressFromLatLng(_selectedLocation);
-  }
-  _hitungOngkir();
-}
 
   LatLng _selectedLocation = const LatLng(-6.2088, 106.8456);
   String _selectedAddress = 'Geser peta untuk memilih lokasi';
   bool _isLoadingAddress = false;
   double _jarakKm = 0.0;
   int _totalOngkir = 0;
+  List<LatLng> _routePoints = [];
 
-  // ✅ pakai Data bukan DataPasar
-  DataPasar? get _pasar => _pasarC.pasarList.isNotEmpty ? _pasarC.pasarList.first : null;
+  DataPasar? get _pasar =>
+      _pasarC.pasarList.isNotEmpty ? _pasarC.pasarList.first : null;
 
- 
+  @override
+  void initState() {
+    super.initState();
+    _mapController = MapController();
+    _initLocationFromProfile();
+
+    if (_pasarC.pasarList.isNotEmpty) {
+      _hitungOngkir();
+      _getRoute(); // ✅
+    } else {
+      _pasarWorker = ever(_pasarC.pasarList, (_) {
+        if (mounted) {
+          setState(() {});
+          _hitungOngkir();
+          _getRoute(); // ✅
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    if (_pasarC.pasarList.isEmpty) _pasarWorker.dispose();
+    super.dispose();
+  }
+
+  void _initLocationFromProfile() {
+    final alamat = _profileC.dataProfile.value?.alamat;
+    if (alamat?.latitude != null && alamat?.longitude != null) {
+      _selectedLocation = LatLng(alamat!.latitude!, alamat.longitude!);
+      _getAddressFromLatLng(_selectedLocation);
+    }
+    _hitungOngkir();
+  }
+
   void _hitungOngkir() {
     if (_pasar == null) return;
     if (_pasar!.latitude == null || _pasar!.longitude == null) return;
 
-    final distance =  Distance();
-    final double km = distance.as(
-      LengthUnit.Kilometer,
+    final distance = Distance();
+    final double meter = distance.as(
+      LengthUnit.Meter,
       _selectedLocation,
       LatLng(_pasar!.latitude!, _pasar!.longitude!),
     );
 
+    final double km = meter / 1000;
+    final int minimal = _pasar!.minimalOngkir ?? 0;
+    final int perKm = _pasar!.ongkir ?? 0;
+
     setState(() {
       _jarakKm = double.parse(km.toStringAsFixed(1));
-      _totalOngkir = (km * (_pasar!.ongkir ?? 0)).ceil();
+      if (km <= 1) {
+        _totalOngkir = minimal;
+      } else {
+        final double sisaKm = km - 1;
+        _totalOngkir = minimal + (sisaKm * perKm).ceil();
+      }
     });
+  }
+
+  // ✅ Ambil rute dari OSRM
+  Future<void> _getRoute() async {
+    if (_pasar == null) return;
+    if (_pasar!.latitude == null || _pasar!.longitude == null) return;
+
+    try {
+      final response = await _dio.get(
+        'https://router.project-osrm.org/route/v1/driving/'
+        '${_selectedLocation.longitude},${_selectedLocation.latitude};'
+        '${_pasar!.longitude!},${_pasar!.latitude!}',
+        queryParameters: {'overview': 'full', 'geometries': 'geojson'},
+      );
+
+      if (response.statusCode == 200) {
+        final coords =
+            response.data['routes'][0]['geometry']['coordinates'] as List;
+        setState(() {
+          _routePoints = coords
+              .map((c) => LatLng(c[1].toDouble(), c[0].toDouble()))
+              .toList();
+        });
+      }
+    } catch (e) {
+      debugPrint('Gagal ambil rute: $e');
+    }
   }
 
   Future<void> _getAddressFromLatLng(LatLng latLng) async {
@@ -95,10 +127,16 @@ void _initLocationFromProfile() {
     try {
       final response = await _dio.get(
         'https://nominatim.openstreetmap.org/reverse',
-        queryParameters: {'lat': latLng.latitude, 'lon': latLng.longitude, 'format': 'json'},
+        queryParameters: {
+          'lat': latLng.latitude,
+          'lon': latLng.longitude,
+          'format': 'json',
+        },
         options: Options(headers: {'User-Agent': 'ePasar/1.0'}),
       );
-      setState(() => _selectedAddress = response.data['display_name'] ?? 'Alamat tidak ditemukan');
+      setState(() =>
+          _selectedAddress =
+              response.data['display_name'] ?? 'Alamat tidak ditemukan');
     } catch (e) {
       setState(() => _selectedAddress = 'Gagal mendapatkan alamat');
     } finally {
@@ -119,20 +157,22 @@ void _initLocationFromProfile() {
       Get.snackbar('Error', 'Aktifkan izin lokasi di pengaturan');
       return;
     }
-    final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     final latLng = LatLng(pos.latitude, pos.longitude);
     _mapController.move(latLng, 16.0);
     setState(() => _selectedLocation = latLng);
     await _getAddressFromLatLng(latLng);
     _hitungOngkir();
+    _getRoute(); // ✅
   }
 
-  // ✅ Return data ke EditProfileView, bukan langsung save ke API
   void _gunakanLokasi() {
     Get.back(result: {
       'alamat': _selectedAddress,
       'latitude': _selectedLocation.latitude,
       'longitude': _selectedLocation.longitude,
+      'jarakKm': _jarakKm,
     });
   }
 
@@ -153,7 +193,6 @@ void _initLocationFromProfile() {
       ),
       body: Stack(
         children: [
-          // ── Peta ──
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
@@ -166,16 +205,30 @@ void _initLocationFromProfile() {
                 if (event is MapEventMoveEnd) {
                   _getAddressFromLatLng(event.camera.center);
                   _hitungOngkir();
+                  _getRoute(); // ✅
                 }
               },
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate:
+                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.e_pasar',
               ),
 
-              // ✅ Marker pasar
+              // ✅ Garis rute
+              if (_routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _routePoints,
+                      strokeWidth: 4,
+                      color: const Color(0xFF0077B6),
+                    ),
+                  ],
+                ),
+
+              // Marker pasar
               if (_pasar != null)
                 MarkerLayer(
                   markers: [
@@ -186,18 +239,21 @@ void _initLocationFromProfile() {
                       child: Column(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: const Color(0xFF0077B6),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               _pasar!.namaPasar ?? 'Pasar',
-                              style: const TextStyle(color: Colors.white, fontSize: 11),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 11),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const Icon(Icons.storefront, color: Color(0xFF0077B6), size: 28),
+                          const Icon(Icons.storefront,
+                              color: Color(0xFF0077B6), size: 28),
                         ],
                       ),
                     ),
@@ -206,7 +262,7 @@ void _initLocationFromProfile() {
             ],
           ),
 
-          // ── Pin merah tengah ──
+          // Pin merah tengah
           const Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -217,7 +273,7 @@ void _initLocationFromProfile() {
             ),
           ),
 
-          // ── Tombol GPS ──
+          // Tombol GPS
           Positioned(
             bottom: 230,
             right: 16,
@@ -228,7 +284,7 @@ void _initLocationFromProfile() {
             ),
           ),
 
-          // ── Panel bawah ──
+          // Panel bawah
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -236,51 +292,57 @@ void _initLocationFromProfile() {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+                borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(20)),
+                boxShadow: [
+                  BoxShadow(blurRadius: 10, color: Colors.black26)
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 40, height: 4,
+                    width: 40,
+                    height: 4,
                     margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+                    decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2)),
                   ),
-
-                  // Alamat
                   _isLoadingAddress
-                    ? const CircularProgressIndicator()
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.location_on, color: Colors.red),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(_selectedAddress,
-                              style: const TextStyle(fontSize: 13),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis),
-                          ),
-                        ],
-                      ),
-
+                      ? const CircularProgressIndicator()
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.location_on, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(_selectedAddress,
+                                  style: const TextStyle(fontSize: 13),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
                   const SizedBox(height: 12),
                   const Divider(),
                   const SizedBox(height: 8),
-
-                  // Jarak & ongkir
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(children: [
-                        const Icon(Icons.straighten, size: 18, color: Colors.grey),
+                        const Icon(Icons.straighten,
+                            size: 18, color: Colors.grey),
                         const SizedBox(width: 4),
-                        Text('$_jarakKm km dari pasar',
-                          style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                        Text(
+                          '${_jarakKm.toStringAsFixed(1)} km dari pasar',
+                          style: TextStyle(
+                              fontSize: 13, color: Colors.grey[700]),
+                        ),
                       ]),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.green[50],
                           borderRadius: BorderRadius.circular(8),
@@ -288,15 +350,15 @@ void _initLocationFromProfile() {
                         ),
                         child: Text(
                           'Ongkir: ${_formatRupiah(_totalOngkir)}',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green[700], fontSize: 13),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green[700],
+                              fontSize: 13),
                         ),
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
-
-                  // ✅ Tombol return ke EditProfileView
                   SizedBox(
                     width: double.infinity,
                     child: Container(
@@ -309,15 +371,21 @@ void _initLocationFromProfile() {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ElevatedButton(
-                        onPressed: _isLoadingAddress ? null : _gunakanLokasi,
+                        onPressed:
+                            _isLoadingAddress ? null : _gunakanLokasi,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: const Text('Gunakan Lokasi Ini', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        child: const Text('Gunakan Lokasi Ini',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ),

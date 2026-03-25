@@ -286,7 +286,7 @@ class _KiosEditViewState extends State<KiosEditView> {
             width: double.infinity,
             color: Colors.grey[200],
             child: Image.network(
-              'http://localhost:8000/storage/$_currentFotoUrl',
+              'https://perseveringly-coxal-chandler.ngrok-free.dev/storage/$_currentFotoUrl',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return const Center(

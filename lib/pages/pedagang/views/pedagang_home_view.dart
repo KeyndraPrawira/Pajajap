@@ -148,7 +148,7 @@ class PedagangHomeView extends GetView<PedagangController> {
           children: [
             kios.fotoKios != null
                 ? Image.network(
-                    'http://localhost:8000/storage/${kios.fotoKios}',
+                    'https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${kios.fotoKios}',
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(color: primaryColor),
                   )
@@ -289,7 +289,7 @@ class PedagangHomeView extends GetView<PedagangController> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   child: p.foto != null
                       ? Image.network(
-                          "http://localhost:8000/storage/${p.foto}",
+                          "https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${p.foto}",
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (_, __, ___) => Container(color: Colors.grey[100], child: const Icon(Icons.broken_image)),

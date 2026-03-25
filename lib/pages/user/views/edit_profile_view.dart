@@ -21,6 +21,7 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   double? _latitude;
   double? _longitude;
+  double? _jarakKm;
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     // Mengambil data awal dari controller secara eksplisit
     final profile = _profileC.dataProfile.value;
     
-    _nameController = TextEditingController(text: profile?.username ?? '');
+    _nameController = TextEditingController(text: profile?.name ?? '');
     _phoneController = TextEditingController(text: profile?.nomorTelepon ?? '');
     _alamatController = TextEditingController(text: profile?.alamat?.alamatLengkap ?? '');
     _latitude = profile?.alamat?.latitude;
@@ -77,6 +78,8 @@ class _EditProfileViewState extends State<EditProfileView> {
         _alamatController.text.trim(),
         _latitude ?? 0.0,
         _longitude ?? 0.0,
+        _jarakKm ?? 0.0,
+
       );
     }
     
@@ -93,8 +96,8 @@ class _EditProfileViewState extends State<EditProfileView> {
         
         // Pastikan controller terupdate jika dataProfile berubah di background
         final profile = _profileC.dataProfile.value;
-        if (_nameController.text.isEmpty && profile?.username != null) {
-          _nameController.text = profile!.username!;
+        if (_nameController.text.isEmpty && profile?.name != null) {
+          _nameController.text = profile!.name!;
         }
 
         return CustomScrollView(
@@ -160,7 +163,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        profile?.username ?? 'User',
+                        profile?.name ?? 'User',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -259,7 +262,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                       ),
                       const SizedBox(height: 24),
 
-                      // Tombol Simpan dengan Gradient
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(

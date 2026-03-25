@@ -38,6 +38,9 @@ class DataPasar {
     String? alamat;
     String? fotoPasar;
     int? ongkir;
+    int? minimalOngkir;
+    int? biayaLayanan;
+    int? biayaBeratBarang;
     String? kontak;
     String? deskripsi;
     double? longitude;
@@ -51,6 +54,9 @@ class DataPasar {
         this.alamat,
         this.fotoPasar,
         this.ongkir,
+        this.minimalOngkir,
+        this.biayaLayanan,
+        this.biayaBeratBarang,
         this.kontak,
         this.deskripsi,
         this.longitude,
@@ -65,6 +71,9 @@ class DataPasar {
         alamat: json["alamat"],
         fotoPasar: json["foto_pasar"],
         ongkir: json["ongkir"],
+        minimalOngkir: json["minimal_ongkir"],
+        biayaLayanan: json["biaya_layanan"],
+        biayaBeratBarang: json["biaya_berat_barang"],
         kontak: json["kontak"],
         deskripsi: json["deskripsi"],
         longitude: double.tryParse(json["longitude"]?.toString() ?? ""),
@@ -79,6 +88,9 @@ class DataPasar {
         "alamat": alamat,
         "foto_pasar": fotoPasar,
         "ongkir": ongkir,
+        "minimal_ongkir": minimalOngkir,
+        "biaya_layanan": biayaLayanan,
+        "biaya_berat_barang": biayaBeratBarang,
         "kontak": kontak,
         "deskripsi": deskripsi,
         "longitude": longitude,

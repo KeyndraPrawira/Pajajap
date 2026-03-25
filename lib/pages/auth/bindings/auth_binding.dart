@@ -14,9 +14,9 @@ class AuthBinding extends Bindings {
       );
     }
     
-    Get.put<AuthController>(
-      AuthController(),
-      permanent: false,
+    Get.lazyPut<AuthController>(
+      () => AuthController(),
+      fenix: true,
     );
-  }
+}
 }

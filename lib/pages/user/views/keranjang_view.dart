@@ -1,4 +1,6 @@
+import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/pages/user/controllers/keranjang_controller.dart';
+import 'package:e_pasar/pages/user/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -130,7 +132,7 @@ class KeranjangView extends GetView<KeranjangController> {
     final hargaSatuan = produk?.harga ?? 0;
     final jumlah = int.tryParse(item.jumlah ?? '1') ?? 1;
     final imageUrl = produk?.foto != null
-        ? 'http://localhost:8000/storage/${produk!.foto}'
+        ? 'http://https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${produk!.foto}'
         : null;
 
     return Container(
@@ -493,8 +495,30 @@ class KeranjangView extends GetView<KeranjangController> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: navigate to checkout
-                  // Get.toNamed('/checkout');
+                  final profileC = Get.find<ProfileController>();
+                  final alamat = profileC.dataProfile.value?.alamat;
+              
+                  // Cek alamat sudah diset belum
+                  if (alamat == null || alamat.alamatLengkap == null) {
+                    Get.snackbar(
+                      'Alamat Belum Diset',
+                      'Silakan set alamat pengiriman terlebih dahulu',
+                      backgroundColor: Colors.orange,
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.TOP,
+                      icon: const Icon(Icons.location_off, color: Colors.white),
+                    );
+                    return;
+                  }
+              
+                  // Navigate ke checkout dengan data keranjang + alamat
+                  Get.toNamed(
+                    AppRoutes.CHECKOUT,
+                    arguments: {
+                      'keranjang': controller.keranjangList.toList(),
+                      'alamat': alamat,
+                    },
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,

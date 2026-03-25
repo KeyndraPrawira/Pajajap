@@ -48,7 +48,7 @@ class UserProfileView extends StatelessWidget {
 
                   // Nama
                   Text(
-                    profile?.username ?? authService.getUserName() ?? 'User',
+                    profile?.name ?? authService.getUserName() ?? 'User',
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

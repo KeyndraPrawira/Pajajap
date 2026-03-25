@@ -56,7 +56,7 @@ class UserHomeView extends GetView<UserProdukController> {
     final jumlahObs = 1.obs;
     final hargaSatuan = produk.harga ?? 0;
     final imageUrl = produk.foto != null
-        ? 'http://localhost:8000/storage/${produk.foto}'
+        ? 'https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${produk.foto}'
         : null;
 
     showModalBottomSheet(
@@ -864,7 +864,7 @@ class UserHomeView extends GetView<UserProdukController> {
 
   Widget _buildProdukCard(BuildContext context, DataProduk produk) {
     final imageUrl = produk.foto != null
-        ? 'http://localhost:8000/storage/${produk.foto}'
+        ? 'https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${produk.foto}'
         : null;
 
     return GestureDetector(

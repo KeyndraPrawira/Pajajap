@@ -1,3 +1,7 @@
+import 'package:e_pasar/pages/auth/bindings/complete_profile_binding.dart';
+import 'package:e_pasar/pages/auth/bindings/login_binding.dart';
+import 'package:e_pasar/pages/auth/views/complete_profile.dart';
+import 'package:e_pasar/pages/driver/views/driver_home_view.dart';
 import 'package:e_pasar/pages/pedagang/controllers/pedagang_controller.dart';
 import 'package:e_pasar/pages/pedagang/controllers/produk_controller.dart';
 import 'package:e_pasar/pages/pedagang/controllers/produk_form_controller.dart';
@@ -5,16 +9,20 @@ import 'package:e_pasar/pages/pedagang/views/kios_edit_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_add_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_edit_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_list_view.dart';
+import 'package:e_pasar/pages/user/controllers/checkout_controller.dart';
+import 'package:e_pasar/pages/user/views/checkout_view.dart';
+import 'package:e_pasar/pages/user/views/mencari_driver_view.dart';
 import 'package:e_pasar/pages/user/views/user_home_view.dart';
 import 'package:get/get.dart';
 
 import '../../pages/auth/bindings/auth_binding.dart';
-import '../../pages/auth/views/auth_view.dart';
+import '../../pages/auth/views/login_view.dart';
 import '../../pages/auth/views/register_view.dart';
 import '../../pages/dashboard/bindings/dashboard_binding.dart';
 import '../../pages/dashboard/views/dashboard_view.dart';
 import '../../pages/driver/bindings/driver_binding.dart';
 import '../../pages/driver/views/driver_view.dart';
+
 import '../../pages/home/bindings/home_binding.dart';
 import '../../pages/home/views/home_view.dart';
 import '../../pages/pedagang/bindings/pedagang_binding.dart';
@@ -66,6 +74,16 @@ class AppPages {
       page: () => const ProfileView(),
       binding: ProfileBinding(),
     ),
+    GetPage(name: _Paths.CHECKOUT, 
+    page: () => const CheckoutView(),
+    binding: BindingsBuilder(() {
+      Get.lazyPut<CheckoutController>(() => CheckoutController());
+    })),
+    GetPage(
+  name: AppRoutes.MENCARI_DRIVER,
+  page: () => const MencariDriverView(),
+  middlewares: [AuthMiddleware(requiredRole: 'user')],
+),  
     GetPage(
       name: _Paths.DASHBOARD,
       page: () => const DashboardView(),
@@ -86,7 +104,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.LOGIN,
       page: () => const LoginView(),
-      binding: AuthBinding(),
+      binding: LoginBinding(),
       middlewares: [
         GuestMiddleware()
       ], // Kalau udah login, ga bisa akses login page
@@ -94,8 +112,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.REGISTER,
       page: () => const RegisterView(),
-      binding: AuthBinding(),
+      binding: LoginBinding(),
       middlewares: [GuestMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.COMPLETE_PROFILE,
+      page: () =>const CompleteProfileView(),
+      binding: CompleteProfileBinding(),
     ),
     GetPage(
       name: AppRoutes.PEDAGANG_HOME,
@@ -110,6 +133,8 @@ class AppPages {
       page: () => const DriverView(),
       binding: DriverBinding(),
       middlewares: [AuthMiddleware(requiredRole: 'driver')],
+
+
     ),
     GetPage(
       name: AppRoutes.USER_HOME,
@@ -149,6 +174,8 @@ class AppPages {
       name: _Paths.DRIVER,
       page: () => const DriverView(),
       binding: DriverBinding(),
+
+
     ),
     GetPage(
       name: _Paths.USER,

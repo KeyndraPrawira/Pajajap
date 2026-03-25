@@ -1,4 +1,5 @@
 // lib/main.dart
+import 'package:e_pasar/app/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -10,7 +11,7 @@ void main() async {
   
   // Initialize GetStorage untuk local storage
   await GetStorage.init();
-  
+  Get.put(AuthService(), permanent: true);
   runApp(const MyApp());
 }
 

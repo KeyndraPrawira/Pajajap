@@ -98,6 +98,7 @@ class Produk {
   String? nama;
   int? harga;
   String? foto;
+  double? berat_satuan;
   String? deskripsi;
 
   Produk({
@@ -105,6 +106,7 @@ class Produk {
     this.nama,
     this.harga,
     this.foto,
+    this.berat_satuan,
     this.deskripsi,
   });
 
@@ -113,6 +115,9 @@ class Produk {
         nama: json["nama"],
         harga: json["harga"],
         foto: json["foto"],
+        berat_satuan: (json["berat_satuan"] != null)
+            ? double.tryParse(json["berat_satuan"].toString())
+            : null,
         deskripsi: json["deskripsi"],
       );
 
@@ -121,6 +126,7 @@ class Produk {
         "nama": nama,
         "harga": harga,
         "foto": foto,
+        "berat_satuan": berat_satuan,
         "deskripsi": deskripsi,
       };
 }

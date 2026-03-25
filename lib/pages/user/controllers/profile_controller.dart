@@ -12,7 +12,7 @@ class ProfileController extends GetxController {
   var dataProfile = Rxn<DataProfile>();
   var profile = Rxn<Profile>();
  final authC = Get.find<AuthController>();
-String get token => authC.token;
+String get token => authC.box.read('token') ?? '';
 
   @override
   void onInit() {
@@ -34,7 +34,7 @@ String get token => authC.token;
     if (result != null) {
       profile.value = result;           // ✅ Profile (wrapper)
       dataProfile.value = result.data;  // ✅ DataProfile (isi)
-      print("Username: ${dataProfile.value?.username}");
+      print("Nama: ${dataProfile.value?.name}");
       print("Alamat: ${dataProfile.value?.alamat?.alamatLengkap}");
     }
   } catch (e) {
@@ -46,7 +46,7 @@ String get token => authC.token;
 }
   /// update nama dan nomor telepon
   Future<void> updateProfile(
-  String username,
+  String name,
   String nomorTelepon,
 ) async {
 
@@ -56,7 +56,7 @@ String get token => authC.token;
 
     final success = await ProfileService.updateProfile(
       token,
-      username,
+      name,
       nomorTelepon,
     );
 
@@ -75,6 +75,7 @@ String get token => authC.token;
   String alamat,
   double latitude,
   double longitude,
+  double jarakKm,
 ) async {
 
   try {
@@ -86,6 +87,7 @@ String get token => authC.token;
       alamat,
       latitude,
       longitude,
+      jarakKm
     );
 
     if (success) {

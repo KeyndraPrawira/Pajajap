@@ -26,7 +26,7 @@ class ProfileService {
   /// update nama dan nomor telepon
   static Future<bool> updateProfile(
     String token,
-    String username,
+    String name,
     String nomorTelepon,
   ) async {
 
@@ -34,7 +34,7 @@ class ProfileService {
       Uri.parse('${Api.baseUrl}/profile/me'),
       headers: Api.headersWithAuth(token),
       body: jsonEncode({
-        "username": username,
+        "name": name,
         "nomor_telepon": nomorTelepon
       }),
     );
@@ -48,6 +48,7 @@ class ProfileService {
   String alamat,
   double latitude,
   double longitude,
+  double jarakKm,
 ) async {
 
   final res = await http.post(
@@ -56,7 +57,8 @@ class ProfileService {
     body: jsonEncode({
       "alamat_lengkap": alamat,
       "latitude": latitude,
-      "longitude": longitude
+      "longitude": longitude,
+      "jarak_km": jarakKm
     }),
   );
 

@@ -1,9 +1,10 @@
 // lib/pages/auth/views/login_view.dart
 import 'package:e_pasar/pages/auth/controllers/auth_controller.dart';
+import 'package:e_pasar/pages/auth/controllers/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class LoginView extends GetView<AuthController> {
+class LoginView extends GetView<LoginController> {
   const LoginView({super.key});
 
   @override
@@ -177,15 +178,20 @@ class LoginView extends GetView<AuthController> {
                 const SizedBox(height: 32),
 
                 // Social Login
-                    Container(
-                      alignment: Alignment.center,
-                      child: _buildSocialButton(
-                        "Google",
-                        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
+                   const SizedBox(height: 32),
+
+                    Obx(() => GestureDetector(
+                      onTap: controller.isLoading.value
+                          ? null
+                          : controller.loginWithGoogle,
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: _buildSocialButton(
+                          "Google",
+                          "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    
+                    )),
                   
                 
 

@@ -67,7 +67,7 @@ Future<void> fetchKios() async {
       
       print('✅ FOUND MY KIOS: ${myKios.value?.namaKios}');
       print('📸 FOTO KIOS PATH: ${myKios.value?.fotoKios}');
-      print('🔗 FULL URL: http://localhost:8000/storage/${myKios.value?.fotoKios}');
+      print('🔗 FULL URL: https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${myKios.value?.fotoKios}');
     } else {
       kiosList.value = [];
       myKios.value = null;

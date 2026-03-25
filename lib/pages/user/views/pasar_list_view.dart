@@ -61,7 +61,7 @@ class PasarListView extends StatelessWidget {
                           height: 80,
                           child: pasar.fotoPasar != null
                               ? CachedNetworkImage(
-                                  imageUrl: 'http://localhost:8000/storage/${pasar.fotoPasar}',
+                                  imageUrl: 'https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${pasar.fotoPasar}',
                                   fit: BoxFit.cover,
                                   placeholder: (_, __) => Container(
                                     color: const Color(0xFFE8F5F9),
