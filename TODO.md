@@ -1,13 +1,11 @@
-# Driver Home Page Implementation
+# Driver Delivery Page (Take Product)
 
-## Steps (GetX pattern in lib/pages/driver/):
+## Plan:
+**Information Gathered:**
+- No delivery views. OrderService.detailOrder loads full data (buyer, orderDetails.produk.kios)
+- Backend checkout → orderDetails with produk.foto, nama_produk, kios.nama_kios, kios.lokasi (assume 'alamat')
+- Layout: Modal Column → Profile(top-right) | Buyer info | Products List | Ongkir + Total (gradient)
 
-- [x] 1. Add fl_chart dependency to pubspec.yaml and run `flutter pub get`
-- [x] 2. Update lib/pages/driver/controllers/driver_controller.dart (add balance, income data)
-- [x] 3. Create lib/pages/driver/views/driver_home_view.dart (new home page with balance card & line chart)
-- [x] 4. Update lib/app/routes/app_pages.dart (point DRIVER_HOME to DriverHomeView)
-- [ ] 5. ~~Update binding if needed~~ (already good)
-- [ ] 6. Test: `flutter run`, login as driver, verify balance/chart display
-
-Updated: Step 1 in progress.
-
+**Files:**
+1. controllers/delivery_controller.dart (load order by id)
+2

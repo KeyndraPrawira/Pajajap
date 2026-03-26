@@ -105,9 +105,39 @@ class OrderService {
     }
   }
 
+  // ── PENDING ORDERS FOR DRIVER ─────────────────────────────────
+  // GET /api/orders/pending
+  Future<List<dynamic>> getPendingOrders() async {
+    try {
+      if (token == null) throw Exception('Token tidak ditemukan');
+
+      final uri = Uri.parse('${Api.baseUrl}/orders/available');
+      print('📡 [PENDING ORDERS] URL: $uri');
+
+      final response = await http.get(
+        uri,
+        headers: Api.headersWithAuth(token!),
+      );
+
+      print('📥 [PENDING ORDERS] Status: ${response.statusCode}');
+      print('📥 [PENDING ORDERS] Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+        return decoded['data'] as List<dynamic>;
+      } else {
+        throw Exception('Gagal ambil pending orders (${response.statusCode})');
+      }
+    } catch (e) {
+      print('💥 [PENDING ORDERS] Exception: $e');
+      return [];
+    }
+  }
+
   // ── ACCEPT ORDER (Driver) ──────────────────────────────────
   // POST /api/orders/{id}/accept
   Future<Map<String, dynamic>> acceptOrder(int orderId) async {
+
     try {
       if (token == null) throw Exception('Token tidak ditemukan');
 
