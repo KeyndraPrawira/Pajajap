@@ -9,7 +9,6 @@ class SplashScreenBinding extends Bindings {
   void dependencies() {
     print('🔵 SplashScreenBinding - Loading AuthService');
     // AuthService permanent supaya bisa dipake di seluruh app
-    Get.put(AuthService(), permanent: true);
     print('🔵 SplashScreenBinding - Loading SplashScreenController');
     Get.put(SplashScreenController());
     print('🔵 SplashScreenBinding - Done');

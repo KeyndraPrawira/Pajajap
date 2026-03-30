@@ -1,6 +1,9 @@
 import 'package:e_pasar/pages/auth/bindings/complete_profile_binding.dart';
 import 'package:e_pasar/pages/auth/bindings/login_binding.dart';
 import 'package:e_pasar/pages/auth/views/complete_profile.dart';
+import 'package:e_pasar/pages/driver/bindings/delivery_binding.dart';
+import 'package:e_pasar/pages/driver/views/delivery_send_view.dart';
+import 'package:e_pasar/pages/driver/views/delivery_view.dart';
 import 'package:e_pasar/pages/driver/views/driver_home_view.dart';
 import 'package:e_pasar/pages/pedagang/controllers/pedagang_controller.dart';
 import 'package:e_pasar/pages/pedagang/controllers/produk_controller.dart';
@@ -168,8 +171,8 @@ class AppPages {
         Get.lazyPut<ProdukFormController>(() => ProdukFormController());
       }),
     ),
-  ],
-),
+    ],
+  ),
     GetPage(
       name: _Paths.DRIVER,
       page: () => const DriverView(),
@@ -177,6 +180,15 @@ class AppPages {
 
 
     ),
+    GetPage(
+      name: _Paths.DELIVERY_CHECK,
+      page: () => const DeliveryView(),
+      binding: DriverBinding(),
+      
+    ),
+    GetPage(name: AppRoutes.DELIVERY_SEND,
+     page: () => const DeliverySendView(),
+     binding: DeliveryBinding()),
     GetPage(
       name: _Paths.USER,
       page: () => const UserView(),

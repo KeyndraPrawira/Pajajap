@@ -77,7 +77,7 @@ class KeranjangController extends GetxController {
         Get.snackbar(
           'Berhasil',
           result.message ?? 'Produk ditambahkan ke keranjang',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
         );
       }
     } catch (e) {
@@ -168,12 +168,14 @@ class KeranjangController extends GetxController {
   // ─── INCREMENT / DECREMENT helper ────────────────────────
   Future<void> incrementItem(DataKeranjang item, int hargaSatuan) async {
     final newJumlah = (int.tryParse(item.jumlah ?? '1') ?? 1) + 1;
-    await updateKeranjang(
-      id: item.id!,
-      produkId: item.produkId!,
-      jumlah: newJumlah,
-      hargaTotal: newJumlah * hargaSatuan,
-    );
+       updateKeranjang(
+            id: item.id!,
+            produkId: item.produkId!,
+            jumlah: newJumlah,
+            hargaTotal: newJumlah * hargaSatuan,
+          );
+      ;
+      
   }
 
   Future<void> decrementItem(DataKeranjang item, int hargaSatuan) async {

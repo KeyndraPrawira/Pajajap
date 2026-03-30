@@ -1,6 +1,8 @@
 // lib/app/modules/splash/controllers/splash_controller.dart
 import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/app/services/auth_services.dart';
+import 'package:e_pasar/app/services/order_services.dart';
+import 'package:e_pasar/pages/driver/views/delivery_view.dart';
 import 'package:get/get.dart';
 
 
@@ -23,46 +25,60 @@ class SplashScreenController extends GetxController {
   }
 
   Future<void> _checkAuth() async {
-    print('🔵 SplashScreenController - _checkAuth START');
-    // Delay untuk splash screen
-    await Future.delayed(const Duration(seconds: 2));
-    print('🔵 SplashScreenController - Delay done');
+  await Future.delayed(const Duration(seconds: 2));
 
-    // Cek apakah user sudah login (dari local storage)
-    final token = _authService.getToken();
-    print('🔵 SplashScreenController - Token: $token');
-
-    if (token != null && token.isNotEmpty) {
-      // User sudah login, check berdasarkan role
-      final role = _authService.getRole();
-      print('🔵 SplashScreenController - Role: $role');
-      if (role != null && role.isNotEmpty) {
-        print('🔵 SplashScreenController - Navigating to Home');
-        _navigateToHome(role);
-      } else {
-        // Tidak ada role, ke login
-        print('🔵 SplashScreenController - No role, navigating to LOGIN');
-        Get.offAllNamed(AppRoutes.LOGIN);
-      }
+  final token = _authService.getToken();
+  if (token != null && token.isNotEmpty) {
+    final role = _authService.getRole();
+    if (role != null && role.isNotEmpty) {
+      await _navigateToHome(role); // ← tambah await
     } else {
-      // User belum login
-      print('🔵 SplashScreenController - No token, navigating to LOGIN');
       Get.offAllNamed(AppRoutes.LOGIN);
     }
+  } else {
+    Get.offAllNamed(AppRoutes.LOGIN);
   }
+}
 
-  void _navigateToHome(String role) {
-    switch (role.toLowerCase()) {
-      case 'pedagang':
-        Get.offAllNamed(AppRoutes.PEDAGANG_HOME);
-        break;
-      case 'driver':
-        Get.offAllNamed(AppRoutes.DRIVER_HOME);
-        break;
-      case 'user':
-      default:
-        Get.offAllNamed(AppRoutes.USER_HOME);
-        break;
-    }
+Future<void> _navigateToHome(String role) async {
+  switch (role.toLowerCase()) {
+    case 'driver':
+      // Cek dulu apakah ada active order
+      // await _checkDriverActiveOrder();
+      break;
+    case 'pedagang':
+      Get.offAllNamed(AppRoutes.PEDAGANG_HOME);
+      break;
+    case 'user':
+    default:
+      Get.offAllNamed(AppRoutes.USER_HOME);
+      break;
   }
+}
+
+// Future<void> _checkDriverActiveOrder() async {
+//   try {
+//     final orderService = Get.find<OrderService>();
+//     final activeOrder = await orderService.getActiveOrder();
+
+//     if (activeOrder != null) {
+//       final status = activeOrder;
+//       final driverId = activeOrder['driver_id'];
+
+//       if ((status == 'dalam_proses' || status == 'dikirim') && driverId != null) {
+//         print('🚗 Driver punya active order, redirect ke DeliveryView');
+//         Get.offAll(() => const DeliveryView(), arguments: activeOrder['id']);
+//         return;
+//       }
+//     }
+
+//     // Tidak ada active order, ke home biasa
+//     print('🏠 Tidak ada active order, ke Driver Home');
+//     Get.offAllNamed(AppRoutes.DRIVER_HOME);
+//   } catch (e) {
+//     print('💥 Error check active order: $e');
+//     // Kalau error, tetap ke home
+//     Get.offAllNamed(AppRoutes.DRIVER_HOME);
+//   }
+// }
 }

@@ -17,21 +17,18 @@ class SplashScreenView extends GetView<SplashScreenController> {
             Container(
               width: 100,
               height: 100,
-              decoration: BoxDecoration(
-                color: const Color(0xFF0D47A1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(
-                Icons.shopping_bag,
-                size: 60,
-                color: Colors.white,
+              
+              child:  Image.asset(
+                'assets/app_icon/pajajap-gradient.png',
+                width: 100,
+                height: 100,
               ),
             ),
             const SizedBox(height: 30),
             
             // App Name
             const Text(
-              'E-Pasar',
+              'Pajajap',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -52,7 +49,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
             
             // Loading Indicator
             const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0D47A1)),
+              valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 0, 163, 16)),
               strokeWidth: 2,
             ),
           ],

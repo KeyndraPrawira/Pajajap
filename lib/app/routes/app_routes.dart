@@ -20,6 +20,8 @@ abstract class Routes {
   static const COMPLETE_PROFILE = _Paths.PAGES + _Paths.COMPLETE_PROFILE;
   static const CHECKOUT = _Paths.PAGES + _Paths.CHECKOUT;
   static const MENCARI_DRIVER = _Paths.PAGES + _Paths.MENCARI_DRIVER;
+  static const DELIVERY_CHECK = _Paths.PAGES + _Paths.DELIVERY_CHECK;
+  static const DELIVERY_SEND = _Paths.PAGES + _Paths.DELIVERY_SEND;
 }
 
 abstract class _Paths {
@@ -44,6 +46,12 @@ abstract class _Paths {
   static String produkEdit(int id) => '/produk/edit/$id';
   static const CHECKOUT = '/checkout';
   static const MENCARI_DRIVER = '/mencari-driver';
+
+  static const DELIVERY_CHECK = '/delivery/:id/check';
+  static String deliveryCheck(int id) => '/delivery/$id/check';
+
+  static const DELIVERY_SEND = '/delivery/:id/send';
+  static String deliverySend(int id) => '/delivery/$id/send';
 
 }
 
@@ -74,4 +82,9 @@ abstract class AppRoutes {
 
   static const CHECKOUT = '/checkout';
   static const MENCARI_DRIVER = '/mencari-driver';
+  static const DELIVERY_CHECK = '/delivery/:id/check';
+  static String deliveryCheck(int id) => '/delivery/$id/check';
+  static const DELIVERY = '/delivery';
+  static const DELIVERY_SEND = '/delivery/:id/send';
+  static String deliverySend(int id) => '/delivery/$id/send';
 }

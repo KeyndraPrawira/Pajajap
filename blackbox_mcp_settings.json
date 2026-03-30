@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "github.com/cocoindex-io/cocoindex-code": {
+      "type": "stdio",
+      "command": "ccc",
+      "args": ["mcp"]
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    }
+  }
+}

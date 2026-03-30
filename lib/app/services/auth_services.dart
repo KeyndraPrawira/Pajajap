@@ -1,4 +1,3 @@
-// lib/app/data/services/auth_service.dart
 import 'dart:convert';
 import 'package:e_pasar/app/data/models/user_model.dart';
 import 'package:e_pasar/app/utils/api.dart';
@@ -140,7 +139,6 @@ class AuthService extends GetxService {
   // ==================== GOOGLE LOGIN ==================== ← tambah ini
   Future<Map<String, dynamic>> loginWithGoogle() async {
     try {
-      await _googleSignIn.signOut();
       // Trigger popup Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {

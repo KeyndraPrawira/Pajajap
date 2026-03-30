@@ -1,11 +1,6 @@
-# Driver Delivery Page (Take Product)
-
-## Plan:
-**Information Gathered:**
-- No delivery views. OrderService.detailOrder loads full data (buyer, orderDetails.produk.kios)
-- Backend checkout → orderDetails with produk.foto, nama_produk, kios.nama_kios, kios.lokasi (assume 'alamat')
-- Layout: Modal Column → Profile(top-right) | Buyer info | Products List | Ongkir + Total (gradient)
-
-**Files:**
-1. controllers/delivery_controller.dart (load order by id)
-2
+# Driver Active Order Implementation
+✅ 1. Create TODO.md
+✅ 2. Update order_driver_controller.dart with correct filtering, polling, continueToDelivery
+✅ 3. Implement driver_active_order_view.dart with wave cards, UI
+⏳ 4. Test navigation to DeliveryView
+⏳ 5. Complete & attempt_completion

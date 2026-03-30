@@ -819,7 +819,7 @@ class UserHomeView extends GetView<UserProdukController> {
       if (controller.isLoading.value) {
         return SliverToBoxAdapter(
           child: SizedBox(
-            height: 200,
+            height: 500,
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -980,7 +980,7 @@ class UserHomeView extends GetView<UserProdukController> {
                     // ── Tombol + Keranjang → buka modal ──
                     SizedBox(
                       width: double.infinity,
-                      height: 32,
+                      height: 22,
                       child: ElevatedButton.icon(
                         onPressed: () =>
                             _showAddToCartModal(context, produk),

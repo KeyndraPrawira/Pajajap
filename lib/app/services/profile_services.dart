@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import '../utils/api.dart';
 import '../data/models/profile_model.dart';
 
@@ -91,4 +90,16 @@ class ProfileService {
     return false;
   }
 }
+  static Future<Profile?> refreshProfile(String token) async {
+    final res = await http.get(
+      Uri.parse('${Api.baseUrl}/profile/me'),
+      headers: Api.headersWithAuth(token),
+    );
+
+    if (res.statusCode == 200) {
+      return profileFromJson(res.body);
+    }
+    return null;
   }
+}
+

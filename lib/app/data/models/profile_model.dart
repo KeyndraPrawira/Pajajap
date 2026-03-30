@@ -32,10 +32,12 @@ class DataProfile {
     String? role;
     String? nomorTelepon;
     dynamic fotoProfil;
+    bool? isOnline;
     dynamic rememberToken;
     DateTime? createdAt;
     DateTime? updatedAt;
     Alamat? alamat;
+
 
     DataProfile({
         this.id,
@@ -46,6 +48,7 @@ class DataProfile {
         this.nomorTelepon,
         this.fotoProfil,
         this.rememberToken,
+        this.isOnline,
         this.createdAt,
         this.updatedAt,
         this.alamat,
@@ -59,7 +62,9 @@ class DataProfile {
         role: json["role"],
         nomorTelepon: json["nomor_telepon"],
         fotoProfil: json["foto_profil"],
+        isOnline: json["is_online"],
         rememberToken: json["remember_token"],
+
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
         updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
         alamat: json["alamat"] == null ? null : Alamat.fromJson(json["alamat"]),
@@ -77,6 +82,7 @@ class DataProfile {
         "created_at": createdAt?.toIso8601String(),
         "updated_at": updatedAt?.toIso8601String(),
         "alamat": alamat?.toJson(),
+        "is_online": isOnline,
     };
 }
 

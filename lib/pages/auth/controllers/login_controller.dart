@@ -66,6 +66,8 @@ class LoginController extends GetxController {
     }
   }
 
+  
+
   Future<void> loginWithGoogle() async {
     isLoading.value = true;
     try {
