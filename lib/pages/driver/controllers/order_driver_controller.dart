@@ -78,7 +78,16 @@ class OrderDriverController extends GetxController {
       print('Initial load error: $e');
     }
   }
+  // Tambah 2 method ini:
+Future<void> ignoreOrder(int orderId) async {
+  pendingOrders.removeWhere((order) => order['id'] == orderId);
+  Get.snackbar('✅ Diabaikan', 'Order dihapus dari daftar');
+}
 
+Future<void> refreshData() async {
+  await loadPendingOrders();
+  await loadActiveOrders();
+}
 
   Future<void> acceptOrder(int id) async {
     loadingOrders[id] = true;
