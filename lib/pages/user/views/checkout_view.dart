@@ -10,6 +10,100 @@ import 'package:cached_network_image/cached_network_image.dart';
 class CheckoutView extends GetView<CheckoutController> {
   const CheckoutView({super.key});
 
+  void _showConfirmDialog() {
+    showDialog(
+      context: Get.context!,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.shopping_bag_rounded, color: Color(0xFF0077B6), size: 24),
+            SizedBox(width: 12),
+            Text(
+              'Konfirmasi Pesanan',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF023E58),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${controller.keranjangList.length} item${controller.keranjangList.length > 1 ? 's' : ''}',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Total: ${controller.formatRupiah(controller.totalBayar)}',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF0077B6),
+              ),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Lanjutkan pembuatan pesanan?',
+              style: TextStyle(fontSize: 14, color: Color(0xFF6C757D)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            style: TextButton.styleFrom(
+              foregroundColor: Color(0xFF6C757D),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Color(0xFFDEE2E6)),
+              ),
+            ),
+            child: Text('Batal', style: TextStyle(fontWeight: FontWeight.w600)),
+          ),
+          SizedBox(
+            width: 120,
+            child: ElevatedButton(
+              onPressed: controller.isLoading.value 
+                ? null 
+                : controller.prosesCheckout,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF0077B6), Color(0xFF06D6A0)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    'Lanjut',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -538,7 +632,7 @@ class CheckoutView extends GetView<CheckoutController> {
             Obx(() => SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: controller.isLoading.value ? null : controller.checkout,
+                    onPressed: controller.isLoading.value ? null : () => _showConfirmDialog(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,

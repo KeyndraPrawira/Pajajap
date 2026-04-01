@@ -78,6 +78,7 @@ class KeranjangController extends GetxController {
           'Berhasil',
           result.message ?? 'Produk ditambahkan ke keranjang',
           snackPosition: SnackPosition.TOP,
+          duration: const Duration(seconds: 2),
         );
       }
     } catch (e) {

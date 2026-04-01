@@ -4,7 +4,9 @@ import 'dart:async';
 import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/app/services/order_services.dart';
 import 'package:flutter/material.dart';
+import 'user_delivery_view.dart';
 import 'package:get/get.dart';
+import 'user_delivery_view.dart';
 
 class MencariDriverView extends StatefulWidget {
   const MencariDriverView({super.key});
@@ -105,10 +107,10 @@ class _MencariDriverViewState extends State<MencariDriverView>
         final status = result['status']?.toString() ?? '';
         final driverId = result['driver_id'];
 
-        if (driverId != null && status == 'dikirim') {
+if (driverId != null && status == 'dalam_proses') {
           _pollingTimer?.cancel();
-          // Driver ketemu → navigasi ke halaman order aktif
-          
+          // Driver accept - navigasi ke User DeliveryView
+          Get.offAll(() => const UserDeliveryView(), arguments: orderId);
         } else if (status == 'dibatalkan') {
           _pollingTimer?.cancel();
           Get.back();

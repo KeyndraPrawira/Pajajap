@@ -22,6 +22,7 @@ abstract class Routes {
   static const MENCARI_DRIVER = _Paths.PAGES + _Paths.MENCARI_DRIVER;
   static const DELIVERY_CHECK = _Paths.PAGES + _Paths.DELIVERY_CHECK;
   static const DELIVERY_SEND = _Paths.PAGES + _Paths.DELIVERY_SEND;
+  static const USER_DELIVERY = _Paths.PAGES + _Paths.USER_DELIVERY;
 }
 
 abstract class _Paths {
@@ -52,6 +53,8 @@ abstract class _Paths {
 
   static const DELIVERY_SEND = '/delivery/:id/send';
   static String deliverySend(int id) => '/delivery/$id/send';
+
+  static const USER_DELIVERY = '/user/delivery';
 
 }
 
@@ -87,4 +90,5 @@ abstract class AppRoutes {
   static const DELIVERY = '/delivery';
   static const DELIVERY_SEND = '/delivery/:id/send';
   static String deliverySend(int id) => '/delivery/$id/send';
+  static const USER_DELIVERY = '/user/delivery';
 }

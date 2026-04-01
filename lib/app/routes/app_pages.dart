@@ -14,7 +14,9 @@ import 'package:e_pasar/pages/pedagang/views/produk_edit_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_list_view.dart';
 import 'package:e_pasar/pages/user/controllers/checkout_controller.dart';
 import 'package:e_pasar/pages/user/views/checkout_view.dart';
+import 'package:e_pasar/pages/user/views/user_delivery_view.dart';
 import 'package:e_pasar/pages/user/views/mencari_driver_view.dart';
+import 'package:e_pasar/pages/user/views/user_delivery_view.dart';
 import 'package:e_pasar/pages/user/views/user_home_view.dart';
 import 'package:get/get.dart';
 
@@ -180,15 +182,25 @@ class AppPages {
 
 
     ),
-    GetPage(
+GetPage(
       name: _Paths.DELIVERY_CHECK,
       page: () => const DeliveryView(),
       binding: DriverBinding(),
-      
     ),
-    GetPage(name: AppRoutes.DELIVERY_SEND,
+    GetPage(
+      name: _Paths.USER_DELIVERY,
+      page: () => const UserDeliveryView(),
+      binding: UserBinding(),
+      middlewares: [AuthMiddleware(requiredRole: 'user')],
+    ),
+GetPage(name: AppRoutes.DELIVERY_SEND,
      page: () => const DeliverySendView(),
      binding: DeliveryBinding()),
+    GetPage(
+      name: AppRoutes.USER_DELIVERY,
+      page: () => const UserDeliveryView(),
+      binding: UserBinding(),
+    ),
     GetPage(
       name: _Paths.USER,
       page: () => const UserView(),

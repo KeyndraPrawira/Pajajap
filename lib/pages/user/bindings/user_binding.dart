@@ -1,18 +1,24 @@
-import 'package:e_pasar/pages/auth/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 
 import 'package:e_pasar/app/services/auth_services.dart';
+import 'package:e_pasar/app/services/order_services.dart';
+import 'package:e_pasar/pages/auth/controllers/auth_controller.dart';
+import 'package:e_pasar/pages/driver/controllers/delivery_controller.dart';
 import 'package:e_pasar/pages/pedagang/controllers/produk_controller.dart';
 import 'package:e_pasar/pages/user/controllers/keranjang_controller.dart';
+import 'package:e_pasar/pages/user/controllers/order_controller.dart';
+import 'package:e_pasar/pages/user/controllers/pasar_controller.dart';
 import 'package:e_pasar/pages/user/controllers/produk_controller.dart';
 import 'package:e_pasar/pages/user/controllers/profile_controller.dart';
-import 'package:e_pasar/pages/user/controllers/pasar_controller.dart';
 
 import '../controllers/user_controller.dart';
 
 class UserBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<OrderController>(
+      () => OrderController(),
+    );
     Get.lazyPut<AuthController>(
       () => AuthController(),
     );
@@ -24,8 +30,6 @@ class UserBinding extends Bindings {
       ProfileController(),
       permanent: true,
     );
-
-     
 
     Get.lazyPut<KeranjangController>(
       () => KeranjangController(),
@@ -51,9 +55,14 @@ class UserBinding extends Bindings {
       () => UserProdukController(),
     );
 
-    
-   
+    Get.lazyPut(
+      () => OrderService(),
+      fenix: true,
+    );
 
-   
+    Get.lazyPut(
+      () => DeliveryController(),
+      fenix: true,
+    );
   }
 }

@@ -1,11 +1,11 @@
 import 'package:e_pasar/app/routes/app_pages.dart';
-import 'package:e_pasar/pages/driver/views/delivery_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_pasar/app/data/models/order_model.dart';
 import 'package:e_pasar/app/services/order_services.dart';
 
 class DeliveryController extends GetxController {
+  var isUserMode = false.obs;
   final OrderService orderService = Get.find();
 
   final Rxn<DataOrder> orderData = Rxn<DataOrder>();
@@ -28,6 +28,12 @@ class DeliveryController extends GetxController {
     try {
       final response = await orderService.detailOrder(orderId);
       orderData.value = DataOrder.fromJson(response);
+      // Load item status from order details
+      for (var detail in orderData.value!.orderDetails ?? []) {
+        if (detail.id != null) {
+          itemStatus[detail.id!] = detail.status ?? 'pending';
+        }
+      }
     } catch (e) {
       Get.snackbar('Error', 'Gagal load order: $e');
     } finally {
@@ -36,6 +42,7 @@ class DeliveryController extends GetxController {
   }
 
   Future<void> onItemTap(OrderDetail detail) async {
+    if (isUserMode.value) return; // User mode: read-only
     if (detail.id == null) return;
     final current = itemStatus[detail.id] ?? '';
     if (current == 'diambil') return;
@@ -49,7 +56,7 @@ class DeliveryController extends GetxController {
       final driverId = orderData.value?.driverId;
 
       if ((status == 'dalam_proses') && driverId != null) {
-        Get.offAll(() => const DeliveryView(), arguments: orderData.value?.id);
+Get.offAllNamed('/delivery-check', arguments: orderData.value?.id);
       } else if (status == 'dikirim') {
         Get.toNamed(AppRoutes.DELIVERY_SEND, arguments: orderData.value!.id!);
       } else {
@@ -61,9 +68,10 @@ class DeliveryController extends GetxController {
   /// [catatan] opsional, diisi saat status = 'tidak_ada'
   Future<void> updateItemStatus(int id, String newStatus,
       {String? catatan}) async {
+    if (isUserMode.value) return; // User mode: no updates
     loadingItems[id] = true;
     try {
-      await orderService.updateItemStatus(id, newStatus,  catatan: catatan);
+      await orderService.updateItemStatus(id, newStatus, catatan: catatan);
       itemStatus[id] = newStatus;
       catatan != null ? Get.snackbar('Catatan', catatan) : null;
     } catch (e) {
@@ -74,6 +82,7 @@ class DeliveryController extends GetxController {
   }
 
   Future<void> sendDelivery() async {
+    if (isUserMode.value) return; // User mode: no action
     if (orderData.value == null) return;
     final details = orderData.value!.orderDetails ?? [];
     final adaPending = details.any((d) {
@@ -101,6 +110,7 @@ class DeliveryController extends GetxController {
   }
 
   Future<void> completeDelivery() async {
+    if (isUserMode.value) return; // User mode: no action
     if (orderData.value == null) return;
     try {
       await orderService.completeDelivery(orderData.value!.id!);
@@ -111,3 +121,4 @@ class DeliveryController extends GetxController {
     }
   }
 }
+

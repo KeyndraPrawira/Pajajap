@@ -103,6 +103,12 @@ class CheckoutController extends GetxController {
     return buffer.toString();
   }
 
+// ─── prosesCheckout() ─────────────────────────────────────
+  void prosesCheckout() {
+    Get.back(); // Tutup dialog
+    checkout(); // Jalankan checkout asli
+  }
+
   // ─── CHECKOUT ─────────────────────────────────────────────
   Future<void> checkout() async {
     try {
@@ -110,7 +116,7 @@ class CheckoutController extends GetxController {
       final result = await _orderService.checkout();
       if (result['success'] == true) {
         Get.snackbar(
-          'Berhasil! 🎉',
+          'Berhasil!',
           'Order berhasil dibuat',
           backgroundColor: Colors.green,
           colorText: Colors.white,

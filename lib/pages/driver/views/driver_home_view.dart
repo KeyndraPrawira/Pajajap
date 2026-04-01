@@ -228,8 +228,16 @@ class DriverHomeView extends GetView<OrderDriverController> {
                               padding: EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
-                            onPressed: () => controller.acceptOrder(order['id']),
-                            child: Text('Terima Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+onPressed: controller.loadingOrders[order['id']] == true 
+                              ? null 
+                              : () => controller.acceptOrder(order['id']),
+                            child: controller.loadingOrders[order['id']] == true 
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : Text('Terima Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ],

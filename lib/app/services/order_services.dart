@@ -1,14 +1,29 @@
 // lib/app/services/order_service.dart
 
 import 'dart:convert';
+import 'package:e_pasar/app/services/order_realtime_services.dart';
 import 'package:e_pasar/app/utils/api.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
 class OrderService {
   final box = GetStorage();
+  OrderRealTimeService? _realTimeService;
 
   String? get token => box.read('token');
+  void initRealTime(Function(Map<String, dynamic>) onOrderUpdate) {
+    _realTimeService = OrderRealTimeService(onOrderUpdate: onOrderUpdate);
+  }
+  Future<void> connectRealTime() async {
+    if (_realTimeService != null) {
+      await _realTimeService!.connect();
+    }
+  }
+  Future<void> disconnectRealTime() async {
+    await _realTimeService?.disconnect();
+  }
+
+  bool get isRealTimeConnected => _realTimeService != null;
 
   // ── CHECKOUT (Buyer) ───────────────────────────────────────
   // POST /api/orders
@@ -98,9 +113,16 @@ class OrderService {
         throw Exception('Order tidak ditemukan');
       } else {
         throw Exception('Gagal ambil detail order (${response.statusCode})');
+        
       }
     } catch (e) {
+            final uri = Uri.parse('${Api.baseUrl}/orders/$id');
+      final response = await http.get(
+        uri,
+        headers: Api.headersWithAuth(token!),
+      );
       print('💥 [DETAIL ORDER] Exception: $e');
+           print('📥 [MY ORDERS] Body: ${response.body}');
       rethrow;
     }
   }

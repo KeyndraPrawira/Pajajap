@@ -8,128 +8,95 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
 
 class OrderDriverController extends GetxController {
-  final OrderService orderService = Get.put(OrderService());
-    final Rxn<DataOrder> orderData = Rxn<DataOrder>();
+  final OrderService orderService = Get.find<OrderService>();
+  var pendingOrders = <Map<String, dynamic>>[].obs;
+  final RxMap<int, bool> loadingOrders = <int, bool>{}.obs;
 
-  // Dummy data for driver home
-  var balance = 'Rp 250.000'.obs;
-  
-
-
-  var incomeSpots = <FlSpot>[].obs;
-  var pendingOrders = <dynamic>[].obs;   // menunggu_driver
-  var activeOrders = <DataOrder>[].obs;    // dalam_proses / dikirim
-  var buyer = <Buyer>[].obs;
-  Timer? _pollTimer;
-@override
+  @override
   void onInit() {
     super.onInit();
-    generateDummyIncomeData();
-    startPolling(); // for pending
-    startActivePolling(); // for active
+    setupRealTime();  // CUMA INI YANG DIBUTUHKAN!
+    loadPendingOrders();
+    loadActiveOrders(); // Sekali aja buat initial load
   }
 
-@override
-  void onClose() {
-    _pollTimer?.cancel();
-    _activePollTimer?.cancel();
-    super.onClose();
+  // 🔥 REAL-TIME ONLY (No Polling!)
+  void setupRealTime() {
+    orderService.initRealTime(_handleRealTimeUpdate);
+    orderService.connectRealTime();
   }
-
-  void startPolling() {
-    pollPendingOrders();
-    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) => pollPendingOrders());
-  }
-
-  Future<void> pollPendingOrders() async {
-  try {
-    final orders = await orderService.getPendingOrders();
-    pendingOrders.value = orders
-        .where((o) => o['status'] == 'menunggu_driver')
-        .toList();
-  } catch (e) {
-    print('Polling error: $e');
-  }
-} 
-
-      Future<void> pollActiveOrders() async {
-      try {
-        final rawOrders = await orderService.getActiveOrder();
-        if (rawOrders.isNotEmpty) {
-          // Parse setiap item lewat DataOrder supaya kode_pesanan → String
-          activeOrders.value = rawOrders
-              .map((item) => DataOrder.fromJson(item as Map<String, dynamic>))
-              .toList();
-
-        } else {
-          activeOrders.value = [];
-        }
-      } catch (e) {
-        print('Polling active orders error: $e');
+  
+  void _handleRealTimeUpdate(Map<String, dynamic> updatedOrder) {
+    final orderId = updatedOrder['id'] as int;
+    
+    if (updatedOrder['status'] == 'menunggu_driver') {
+      // NEW ORDER
+      if (!pendingOrders.any((o) => o['id'] == orderId)) {
+        pendingOrders.insert(0, updatedOrder);
+        Get.snackbar('🚚 New Order!', '#${updatedOrder['kode_pesanan']}');
+      }
+    } else {
+      // ORDER DIAMBIL / UPDATE
+      final index = pendingOrders.indexWhere((o) => o['id'] == orderId);
+      if (index != -1) {
+        pendingOrders.removeAt(index);
+        Get.snackbar('⏰ Order Taken!', 'Diambil driver lain');
       }
     }
 
-  Timer? _activePollTimer;
-
-  void startActivePolling() {
-    pollActiveOrders();
-    _activePollTimer = Timer.periodic(const Duration(seconds: 10), (_) => pollActiveOrders());
-  }
-
-  void continueToDelivery(int orderId, String status) {
-  if (status == 'dikirim') {
-    Get.toNamed(
-      AppRoutes.DELIVERY_SEND,
-      arguments: orderId, // ← pakai orderId dari parameter
-    );
-    return;
-  } else if (status == 'dalam_proses') {
-    Get.to(() => const DeliveryView(), arguments: orderId);
-  } else {
-    Get.snackbar(
-      'Gagal',
-      'Status saat ini: $status',
-    );
+    // Orderan yang telah diterima
+    if (updatedOrder['status'] == 'dalam_proses' || updatedOrder['status'] == 'dikirim') {
+      if (updatedOrder['status']=='dalam_proses') {
+        Get.toNamed(AppRoutes.DELIVERY_CHECK, arguments: orderId);
+      }else if (updatedOrder['status']=='dikirim') {
+        Get.toNamed(AppRoutes.DELIVERY_SEND, arguments: orderId);
+      }
     }
-    print('🔍 Continue to delivery for orderId: $orderId with status: $status');
   }
 
-  Future<void> ignoreOrder(int orderId) async {
-    // Remove from local list (no backend ignore, just dismiss)
-    pendingOrders.removeWhere((order) => order['id'] == orderId);
-    Get.snackbar('Ignored', 'Order diabaikan');
-  }
-
-  void generateDummyIncomeData() {
-    incomeSpots.clear();
-    final now = DateTime.now();
-    for (int hour = 8; hour <= 18; hour++) {
-      final time = now.add(Duration(hours: hour - now.hour));
-      final value = (50 + (hour * 20) + (20 * (hour.remainder(5)))).toDouble() * 1000;
-      incomeSpots.add(FlSpot(time.hour.toDouble(), value));
+  // Initial load sekali aja
+  Future<void> loadPendingOrders() async {
+    try {
+      final orders = await orderService.getPendingOrders();
+      pendingOrders.value = orders
+          .where((o) => o['status'] == 'menunggu_driver')
+          .cast<Map<String, dynamic>>()
+          .toList();
+    } catch (e) {
+      print('Initial load error: $e');
     }
-    incomeSpots.refresh();
   }
 
-  void refreshData() {
-    balance.value = 'Rp ${250000 + (10000 * DateTime.now().millisecond ~/ 1000 % 10)}';
-    generateDummyIncomeData();
-    pollPendingOrders();
+  Future<void> loadActiveOrders() async {
+    try {
+      final orders = await orderService.getActiveOrder();
+      pendingOrders.value = orders
+          .where((o) => o['status'] == 'menunggu_driver')
+          .cast<Map<String, dynamic>>()
+          .toList();
+    } catch (e) {
+      print('Initial load error: $e');
+    }
   }
+
 
   Future<void> acceptOrder(int id) async {
-  try {
+    loadingOrders[id] = true;
+    try {
       await orderService.acceptOrder(id);
-      Get.snackbar('Success', 'Order diterima!'
-      
-      );
-      print('🔍 Get.arguments: ${Get.arguments}');
-     print('🔍 orderId: $id');
-      pollPendingOrders();
-      Get.offAllNamed(AppRoutes.DELIVERY_CHECK, arguments:id); // Refresh list
+      // Real-time AUTO remove dari list!
+      Get.offAllNamed(AppRoutes.DELIVERY_CHECK, arguments: id);
     } catch (e) {
       Get.snackbar('Error', e.toString());
+    } finally {
+      loadingOrders.remove(id);
     }
-    }
+    loadingOrders.refresh();
+  }
 
+  @override
+  void onClose() {
+    orderService.disconnectRealTime();
+    super.onClose();
+  }
 }

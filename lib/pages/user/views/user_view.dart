@@ -1,5 +1,6 @@
 // lib/app/modules/user/views/user_home_view.dart
 import 'package:e_pasar/pages/user/controllers/user_controller.dart';
+import 'package:e_pasar/pages/user/views/active_order_view.dart';
 import 'package:e_pasar/pages/user/views/user_home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,6 +16,7 @@ class UserView extends StatelessWidget {
 
     final List<Widget> pages = [
        UserHomeView(),
+       const ActiveOrderView(),
       const UserProfileView(),
     ];
 
@@ -36,10 +38,16 @@ class UserView extends StatelessWidget {
                 label: 'Beranda',
               ),
               BottomNavigationBarItem(
+                icon: Icon(Icons.notes_outlined),
+                activeIcon: Icon(Icons.notes),
+                label: 'Pesanan',
+              ),
+              BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),
                 activeIcon: Icon(Icons.person),
                 label: 'Profile',
               ),
+              
             ],
           ),
         ));
