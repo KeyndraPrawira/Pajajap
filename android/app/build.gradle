@@ -1,8 +1,12 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+    
 }
 
 def localProperties = new Properties()
@@ -24,7 +28,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "com.example.e_pasar"
+    namespace = "com.example.pajajap"
     compileSdk = 34
     ndkVersion = "25.1.8937393"  // ← ganti dari flutter.ndkVersion
 
@@ -38,8 +42,8 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.e_pasar"
-        minSdk = 21  // ← ganti dari flutter.minSdkVersion
+        applicationId = "com.example.pajajap"
+        minSdk = 23
         targetSdk = 34
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName

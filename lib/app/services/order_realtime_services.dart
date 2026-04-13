@@ -1,54 +1,82 @@
-import 'dart:convert';
-
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
+import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class OrderRealTimeService {
-  PusherChannelsFlutter _pusher = PusherChannelsFlutter.getInstance();
   final Function(Map<String, dynamic>) onOrderUpdate;
-  
-  OrderRealTimeService({required this.onOrderUpdate});
-  
+  final String path;
+
+  DatabaseReference? _ref;
+  StreamSubscription<DatabaseEvent>? _addedSub;
+  StreamSubscription<DatabaseEvent>? _changedSub;
+  StreamSubscription<DatabaseEvent>? _removedSub;
+
+  OrderRealTimeService({
+    required this.onOrderUpdate,
+    this.path = 'orders',
+  });
+
   Future<void> connect() async {
     try {
-      await _pusher.init(
-        apiKey: 'YOUR_APP_KEY',
-        cluster: 'mt1',
-        // ✅ VERSI 2.2.1: onEvent nerima PusherEvent
-        onEvent: (PusherEvent event) {
-          print('📨 Event: ${event.eventName}');
-          print('📦 Data: ${event.data}');
-          
-          // Cek OrderUpdated
-          if (event.eventName == 'App\\Events\\OrderUpdated') {
-            try {
-              final Map<String, dynamic> eventData = json.decode(event.data);
-              final orderData = eventData['order'] ?? eventData;
-              onOrderUpdate(Map<String, dynamic>.from(orderData));
-            } catch (e) {
-              print('Parse error: $e');
-            }
-          }
-        },
-        onSubscriptionSucceeded: (String channelName, dynamic response) {
-          print('✅ Subscribed: $channelName');
-        },
-        onError: (String message, int? code, dynamic e) {
-          print('❌ Error: $message');
-        },
-      );
-      
-      await _pusher.subscribe(channelName: 'orders');
-      await _pusher.connect();
-      
+      _ref = FirebaseDatabase.instance.ref(path);
+
+      _addedSub = _ref!.onChildAdded.listen(_handleSnapshot);
+      _changedSub = _ref!.onChildChanged.listen(_handleSnapshot);
+      // Di dalam fungsi connect()
+     
+      _removedSub = _ref!.onChildRemoved.listen((event) {
+        final key = event.snapshot.key;
+        onOrderUpdate({
+          'id': int.tryParse(key ?? '') ?? key,
+          '_deleted': true,
+        });
+      });
+
+      print('✅ Firebase connected on path: $path');
     } catch (e) {
-      print('💥 Init error: $e');
+      print('💥 Firebase init error: $e');
     }
   }
-  
+
+  void _handleSnapshot(DatabaseEvent event) {
+    try {
+      final raw = event.snapshot.value;
+      if (raw == null || raw is! Map) return;
+
+      final data = _normalizeMap(raw);
+      data['id'] ??=
+          int.tryParse(event.snapshot.key ?? '') ?? event.snapshot.key;
+
+      print('📨 Firebase update [$path/${event.snapshot.key}]');
+      print('📦 Data: $data');
+
+      onOrderUpdate(data);
+    } catch (e) {
+      print('Parse Firebase error: $e');
+    }
+  }
+
+  Map<String, dynamic> _normalizeMap(Map raw) {
+    return raw.map((key, value) {
+      return MapEntry(key.toString(), _normalizeValue(value));
+    });
+  }
+
+  dynamic _normalizeValue(dynamic value) {
+    if (value is Map) return _normalizeMap(value);
+    if (value is List) return value.map(_normalizeValue).toList();
+    return value;
+  }
+
   Future<void> disconnect() async {
     try {
-      await _pusher.unsubscribe(channelName: 'orders');
-      await _pusher.disconnect();
+      await _addedSub?.cancel();
+      await _changedSub?.cancel();
+      await _removedSub?.cancel();
+      _addedSub = null;
+      _changedSub = null;
+      _removedSub = null;
+      _ref = null;
     } catch (e) {
       print('Disconnect error: $e');
     }

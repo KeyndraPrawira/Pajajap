@@ -5,8 +5,10 @@ class DistanceUtils {
   /// Menghitung jarak antara dua koordinat dalam kilometer
   /// Menggunakan formula Haversine
   static double calculateDistance(
-    double lat1, double lon1,
-    double lat2, double lon2,
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
   ) {
     const double earthRadius = 6371; // Radius bumi dalam kilometer
 

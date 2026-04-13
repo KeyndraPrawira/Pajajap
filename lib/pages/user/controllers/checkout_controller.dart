@@ -28,7 +28,7 @@ class CheckoutController extends GetxController {
   double get totalBerat => keranjangList.fold(0.0, (sum, item) {
         final berat = item.produk?.berat_satuan ?? 0.0;
         final jumlah = int.tryParse(item.jumlah ?? '0') ?? 0;
-        return sum + (berat/1000 * jumlah);
+        return sum + (berat / 1000 * jumlah);
       });
 
   bool get tampilkanBiayaBerat => totalBerat > _batasBeratGratis;
@@ -113,8 +113,12 @@ class CheckoutController extends GetxController {
   Future<void> checkout() async {
     try {
       isLoading.value = true;
-      final result = await _orderService.checkout();
+      final result = await _orderService.checkout(metodePembayaran.value);
       if (result['success'] == true) {
+        final orderData = result['data'] as Map<String, dynamic>? ?? {};
+        final orderId = orderData['id'] as int?;
+        final kodePesanan = orderData['kode_pesanan']?.toString() ?? '';
+
         Get.snackbar(
           'Berhasil!',
           'Order berhasil dibuat',
@@ -124,18 +128,25 @@ class CheckoutController extends GetxController {
           duration: const Duration(seconds: 2),
         );
         await Future.delayed(const Duration(seconds: 1));
-       Get.offNamed(
-        AppRoutes.MENCARI_DRIVER,
-        arguments: {
-          'order_id': result['data']['id'],
-          'kode_pesanan': result['data']['kode_pesanan'],
-        },
-      );
+
+        if (orderId == null) {
+          throw Exception('ID order tidak ditemukan');
+        }
+
+        Get.offNamed(
+          AppRoutes.MENCARI_DRIVER,
+          arguments: {
+            'order_id': orderId,
+            'kode_pesanan': kodePesanan,
+          },
+        );
       }
     } catch (e) {
       String pesan = e.toString().replaceAll('Exception: ', '');
-      if (pesan.contains('Keranjang kosong')) pesan = 'Keranjang kamu sudah kosong';
-      if (pesan.contains('Alamat')) pesan = 'Silakan set alamat terlebih dahulu';
+      if (pesan.contains('Keranjang kosong'))
+        pesan = 'Keranjang kamu sudah kosong';
+      if (pesan.contains('Alamat'))
+        pesan = 'Silakan set alamat terlebih dahulu';
       Get.snackbar('Gagal', pesan,
           backgroundColor: Colors.red,
           colorText: Colors.white,

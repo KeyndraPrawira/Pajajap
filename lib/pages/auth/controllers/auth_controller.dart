@@ -18,9 +18,14 @@ class AuthController extends GetxController {
 
   void _navigateBasedOnRole(String role) {
     switch (role.toLowerCase()) {
-      case 'pedagang': Get.offAllNamed(AppRoutes.PEDAGANG_HOME); break;
-      case 'driver': Get.offAllNamed(AppRoutes.DRIVER_HOME); break;
-      default: Get.offAllNamed(AppRoutes.USER_HOME);
+      case 'pedagang':
+        Get.offAllNamed(AppRoutes.PEDAGANG_HOME);
+        break;
+      case 'driver':
+        Get.offAllNamed(AppRoutes.DRIVER_HOME);
+        break;
+      default:
+        Get.offAllNamed(AppRoutes.USER_HOME);
     }
   }
 }

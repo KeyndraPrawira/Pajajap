@@ -1,6 +1,6 @@
 // lib/app/modules/pedagang/views/kios_add_view.dart
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:e_pasar/pages/pedagang/views/widgets/pedagang_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,19 +15,17 @@ class KiosAddView extends StatefulWidget {
 
 class _KiosAddViewState extends State<KiosAddView> {
   final PedagangController controller = Get.find<PedagangController>();
-  
+
   final _formKey = GlobalKey<FormState>();
   final _namaKiosController = TextEditingController();
   final _lokasiController = TextEditingController();
   final _deskripsiController = TextEditingController();
   final _jamBukaController = TextEditingController();
   final _jamTutupController = TextEditingController();
-  
+
   final _selectedImage = Rxn<XFile>();
   final ImagePicker _picker = ImagePicker();
 
-  
-  
   @override
   void dispose() {
     _namaKiosController.dispose();
@@ -41,12 +39,14 @@ class _KiosAddViewState extends State<KiosAddView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: PedagangUi.pageBackground,
       appBar: AppBar(
         title: const Text('Buat Kios Baru'),
         automaticallyImplyLeading: false,
         elevation: 0,
         centerTitle: true,
+        backgroundColor: PedagangUi.darkGreen,
+        foregroundColor: Colors.white,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -58,7 +58,7 @@ class _KiosAddViewState extends State<KiosAddView> {
             children: [
               // Header dengan ilustrasi
               _buildHeader(),
-              
+
               // Form Content
               Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -113,9 +113,10 @@ class _KiosAddViewState extends State<KiosAddView> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Get.theme.primaryColor,
-            Get.theme.primaryColor.withOpacity(0.8),
+          colors: const [
+            PedagangUi.darkGreen,
+            PedagangUi.midGreen,
+            PedagangUi.lightGreen,
           ],
         ),
       ),
@@ -222,7 +223,7 @@ class _KiosAddViewState extends State<KiosAddView> {
             children: [
               _buildIconButton(
                 icon: Icons.edit,
-                color: Colors.blue,
+                color: PedagangUi.darkGreen,
                 onPressed: _showImageSourceDialog,
               ),
               const SizedBox(width: 8),
@@ -245,9 +246,9 @@ class _KiosAddViewState extends State<KiosAddView> {
         height: 200,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: PedagangUi.inputFill,
           border: Border.all(
-            color: Colors.grey[300]!,
+            color: PedagangUi.inputBorder,
             width: 2,
             style: BorderStyle.solid,
           ),
@@ -258,13 +259,13 @@ class _KiosAddViewState extends State<KiosAddView> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Get.theme.primaryColor.withOpacity(0.1),
+                color: PedagangUi.lightGreen.withOpacity(0.18),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.add_photo_alternate_outlined,
                 size: 48,
-                color: Get.theme.primaryColor,
+                color: PedagangUi.darkGreen,
               ),
             ),
             const SizedBox(height: 16),
@@ -323,7 +324,7 @@ class _KiosAddViewState extends State<KiosAddView> {
           width: 4,
           height: 20,
           decoration: BoxDecoration(
-            color: Get.theme.primaryColor,
+            color: PedagangUi.darkGreen,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -342,15 +343,11 @@ class _KiosAddViewState extends State<KiosAddView> {
   Widget _buildNamaKiosField() {
     return TextFormField(
       controller: _namaKiosController,
-      decoration: InputDecoration(
+      decoration: PedagangUi.inputDecoration(
         labelText: 'Nama Kios *',
         hintText: 'Contoh: Toko Sayur Segar',
-        prefixIcon: const Icon(Icons.store_outlined),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        filled: true,
-        fillColor: Colors.white,
+        prefixIcon:
+            const Icon(Icons.store_outlined, color: PedagangUi.darkGreen),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -367,15 +364,11 @@ class _KiosAddViewState extends State<KiosAddView> {
   Widget _buildLokasiField() {
     return TextFormField(
       controller: _lokasiController,
-      decoration: InputDecoration(
+      decoration: PedagangUi.inputDecoration(
         labelText: 'Lokasi/Alamat *',
         hintText: 'Contoh: Blok A No. 12',
-        prefixIcon: const Icon(Icons.location_on_outlined),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        filled: true,
-        fillColor: Colors.white,
+        prefixIcon:
+            const Icon(Icons.location_on_outlined, color: PedagangUi.darkGreen),
       ),
       maxLines: 2,
       validator: (value) {
@@ -393,15 +386,11 @@ class _KiosAddViewState extends State<KiosAddView> {
         Expanded(
           child: TextFormField(
             controller: _jamBukaController,
-            decoration: InputDecoration(
+            decoration: PedagangUi.inputDecoration(
               labelText: 'Jam Buka *',
               hintText: '08:00',
-              prefixIcon: const Icon(Icons.access_time),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.white,
+              prefixIcon:
+                  const Icon(Icons.access_time, color: PedagangUi.darkGreen),
             ),
             readOnly: true,
             onTap: () => _selectTime(context, _jamBukaController),
@@ -417,15 +406,11 @@ class _KiosAddViewState extends State<KiosAddView> {
         Expanded(
           child: TextFormField(
             controller: _jamTutupController,
-            decoration: InputDecoration(
+            decoration: PedagangUi.inputDecoration(
               labelText: 'Jam Tutup *',
               hintText: '17:00',
-              prefixIcon: const Icon(Icons.access_time),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.white,
+              prefixIcon:
+                  const Icon(Icons.access_time, color: PedagangUi.darkGreen),
             ),
             readOnly: true,
             onTap: () => _selectTime(context, _jamTutupController),
@@ -444,15 +429,11 @@ class _KiosAddViewState extends State<KiosAddView> {
   Widget _buildDeskripsiField() {
     return TextFormField(
       controller: _deskripsiController,
-      decoration: InputDecoration(
+      decoration: PedagangUi.inputDecoration(
         labelText: 'Deskripsi Kios',
         hintText: 'Ceritakan tentang kios Anda...',
-        prefixIcon: const Icon(Icons.description_outlined),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        filled: true,
-        fillColor: Colors.white,
+        prefixIcon:
+            const Icon(Icons.description_outlined, color: PedagangUi.darkGreen),
         alignLabelWithHint: true,
       ),
       maxLines: 4,
@@ -466,6 +447,8 @@ class _KiosAddViewState extends State<KiosAddView> {
       child: ElevatedButton(
         onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
+          backgroundColor: PedagangUi.darkGreen,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -566,7 +549,7 @@ class _KiosAddViewState extends State<KiosAddView> {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 40, color: Get.theme.primaryColor),
+            Icon(icon, size: 40, color: PedagangUi.darkGreen),
             const SizedBox(height: 8),
             Text(
               label,
@@ -605,7 +588,8 @@ class _KiosAddViewState extends State<KiosAddView> {
   }
 
   // ==================== TIME PICKER ====================
-  Future<void> _selectTime(BuildContext context, TextEditingController controller) async {
+  Future<void> _selectTime(
+      BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -618,7 +602,7 @@ class _KiosAddViewState extends State<KiosAddView> {
     );
 
     if (picked != null) {
-      final String formattedTime = 
+      final String formattedTime =
           '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
       controller.text = formattedTime;
     }
@@ -641,7 +625,7 @@ class _KiosAddViewState extends State<KiosAddView> {
     // Validate jam buka < jam tutup
     final jamBuka = _jamBukaController.text;
     final jamTutup = _jamTutupController.text;
-    
+
     if (jamBuka.compareTo(jamTutup) >= 0) {
       Get.snackbar(
         'Peringatan',
@@ -660,7 +644,7 @@ class _KiosAddViewState extends State<KiosAddView> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
-            Icon(Icons.check_circle_outline, color: Colors.blue),
+            Icon(Icons.check_circle_outline, color: PedagangUi.darkGreen),
             SizedBox(width: 12),
             Text('Konfirmasi'),
           ],
@@ -702,8 +686,8 @@ class _KiosAddViewState extends State<KiosAddView> {
       lokasi: _lokasiController.text.trim(),
       jamBuka: _jamBukaController.text.trim(),
       jamTutup: _jamTutupController.text.trim(),
-      deskripsi: _deskripsiController.text.trim().isNotEmpty 
-          ? _deskripsiController.text.trim() 
+      deskripsi: _deskripsiController.text.trim().isNotEmpty
+          ? _deskripsiController.text.trim()
           : null,
       fotoKiosBytes: imageBytes,
       fotoKiosFilename: imageName,

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:e_pasar/app/data/models/json_parsers.dart';
+
 Keranjang keranjangFromJson(String str) => Keranjang.fromJson(json.decode(str));
 
 String keranjangToJson(Keranjang data) => json.encode(data.toJson());
@@ -21,16 +23,17 @@ class Keranjang {
     if (json["data"] is List) {
       // index() → array
       parsedData = List<DataKeranjang>.from(
-        (json["data"] as List).map((x) => DataKeranjang.fromJson(x)),
+        (json["data"] as List)
+            .map((x) => DataKeranjang.fromJson(asMap(x) ?? const {})),
       );
     } else if (json["data"] is Map) {
       // store() / update() → single object, wrap jadi list
-      parsedData = [DataKeranjang.fromJson(json["data"])];
+      parsedData = [DataKeranjang.fromJson(asMap(json["data"]) ?? const {})];
     }
 
     return Keranjang(
-      status: json["status"],
-      message: json["message"],
+      status: asInt(json["status"]),
+      message: asString(json["message"]),
       data: parsedData,
     );
   }
@@ -66,19 +69,16 @@ class DataKeranjang {
   });
 
   factory DataKeranjang.fromJson(Map<String, dynamic> json) => DataKeranjang(
-        id: json["id"],
-        userId: json["user_id"],
-        produkId: json["produk_id"]?.toString(),
-        jumlah: json["jumlah"]?.toString(),
-        hargaTotal: json["harga_total"],
-        updatedAt: json["updated_at"] == null
+        id: asInt(json["id"]),
+        userId: asInt(json["user_id"]),
+        produkId: asString(json["produk_id"]),
+        jumlah: asString(json["jumlah"]),
+        hargaTotal: asInt(json["harga_total"]),
+        updatedAt: asDateTime(json["updated_at"]),
+        createdAt: asDateTime(json["created_at"]),
+        produk: asMap(json["produk"]) == null
             ? null
-            : DateTime.parse(json["updated_at"]),
-        createdAt: json["created_at"] == null
-            ? null
-            : DateTime.parse(json["created_at"]),
-        produk:
-            json["produk"] == null ? null : Produk.fromJson(json["produk"]),
+            : Produk.fromJson(asMap(json["produk"])!),
       );
 
   Map<String, dynamic> toJson() => {
@@ -111,14 +111,12 @@ class Produk {
   });
 
   factory Produk.fromJson(Map<String, dynamic> json) => Produk(
-        id: json["id"],
-        nama: json["nama"],
-        harga: json["harga"],
-        foto: json["foto"],
-        berat_satuan: (json["berat_satuan"] != null)
-            ? double.tryParse(json["berat_satuan"].toString())
-            : null,
-        deskripsi: json["deskripsi"],
+        id: asInt(json["id"]),
+        nama: asString(json["nama"]) ?? asString(json["nama_produk"]),
+        harga: asInt(json["harga"]),
+        foto: asString(json["foto"]),
+        berat_satuan: asDouble(json["berat_satuan"]),
+        deskripsi: asString(json["deskripsi"]),
       );
 
   Map<String, dynamic> toJson() => {

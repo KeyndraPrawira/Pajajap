@@ -31,7 +31,8 @@ class DriverActiveOrderView extends GetView<OrderDriverController> {
                 children: [
                   Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('No Active Orders', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  Text('No Active Orders',
+                      style: TextStyle(fontSize: 18, color: Colors.grey)),
                 ],
               ),
             );
@@ -73,7 +74,8 @@ class DriverActiveOrderView extends GetView<OrderDriverController> {
                       children: [
                         // Order code badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.9),
                             borderRadius: BorderRadius.circular(20),
@@ -95,10 +97,10 @@ class DriverActiveOrderView extends GetView<OrderDriverController> {
                         ),
                         const SizedBox(height: 16),
                         // Pemesan name
-                        Text(
-                          'Pemesan: ${order.buyerId?.toString()  ?? 'Nama Pemesan'}',
+                       Text(
+                          'Pemesan: ${order.buyer?.name ?? 'Pemesan belum tersedia'}',
                           style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: Colors.black87,
                           ),
@@ -124,16 +126,16 @@ class DriverActiveOrderView extends GetView<OrderDriverController> {
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () {
-  final id = order.id as int?;
-  final status = order.status as String?;
-  
-  if (id == null || status == null) {
-    Get.snackbar('Error', 'Data order tidak valid');
-    return;
-  }
-  
-  controller.continueToDelivery(id, status);
-},
+                              final id = order.id as int?;
+                              final status = order.status as String?;
+
+                              if (id == null || status == null) {
+                                Get.snackbar('Error', 'Data order tidak valid');
+                                return;
+                              }
+
+                              controller.continueToDelivery(id, status);
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2E7D32),
                               foregroundColor: Colors.white,

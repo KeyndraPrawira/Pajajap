@@ -278,8 +278,8 @@ class KeranjangView extends GetView<KeranjangController> {
                   color: jumlah <= 1
                       ? const Color(0xFFFFF0F0)
                       : const Color(0xFFF0F7F4),
-                  borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(8)),
+                  borderRadius:
+                      const BorderRadius.horizontal(left: Radius.circular(8)),
                 ),
                 child: Icon(
                   jumlah <= 1
@@ -325,8 +325,8 @@ class KeranjangView extends GetView<KeranjangController> {
                 height: 30,
                 decoration: BoxDecoration(
                   color: const Color(0xFF0077B6),
-                  borderRadius: const BorderRadius.horizontal(
-                      right: Radius.circular(8)),
+                  borderRadius:
+                      const BorderRadius.horizontal(right: Radius.circular(8)),
                 ),
                 child: const Icon(Icons.add_rounded,
                     size: 14, color: Colors.white),
@@ -497,20 +497,72 @@ class KeranjangView extends GetView<KeranjangController> {
                 onPressed: () {
                   final profileC = Get.find<ProfileController>();
                   final alamat = profileC.dataProfile.value?.alamat;
-              
+
                   // Cek alamat sudah diset belum
                   if (alamat == null || alamat.alamatLengkap == null) {
-                    Get.snackbar(
-                      'Alamat Belum Diset',
-                      'Silakan set alamat pengiriman terlebih dahulu',
-                      backgroundColor: Colors.orange,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.TOP,
-                      icon: const Icon(Icons.location_off, color: Colors.white),
+                    Get.dialog(
+                      AlertDialog(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        title: Row(
+                          children: [
+                            Icon(Icons.location_off_outlined,
+                                color: Color(0xFFFF9800), size: 24),
+                            SizedBox(width: 12),
+                            Text(
+                              'Alamat Belum Diatur',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF023E58),
+                              ),
+                            ),
+                          ],
+                        ),
+                        content: Text(
+                          'Anda belum mengatur alamat pengiriman. Atur sekarang?',
+                          style: TextStyle(fontSize: 14, height: 1.4),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Get.back(),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Color(0xFF6C757D),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Color(0xFFDEE2E6)),
+                              ),
+                            ),
+                            child: Text('Nanti',
+                                style: TextStyle(fontWeight: FontWeight.w600)),
+                          ),
+                          SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              Get.back(); // Tutup dialog
+                              Get.toNamed(AppRoutes
+                                  .EDIT_PROFILE); // atau AppRoutes.EDIT_ALAMAT
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF0077B6),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                            ),
+                            child: Text('Atur Sekarang',
+                                style: TextStyle(fontWeight: FontWeight.w700)),
+                          ),
+                        ],
+                      ),
                     );
                     return;
                   }
-              
+
                   // Navigate ke checkout dengan data keranjang + alamat
                   Get.toNamed(
                     AppRoutes.CHECKOUT,
@@ -593,7 +645,8 @@ class KeranjangView extends GetView<KeranjangController> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -666,8 +719,7 @@ class KeranjangView extends GetView<KeranjangController> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF0077B6),
               foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
               elevation: 0,
@@ -721,8 +773,8 @@ class KeranjangView extends GetView<KeranjangController> {
     return Container(
       color: const Color(0xFFE0F7FA),
       child: const Center(
-        child: Icon(Icons.storefront_rounded,
-            color: Color(0xFF90E0EF), size: 32),
+        child:
+            Icon(Icons.storefront_rounded, color: Color(0xFF90E0EF), size: 32),
       ),
     );
   }

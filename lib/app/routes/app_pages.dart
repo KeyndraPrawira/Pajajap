@@ -5,6 +5,7 @@ import 'package:e_pasar/pages/driver/bindings/delivery_binding.dart';
 import 'package:e_pasar/pages/driver/views/delivery_send_view.dart';
 import 'package:e_pasar/pages/driver/views/delivery_view.dart';
 import 'package:e_pasar/pages/driver/views/driver_home_view.dart';
+import 'package:e_pasar/pages/driver/views/riwayat_detail_view.dart';
 import 'package:e_pasar/pages/pedagang/controllers/pedagang_controller.dart';
 import 'package:e_pasar/pages/pedagang/controllers/produk_controller.dart';
 import 'package:e_pasar/pages/pedagang/controllers/produk_form_controller.dart';
@@ -14,14 +15,17 @@ import 'package:e_pasar/pages/pedagang/views/produk_edit_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_list_view.dart';
 import 'package:e_pasar/pages/user/controllers/checkout_controller.dart';
 import 'package:e_pasar/pages/user/views/checkout_view.dart';
-import 'package:e_pasar/pages/user/views/user_delivery_view.dart';
-import 'package:e_pasar/pages/user/views/mencari_driver_view.dart';
+import 'package:e_pasar/pages/user/views/detail_produk_view.dart';
+import 'package:e_pasar/pages/user/views/edit_profile_view.dart';
+import 'package:e_pasar/pages/user/views/mencari_driver_realtime_view.dart';
+import 'package:e_pasar/pages/user/views/midtrans_payment_view.dart';
 import 'package:e_pasar/pages/user/views/user_delivery_view.dart';
 import 'package:e_pasar/pages/user/views/user_home_view.dart';
 import 'package:get/get.dart';
 
 import '../../pages/auth/bindings/auth_binding.dart';
 import '../../pages/auth/views/login_view.dart';
+import '../../pages/auth/views/register_otp_view.dart';
 import '../../pages/auth/views/register_view.dart';
 import '../../pages/dashboard/bindings/dashboard_binding.dart';
 import '../../pages/dashboard/views/dashboard_view.dart';
@@ -41,6 +45,7 @@ import '../../pages/splash_screen/views/splash_screen_view.dart';
 import '../../pages/user/bindings/user_binding.dart';
 import '../../pages/user/views/user_view.dart';
 import '../middlewares/auth_middleware.dart';
+import '../middlewares/complete_profile_middleware.dart';
 import '../middlewares/guest_middlewar.dart';
 import '../middlewares/kios_middleware.dart';
 
@@ -79,16 +84,24 @@ class AppPages {
       page: () => const ProfileView(),
       binding: ProfileBinding(),
     ),
-    GetPage(name: _Paths.CHECKOUT, 
-    page: () => const CheckoutView(),
-    binding: BindingsBuilder(() {
-      Get.lazyPut<CheckoutController>(() => CheckoutController());
-    })),
     GetPage(
-  name: AppRoutes.MENCARI_DRIVER,
-  page: () => const MencariDriverView(),
-  middlewares: [AuthMiddleware(requiredRole: 'user')],
-),  
+        name: _Paths.CHECKOUT,
+        page: () => const CheckoutView(),
+        binding: BindingsBuilder(() {
+          Get.lazyPut<CheckoutController>(() => CheckoutController());
+        })),
+    GetPage(
+      name: AppRoutes.MIDTRANS_PAYMENT,
+      page: () => const MidtransPaymentView(),
+      binding: UserBinding(),
+      middlewares: [AuthMiddleware(requiredRole: 'user')],
+    ),
+    GetPage(
+      name: AppRoutes.MENCARI_DRIVER,
+      page: () => const MencariDriverRealtimeView(),
+      binding: UserBinding(),
+      middlewares: [AuthMiddleware(requiredRole: 'user')],
+    ),
     GetPage(
       name: _Paths.DASHBOARD,
       page: () => const DashboardView(),
@@ -117,13 +130,20 @@ class AppPages {
     GetPage(
       name: AppRoutes.REGISTER,
       page: () => const RegisterView(),
-      binding: LoginBinding(),
+      binding: RegisterBinding(),
+      middlewares: [GuestMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.REGISTER_OTP,
+      page: () => const RegisterOtpView(),
+      binding: RegisterBinding(),
       middlewares: [GuestMiddleware()],
     ),
     GetPage(
       name: AppRoutes.COMPLETE_PROFILE,
-      page: () =>const CompleteProfileView(),
+      page: () => const CompleteProfileView(),
       binding: CompleteProfileBinding(),
+      middlewares: [CompleteProfileMiddleware()],
     ),
     GetPage(
       name: AppRoutes.PEDAGANG_HOME,
@@ -138,8 +158,6 @@ class AppPages {
       page: () => const DriverView(),
       binding: DriverBinding(),
       middlewares: [AuthMiddleware(requiredRole: 'driver')],
-
-
     ),
     GetPage(
       name: AppRoutes.USER_HOME,
@@ -148,44 +166,48 @@ class AppPages {
       middlewares: [AuthMiddleware(requiredRole: 'user')],
     ),
     GetPage(
-  name: _Paths.PEDAGANG,
-  page: () => const PedagangView(),
-  binding: PedagangBinding(),
-  children: [
-    GetPage(
-      name: '/produk',
-      page: () => const ProdukListView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<ProdukController>(() => ProdukController());
-      }),
+      name: _Paths.PEDAGANG,
+      page: () => const PedagangView(),
+      binding: PedagangBinding(),
+      children: [
+        GetPage(
+          name: '/produk',
+          page: () => const ProdukListView(),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<ProdukController>(() => ProdukController());
+          }),
+        ),
+        GetPage(
+          name: '/produk/create',
+          page: () => const ProdukAddView(),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<ProdukFormController>(() => ProdukFormController());
+          }),
+        ),
+        GetPage(
+          name: '/produk/edit/:id',
+          page: () => const ProdukEditView(),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<ProdukFormController>(() => ProdukFormController());
+          }),
+        ),
+      ],
     ),
-    GetPage(
-      name: '/produk/create',
-      page: () => const ProdukAddView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<ProdukFormController>(() => ProdukFormController());
-      }),
-    ),
-    GetPage(
-      name: '/produk/edit/:id',
-      page: () => const ProdukEditView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<ProdukFormController>(() => ProdukFormController());
-      }),
-    ),
-    ],
-  ),
     GetPage(
       name: _Paths.DRIVER,
       page: () => const DriverView(),
       binding: DriverBinding(),
-
-
     ),
-GetPage(
+    GetPage(
       name: _Paths.DELIVERY_CHECK,
       page: () => const DeliveryView(),
       binding: DriverBinding(),
+    ),
+    GetPage(
+      name: _Paths.ORDER_HISTORY_DETAIL,
+      page: () => const OrderHistoryDetailView(),
+      binding: DriverBinding(),
+      middlewares: [AuthMiddleware(requiredRole: 'driver')],
     ),
     GetPage(
       name: _Paths.USER_DELIVERY,
@@ -193,9 +215,16 @@ GetPage(
       binding: UserBinding(),
       middlewares: [AuthMiddleware(requiredRole: 'user')],
     ),
-GetPage(name: AppRoutes.DELIVERY_SEND,
-     page: () => const DeliverySendView(),
-     binding: DeliveryBinding()),
+    GetPage(
+      name: _Paths.EDIT_PROFILE,
+      page: () => const EditProfileView(),
+      binding: UserBinding(),
+      middlewares: [AuthMiddleware(requiredRole: 'user')],
+    ),
+    GetPage(
+        name: AppRoutes.DELIVERY_SEND,
+        page: () => const DeliverySendView(),
+        binding: DeliveryBinding()),
     GetPage(
       name: AppRoutes.USER_DELIVERY,
       page: () => const UserDeliveryView(),
@@ -206,7 +235,11 @@ GetPage(name: AppRoutes.DELIVERY_SEND,
       page: () => const UserView(),
       binding: UserBinding(),
     ),
-   
+    GetPage(
+      name: AppRoutes.PRODUK_DETAIL,
+      page: () => const DetailProdukView(),
+      binding: UserBinding(),
+    ),
     GetPage(
         name: _Paths.KIOS_ADD,
         page: () => const KiosAddView(),

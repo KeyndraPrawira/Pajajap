@@ -1,4 +1,4 @@
-package com.example.e_pasar
+package com.example.pajajap
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -16,13 +16,19 @@ abstract class Routes {
   static const KIOS_UPDATE = _Paths.PAGES + _Paths.KIOS_UPDATE;
   static const PRODUK_LIST = _Paths.PAGES + _Paths.PRODUK_LIST;
   static const PRODUK_ADD = _Paths.PAGES + _Paths.PEDAGANG + _Paths.PRODUK_ADD;
-  static const PRODUK_EDIT = _Paths.PAGES + _Paths.PEDAGANG + _Paths.PRODUK_EDIT;
+  static const PRODUK_EDIT =
+      _Paths.PAGES + _Paths.PEDAGANG + _Paths.PRODUK_EDIT;
   static const COMPLETE_PROFILE = _Paths.PAGES + _Paths.COMPLETE_PROFILE;
   static const CHECKOUT = _Paths.PAGES + _Paths.CHECKOUT;
   static const MENCARI_DRIVER = _Paths.PAGES + _Paths.MENCARI_DRIVER;
   static const DELIVERY_CHECK = _Paths.PAGES + _Paths.DELIVERY_CHECK;
   static const DELIVERY_SEND = _Paths.PAGES + _Paths.DELIVERY_SEND;
   static const USER_DELIVERY = _Paths.PAGES + _Paths.USER_DELIVERY;
+  static const RIWAYAT = _Paths.PAGES + _Paths.RIWAYAT;
+  static const ORDER_HISTORY_DETAIL =
+      _Paths.PAGES + _Paths.ORDER_HISTORY_DETAIL;
+  static String produkDetail(int id) => _Paths.PAGES + _Paths.produkDetail(id);
+  static const EDIT_PROFILE = _Paths.PAGES + _Paths.EDIT_PROFILE;
 }
 
 abstract class _Paths {
@@ -42,10 +48,13 @@ abstract class _Paths {
   static String kiosUpdate(int id) => '/pedagang/kios/edit/$id';
   static const KIOS_UPDATE = '/pedagang/kios/edit/:id';
   static const PRODUK_LIST = '/produk';
+  static const PRODUK_DETAIL = '/produk/:id/detail';
+  static String produkDetail(int id) => '/produk/$id/detail';
   static const PRODUK_ADD = '/produk/create';
   static const PRODUK_EDIT = '/produk/edit/:id';
   static String produkEdit(int id) => '/produk/edit/$id';
   static const CHECKOUT = '/checkout';
+  static const MIDTRANS_PAYMENT = '/payment/midtrans';
   static const MENCARI_DRIVER = '/mencari-driver';
 
   static const DELIVERY_CHECK = '/delivery/:id/check';
@@ -55,13 +64,17 @@ abstract class _Paths {
   static String deliverySend(int id) => '/delivery/$id/send';
 
   static const USER_DELIVERY = '/user/delivery';
-
+  static const RIWAYAT = '/orders/riwayat';
+  static const ORDER_HISTORY_DETAIL = '/orders/detail/:id';
+  static String orderHistoryDetail(int id) => '/orders/detail/$id';
+  static const EDIT_PROFILE = '/user/profile/edit';
 }
 
 abstract class AppRoutes {
   static const SPLASH = '/';
   static const LOGIN = '/login';
   static const REGISTER = '/register';
+  static const REGISTER_OTP = '/register/otp';
   static const COMPLETE_PROFILE = '/complete-profile';
 
   // Pedagang Routes
@@ -79,11 +92,14 @@ abstract class AppRoutes {
 
 // Pedagang Routes
   static const PRODUK_LIST = '/produk';
+  static const PRODUK_DETAIL = '/produk/:id/detail';
+  static String produkDetail(int id) => '/produk/$id/detail';
   static const PRODUK_ADD = '/produk/create';
   static const PRODUK_EDIT = '/produk/edit/:id';
   static String produkEdit(int id) => '/produk/edit/$id';
 
   static const CHECKOUT = '/checkout';
+  static const MIDTRANS_PAYMENT = '/payment/midtrans';
   static const MENCARI_DRIVER = '/mencari-driver';
   static const DELIVERY_CHECK = '/delivery/:id/check';
   static String deliveryCheck(int id) => '/delivery/$id/check';
@@ -91,4 +107,9 @@ abstract class AppRoutes {
   static const DELIVERY_SEND = '/delivery/:id/send';
   static String deliverySend(int id) => '/delivery/$id/send';
   static const USER_DELIVERY = '/user/delivery';
+  static const RIWAYAT = '/orders/riwayat';
+  static const ORDER_HISTORY_DETAIL = '/orders/detail/:id';
+  static String orderHistoryDetail(int id) => '/orders/detail/$id';
+
+  static const EDIT_PROFILE = '/user/profile/edit';
 }

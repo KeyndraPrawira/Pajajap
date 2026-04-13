@@ -1,4 +1,5 @@
 import 'package:e_pasar/app/routes/app_pages.dart';
+import 'package:e_pasar/app/services/payment_realtime_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_pasar/app/data/models/order_model.dart';
@@ -15,6 +16,10 @@ class DeliveryController extends GetxController {
   final RxMap<int, String> itemStatus = <int, String>{}.obs;
   var isUpdating = false.obs;
   var loadingItems = <int, bool>{}.obs;
+  PaymentRealtimeService? _orderRealtimeService;
+  int? _listenedOrderId;
+  String? _lastShownStatus;
+  String? _lastShownPaymentStatus;
 
   @override
   void onInit() {
@@ -28,6 +33,10 @@ class DeliveryController extends GetxController {
     try {
       final response = await orderService.detailOrder(orderId);
       orderData.value = DataOrder.fromJson(response);
+      _lastShownStatus = orderData.value?.status;
+      _lastShownPaymentStatus = orderData.value?.paymentStatus;
+      await _startRealtime(orderId);
+      itemStatus.clear();
       // Load item status from order details
       for (var detail in orderData.value!.orderDetails ?? []) {
         if (detail.id != null) {
@@ -41,6 +50,67 @@ class DeliveryController extends GetxController {
     }
   }
 
+  Future<void> _startRealtime(int orderId) async {
+    if (_listenedOrderId == orderId && _orderRealtimeService != null) {
+      return;
+    }
+
+    await _orderRealtimeService?.disconnect();
+    _listenedOrderId = orderId;
+    _orderRealtimeService = PaymentRealtimeService(
+      orderId: orderId,
+      onOrderUpdate: _handleRealtimeOrderUpdate,
+    );
+    await _orderRealtimeService!.connect();
+  }
+
+  void _handleRealtimeOrderUpdate(Map<String, dynamic> updatedOrder) {
+    final currentOrder = orderData.value;
+    if (currentOrder == null) {
+      return;
+    }
+
+    final mergedJson = currentOrder.toJson()..addAll(updatedOrder);
+    final mergedOrder = DataOrder.fromJson(mergedJson);
+    orderData.value = mergedOrder;
+
+    final latestStatus = mergedOrder.status ?? '';
+    final latestPaymentStatus = mergedOrder.paymentStatus ?? '';
+
+    if (latestStatus != _lastShownStatus) {
+      if (isUserMode.value &&
+          latestStatus == 'dikirim' &&
+          (mergedOrder.metodePembayaran ?? '').toLowerCase() == 'midtrans' &&
+          latestPaymentStatus.toLowerCase() != 'paid') {
+        Get.snackbar(
+          'Waktunya Bayar',
+          'Pesanan sedang dikirim. Silakan lanjutkan pembayaran Midtrans.',
+          backgroundColor: Colors.orange.shade100,
+          colorText: Colors.orange.shade900,
+        );
+      } else if (!isUserMode.value && latestStatus == 'dikirim') {
+        Get.snackbar(
+          'Lanjut Antar',
+          'Pesanan sudah masuk status dikirim. Antar ke alamat pembeli.',
+        );
+      }
+      _lastShownStatus = latestStatus;
+    }
+
+    if (latestPaymentStatus != _lastShownPaymentStatus &&
+        latestPaymentStatus.toLowerCase() == 'paid') {
+      Get.snackbar(
+        'Pembayaran Berhasil',
+        'Pembayaran order ini sudah diterima.',
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade900,
+      );
+      _lastShownPaymentStatus = latestPaymentStatus;
+    } else if (latestPaymentStatus != _lastShownPaymentStatus) {
+      _lastShownPaymentStatus = latestPaymentStatus;
+    }
+  }
+
   Future<void> onItemTap(OrderDetail detail) async {
     if (isUserMode.value) return; // User mode: read-only
     if (detail.id == null) return;
@@ -50,13 +120,13 @@ class DeliveryController extends GetxController {
   }
 
   Future<void> checkActiveOrder() async {
-    final activeOrder = await orderService.getActiveOrder();
+    final activeOrder = await orderService.getActiveOrders();
     if (activeOrder.isNotEmpty) {
       final status = orderData.value?.status;
       final driverId = orderData.value?.driverId;
 
       if ((status == 'dalam_proses') && driverId != null) {
-Get.offAllNamed('/delivery-check', arguments: orderData.value?.id);
+        Get.offAllNamed('/delivery-check', arguments: orderData.value?.id);
       } else if (status == 'dikirim') {
         Get.toNamed(AppRoutes.DELIVERY_SEND, arguments: orderData.value!.id!);
       } else {
@@ -120,5 +190,10 @@ Get.offAllNamed('/delivery-check', arguments: orderData.value?.id);
       Get.snackbar('Error', 'Gagal selesai delivery: $e');
     }
   }
-}
 
+  @override
+  void onClose() {
+    _orderRealtimeService?.disconnect();
+    super.onClose();
+  }
+}

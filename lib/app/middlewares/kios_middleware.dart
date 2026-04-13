@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class KiosMiddleware extends GetMiddleware {
-
   @override
   RouteSettings? redirect(String? route) {
     final controller = Get.find<PedagangController>();

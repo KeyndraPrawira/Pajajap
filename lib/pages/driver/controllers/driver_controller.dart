@@ -8,24 +8,19 @@ import 'package:e_pasar/pages/driver/views/delivery_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
 
-
-
 class DriverController extends GetxController {
   final AuthService _authService = Get.find();
-  
+
   final UserService userService = Get.put(UserService());
-  
+
   var currentIndex = 0.obs;
   var isOnline = false.obs;
   var profileFoto = ''.obs;
 
-  
-  
-@override
+  @override
   void onInit() {
     super.onInit();
     loadIsOnline();
-   
   }
 
   Future<void> loadIsOnline() async {
@@ -40,8 +35,6 @@ class DriverController extends GetxController {
     }
   }
 
-
-
   Future<void> toggleOnline() async {
     try {
       final newStatus = !isOnline.value;
@@ -53,17 +46,8 @@ class DriverController extends GetxController {
     }
   }
 
-
-  
   Future<void> logout() async {
     await _authService.logout();
     Get.offAllNamed(AppRoutes.LOGIN);
   }
-
-    
-
-
-  }
-
-
-
+}

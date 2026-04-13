@@ -4,7 +4,6 @@ import 'package:e_pasar/app/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class GuestMiddleware extends GetMiddleware {
   @override
   int? get priority => 1;
@@ -20,6 +19,10 @@ class GuestMiddleware extends GetMiddleware {
     final authService = Get.find<AuthService>();
 
     if (authService.isLoggedIn) {
+      if (authService.isProfileIncomplete) {
+        return const RouteSettings(name: AppRoutes.COMPLETE_PROFILE);
+      }
+
       final role = authService.getRole();
 
       switch (role?.toLowerCase()) {

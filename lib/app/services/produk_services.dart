@@ -12,39 +12,42 @@ class ProdukService {
   /// ===============================
   /// 🔹 GET ALL PRODUK
   /// ===============================
- Future<Produk?> getProduk({
-  int? kategoriId,
-  String? search,
-}) async {
-  
-  String url = "${Api.baseUrl}/produk";
+  Future<Produk?> getProduk({
+    int? kategoriId,
+    String? search,
+  }) async {
+    String url = "${Api.baseUrl}/produk";
 
-  Map<String, String> queryParams = {};
+    Map<String, String> queryParams = {};
 
-  if (kategoriId != null) {
-    queryParams["kategori_id"] = kategoriId.toString();
+    if (kategoriId != null) {
+      queryParams["kategori_id"] = kategoriId.toString();
+    }
+
+    if (search != null && search.isNotEmpty) {
+      queryParams["search"] = search;
+    }
+
+    if (queryParams.isNotEmpty) {
+      final uri = Uri.parse(url).replace(queryParameters: queryParams);
+      url = uri.toString();
+    }
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Api.headers,
+    );
+    print("=== PRODUK SERVICE ===");
+    print("Status: ${response.statusCode}");
+    print("Body: ${response.body}");
+    print("errorMessage: ${response.reasonPhrase}");
+
+    if (response.statusCode == 200) {
+      return produkFromJson(response.body);
+    } else {
+      throw Exception("Gagal ambil produk");
+    }
   }
-
-  if (search != null && search.isNotEmpty) {
-    queryParams["search"] = search;
-  }
-
-  if (queryParams.isNotEmpty) {
-    final uri = Uri.parse(url).replace(queryParameters: queryParams);
-    url = uri.toString();
-  }
-
-  final response = await http.get(
-    Uri.parse(url),
-    headers: Api.headers,
-  );
-
-  if (response.statusCode == 200) {
-    return produkFromJson(response.body);
-  } else {
-    throw Exception("Gagal ambil produk");
-  }
-}
 
   /// ===============================
   /// 🔹 CREATE PRODUK

@@ -12,9 +12,9 @@ class UserService {
   Future<Map<String, dynamic>> setActive(bool isOnline) async {
     try {
       if (token == null) throw Exception('No token found');
-      
+
       final uri = Uri.parse('${Api.baseUrl}/set-active');
-      
+
       final response = await http.post(
         uri,
         headers: Api.headersWithAuth(token!),

@@ -25,19 +25,21 @@ class KiosService extends GetxService {
 
       if (response.statusCode == 200) {
         final List<dynamic> decoded = json.decode(response.body);
-        
-        final kiosList = decoded.map((json) => DataKios.fromJson(json)).toList();
-        
+
+        final kiosList =
+            decoded.map((json) => DataKios.fromJson(json)).toList();
+
         print('✅ PARSED MY KIOS: ${kiosList.length} kios found');
-        
+
         // Debug setiap kios
         for (var kios in kiosList) {
-          print('📦 KIOS: ID=${kios.id}, Name=${kios.namaKios}, UserID=${kios.userId}, Foto=${kios.fotoKios}');
+          print(
+              '📦 KIOS: ID=${kios.id}, Name=${kios.namaKios}, UserID=${kios.userId}, Foto=${kios.fotoKios}');
         }
-        
+
         return kiosList;
       }
-      
+
       print('❌ GET MY KIOS FAILED: Status ${response.statusCode}');
       return [];
     } catch (e) {
@@ -47,22 +49,22 @@ class KiosService extends GetxService {
   }
 
   // ================= GET KIOS =================
- Future<List<DataKios>> getKios() async {
-  final response = await http.get(
-    Uri.parse('${Api.baseUrl}/kios'),
-    headers: Api.headersWithAuth(_token!),
-  );
-
-  if (response.statusCode == 200) {
-    final decoded = json.decode(response.body);
-
-    return List<DataKios>.from(
-      decoded.map((x) => DataKios.fromJson(x)),
+  Future<List<DataKios>> getKios() async {
+    final response = await http.get(
+      Uri.parse('${Api.baseUrl}/kios'),
+      headers: Api.headersWithAuth(_token!),
     );
-  }
 
-  return [];
-}
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+
+      return List<DataKios>.from(
+        decoded.map((x) => DataKios.fromJson(x)),
+      );
+    }
+
+    return [];
+  }
 
   // ================= CREATE (WITH FILE UPLOAD) =================
   Future<bool> createKios({
@@ -247,6 +249,42 @@ class KiosService extends GetxService {
       }
     } catch (e) {
       print('🔥 DELETE KIOS ERROR: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateStatusKios({
+    required int id,
+    required String status,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${Api.baseUrl}/kios/$id/status-kios'),
+        headers: Api.headersWithAuth(_token!),
+        body: json.encode({'status': status}),
+      );
+
+      print('UPDATE STATUS KIOS STATUS: ${response.statusCode}');
+      print('UPDATE STATUS KIOS BODY: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        final errorData = json.decode(response.body);
+        Get.snackbar(
+          'Error',
+          errorData['message'] ?? 'Gagal mengupdate status kios',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return false;
+      }
+    } catch (e) {
+      print('🔥 UPDATE STATUS KIOS ERROR: $e');
+      Get.snackbar(
+        'Error',
+        'Terjadi kesalahan: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return false;
     }
   }

@@ -36,7 +36,5 @@ class PedagangBinding extends Bindings {
     Get.lazyPut<PedagangController>(
       () => PedagangController(),
     );
-
-
   }
 }

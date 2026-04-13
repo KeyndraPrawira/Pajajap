@@ -15,7 +15,8 @@ class LoginController extends GetxController {
   final obscurePassword = true.obs;
   final rememberMe = false.obs;
 
-  void togglePasswordVisibility() => obscurePassword.value = !obscurePassword.value;
+  void togglePasswordVisibility() =>
+      obscurePassword.value = !obscurePassword.value;
 
   void toggleRememberMe(bool? value) {
     rememberMe.value = value ?? false;
@@ -25,14 +26,16 @@ class LoginController extends GetxController {
   Future<void> login() async {
     if (validateEmail(emailController.text) != null) {
       Get.snackbar('Validasi Gagal', validateEmail(emailController.text)!,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.orange, colorText: Colors.white);
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white);
       return;
     }
     if (validatePassword(passwordController.text) != null) {
       Get.snackbar('Validasi Gagal', validatePassword(passwordController.text)!,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.orange, colorText: Colors.white);
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white);
       return;
     }
 
@@ -48,47 +51,69 @@ class LoginController extends GetxController {
         box.write('role', auth.user!.role);
         emailController.clear();
         passwordController.clear();
-        Get.snackbar('Berhasil', 'Selamat datang ${auth.user!.name}',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green, colorText: Colors.white);
-        _navigateBasedOnRole(auth.user!.role ?? 'user');
+        final userName = (auth.user!.name ?? '').trim();
+        Get.snackbar('Berhasil',
+            'Selamat datang ${userName.isEmpty ? 'Pengguna' : userName}',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.green,
+            colorText: Colors.white);
+        if (_authService.isProfileIncomplete) {
+          Get.offAllNamed(AppRoutes.COMPLETE_PROFILE);
+        } else {
+          _navigateBasedOnRole(auth.user!.role ?? 'user');
+        }
       } else {
         Get.snackbar('Login Gagal', 'Email atau password salah',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red, colorText: Colors.white);
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
       }
     } catch (e) {
       Get.snackbar('Error', 'Terjadi kesalahan: ${e.toString()}',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red, colorText: Colors.white);
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
     } finally {
-      isLoading.value = false;
+      if (!isClosed) {
+        isLoading.value = false;
+      }
     }
   }
-
-  
 
   Future<void> loginWithGoogle() async {
     isLoading.value = true;
     try {
       final result = await _authService.loginWithGoogle();
       if (result['success'] == true) {
-        if (result['is_new_user'] == true) {
-          Get.offNamed(AppRoutes.COMPLETE_PROFILE);
+        final user = result['user'] as Map<String, dynamic>?;
+        final userName = ((user?['name'] ?? '') as String).trim();
+
+        Get.snackbar('Berhasil',
+            'Selamat datang ${userName.isEmpty ? 'Pengguna' : userName}',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.green,
+            colorText: Colors.white);
+
+        if (_authService.isProfileIncomplete || result['is_new_user'] == true) {
+          Get.offAllNamed(AppRoutes.COMPLETE_PROFILE);
         } else {
           _navigateBasedOnRole(box.read('role') ?? 'user');
         }
       } else {
         Get.snackbar('Login Gagal', result['message'] ?? 'Google login gagal',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red, colorText: Colors.white);
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
       }
     } catch (e) {
       Get.snackbar('Error', 'Terjadi kesalahan: ${e.toString()}',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red, colorText: Colors.white);
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
     } finally {
-      isLoading.value = false;
+      if (!isClosed) {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -100,15 +125,21 @@ class LoginController extends GetxController {
 
   void forgotPassword() {
     Get.snackbar('Info', 'Fitur lupa password akan segera hadir',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.blue, colorText: Colors.white);
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.blue,
+        colorText: Colors.white);
   }
 
   void _navigateBasedOnRole(String role) {
     switch (role.toLowerCase()) {
-      case 'pedagang': Get.offAllNamed(AppRoutes.PEDAGANG_HOME); break;
-      case 'driver': Get.offAllNamed(AppRoutes.DRIVER_HOME); break;
-      default: Get.offAllNamed(AppRoutes.USER_HOME);
+      case 'pedagang':
+        Get.offAllNamed(AppRoutes.PEDAGANG_HOME);
+        break;
+      case 'driver':
+        Get.offAllNamed(AppRoutes.DRIVER_HOME);
+        break;
+      default:
+        Get.offAllNamed(AppRoutes.USER_HOME);
     }
   }
 

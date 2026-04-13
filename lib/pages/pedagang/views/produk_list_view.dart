@@ -1,6 +1,7 @@
 import 'package:e_pasar/app/data/models/produk_model.dart';
 import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/pages/pedagang/controllers/produk_controller.dart';
+import 'package:e_pasar/pages/pedagang/views/widgets/pedagang_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,28 +16,25 @@ class ProdukListView extends GetView<ProdukController> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: PedagangUi.pageBackground,
       appBar: AppBar(
         title: const Text(
           "Produk Saya",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         centerTitle: false,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: PedagangUi.darkGreen,
+        foregroundColor: Colors.white,
         elevation: 0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: Colors.grey.shade200),
-        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'pedagang_produk_list_add',
         onPressed: () {
           Get.toNamed(Routes.PRODUK_ADD)?.then((_) => controller.fetchProduk());
         },
         icon: const Icon(Icons.add),
         label: const Text("Tambah Produk"),
-        backgroundColor: const Color(0xFF2E7D32),
+        backgroundColor: PedagangUi.midGreen,
       ),
       body: Column(
         children: [
@@ -47,13 +45,14 @@ class ProdukListView extends GetView<ProdukController> {
               onChanged: (val) => controller.searchQuery.value = val,
               decoration: InputDecoration(
                 hintText: "Cari produk...",
-                hintStyle: TextStyle(color: Colors.grey.shade400),
-                prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+                hintStyle: const TextStyle(color: PedagangUi.textSubtle),
+                prefixIcon:
+                    const Icon(Icons.search, color: PedagangUi.darkGreen),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: PedagangUi.inputFill,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -70,7 +69,7 @@ class ProdukListView extends GetView<ProdukController> {
                       "${controller.produkList.length} Produk",
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: PedagangUi.textSubtle,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -82,7 +81,9 @@ class ProdukListView extends GetView<ProdukController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value && controller.produkList.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(color: PedagangUi.midGreen),
+                );
               }
 
               if (controller.produkList.isEmpty) {
@@ -122,16 +123,17 @@ class _ProdukTile extends StatelessWidget {
   Widget build(BuildContext context) {
     // Jika pakai emulator Android, gunakan 10.0.2.2. Jika HP fisik, gunakan IP Laptop kamu.
     final fotoUrl = produk.foto != null
-        ? "http://10.0.2.2:8000/storage/${produk.foto}" 
+        ? "http://10.0.2.2:8000/storage/${produk.foto}"
         : null;
 
     final stokHabis = (produk.stok ?? 0) <= 0;
 
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(18),
+      elevation: 0,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         onTap: () {
           Get.toNamed('/pedagang/produk/edit/${produk.id}', arguments: produk)
               ?.then((_) => controller.fetchProduk());
@@ -141,7 +143,7 @@ class _ProdukTile extends StatelessWidget {
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(14),
                 child: fotoUrl != null
                     ? Image.network(
                         fotoUrl,
@@ -165,7 +167,7 @@ class _ProdukTile extends StatelessWidget {
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
-                              color: Colors.black87,
+                              color: PedagangUi.textMain,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -178,7 +180,7 @@ class _ProdukTile extends StatelessWidget {
                                 horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
                               "Habis",
@@ -194,7 +196,7 @@ class _ProdukTile extends StatelessWidget {
                     Text(
                       _formatRupiah(produk.harga),
                       style: const TextStyle(
-                        color: Color(0xFF2E7D32),
+                        color: PedagangUi.darkGreen,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -203,21 +205,25 @@ class _ProdukTile extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.inventory_2_outlined,
-                            size: 12, color: Colors.grey.shade500),
+                            size: 12, color: PedagangUi.textSubtle),
                         const SizedBox(width: 4),
                         Text(
                           "Stok: ${produk.stok ?? 0}",
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade600),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: PedagangUi.textSubtle,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Icon(Icons.scale_outlined,
-                            size: 12, color: Colors.grey.shade500),
+                            size: 12, color: PedagangUi.textSubtle),
                         const SizedBox(width: 4),
                         Text(
                           "${produk.beratSatuan ?? 0} g",
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade600),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: PedagangUi.textSubtle,
+                          ),
                         ),
                       ],
                     ),
@@ -229,13 +235,14 @@ class _ProdukTile extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () {
-                      Get.toNamed('/pedagang/produk/edit/${produk.id}', arguments: produk)
+                      Get.toNamed('/pedagang/produk/edit/${produk.id}',
+                              arguments: produk)
                           ?.then((_) => controller.fetchProduk());
                     },
                     icon: const Icon(Icons.edit_outlined, size: 18),
-                    color: Colors.blue.shade600,
+                    color: PedagangUi.darkGreen,
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.blue.shade50,
+                      backgroundColor: PedagangUi.lightGreen.withOpacity(0.18),
                       minimumSize: const Size(34, 34),
                     ),
                   ),
@@ -260,10 +267,8 @@ class _ProdukTile extends StatelessWidget {
 
   String _formatRupiah(int? nominal) {
     if (nominal == null) return 'Rp 0';
-    final formatted = nominal
-        .toString()
-        .replaceAllMapped(
-            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
+    final formatted = nominal.toString().replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
     return 'Rp $formatted';
   }
 }
@@ -310,7 +315,7 @@ class _EmptyState extends StatelessWidget {
             icon: const Icon(Icons.refresh),
             label: const Text("Coba Muat Ulang"),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2E7D32),
+              backgroundColor: PedagangUi.midGreen,
               foregroundColor: Colors.white,
             ),
           ),

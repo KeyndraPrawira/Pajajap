@@ -160,9 +160,9 @@ class _DeliverySendViewState extends State<DeliverySendView>
 
   String _formatRupiah(int amount) {
     return 'Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    )}';
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]}.',
+        )}';
   }
 
   // ── Dialog konfirmasi sebelum eksekusi ──
@@ -170,8 +170,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
             Icon(Icons.check_circle_outline, color: Color(0xFF0077B6)),
@@ -191,8 +190,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text(
               'Tidak',
-              style: TextStyle(
-                  color: Colors.grey, fontWeight: FontWeight.w600),
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
             ),
           ),
           ElevatedButton(
@@ -207,8 +205,8 @@ class _DeliverySendViewState extends State<DeliverySendView>
             ),
             child: const Text(
               'Lanjut',
-              style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w600),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -262,8 +260,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
                               fontSize: 10,
                               fontWeight: FontWeight.bold)),
                     ),
-                    const Icon(Icons.location_pin,
-                        color: Colors.red, size: 26),
+                    const Icon(Icons.location_pin, color: Colors.red, size: 26),
                   ],
                 ),
               ),
@@ -384,8 +381,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 20,
@@ -406,8 +402,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
                         onVerticalDragEnd: _onDragEnd,
                         child: Container(
                           width: double.infinity,
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           color: Colors.transparent,
                           child: Center(
                             child: Container(
@@ -424,8 +419,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
 
                       // ── BIAYA ──
                       Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Column(
                           children: [
                             Row(
@@ -494,8 +488,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
 
                       // Label daftar produk
                       Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
                           children: [
                             Text(
@@ -511,8 +504,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0077B6)
-                                    .withOpacity(0.1),
+                                color: const Color(0xFF0077B6).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -533,8 +525,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
                       // List produk — Expanded supaya tombol tidak overflow
                       Expanded(
                         child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           itemCount: details.length,
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: 8),
@@ -547,14 +538,12 @@ class _DeliverySendViewState extends State<DeliverySendView>
                               decoration: BoxDecoration(
                                 color: Colors.grey[50],
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                    color: Colors.grey.shade200),
+                                border: Border.all(color: Colors.grey.shade200),
                               ),
                               child: Row(
                                 children: [
                                   ClipRRect(
-                                    borderRadius:
-                                        BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(8),
                                     child: produk?.foto != null &&
                                             produk!.foto!.isNotEmpty
                                         ? Image.network(
@@ -603,8 +592,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF0077B6)
                                           .withOpacity(0.1),
-                                      borderRadius:
-                                          BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
                                       'x${detail.jumlah ?? 0}',
@@ -624,8 +612,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
 
                       // Tombol selesai — fixed di bawah, tidak overflow
                       Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                         child: SizedBox(
                           width: double.infinity,
                           height: 52,
@@ -692,8 +679,7 @@ class _BiayaCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label,
-                    style:
-                        TextStyle(fontSize: 11, color: Colors.grey[500])),
+                    style: TextStyle(fontSize: 11, color: Colors.grey[500])),
                 Text(
                   value,
                   style: TextStyle(

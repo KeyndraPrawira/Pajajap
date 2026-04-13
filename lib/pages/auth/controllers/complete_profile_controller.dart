@@ -13,9 +13,18 @@ class CompleteProfileController extends GetxController {
   final teleponController = TextEditingController();
   final isLoading = false.obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    nameController.text = _authService.getUserName() ?? '';
+    teleponController.text = _authService.getUserPhone() ?? '';
+  }
+
   Future<void> completeProfile() async {
     if (nameController.text.isEmpty) {
-      Get.snackbar('Validasi Gagal', 'Nama tidak boleh kosong',
+      Get.snackbar(
+        'Validasi Gagal',
+        'Nama tidak boleh kosong',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -24,7 +33,9 @@ class CompleteProfileController extends GetxController {
     }
 
     if (teleponController.text.isEmpty) {
-      Get.snackbar('Validasi Gagal', 'Nomor telepon tidak boleh kosong',
+      Get.snackbar(
+        'Validasi Gagal',
+        'Nomor telepon tidak boleh kosong',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -41,7 +52,9 @@ class CompleteProfileController extends GetxController {
       );
 
       if (result['success'] == true) {
-        Get.snackbar('Berhasil', 'Profil berhasil dilengkapi!',
+        Get.snackbar(
+          'Berhasil',
+          'Profil berhasil dilengkapi!',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -49,20 +62,26 @@ class CompleteProfileController extends GetxController {
         final role = box.read('role') ?? 'user';
         _navigateBasedOnRole(role);
       } else {
-        Get.snackbar('Gagal', result['message'] ?? 'Gagal melengkapi profil',
+        Get.snackbar(
+          'Gagal',
+          result['message'] ?? 'Gagal melengkapi profil',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Terjadi kesalahan: ${e.toString()}',
+      Get.snackbar(
+        'Error',
+        'Terjadi kesalahan: ${e.toString()}',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     } finally {
-      isLoading.value = false;
+      if (!isClosed) {
+        isLoading.value = false;
+      }
     }
   }
 

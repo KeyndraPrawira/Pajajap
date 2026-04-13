@@ -169,14 +169,13 @@ class KeranjangController extends GetxController {
   // ─── INCREMENT / DECREMENT helper ────────────────────────
   Future<void> incrementItem(DataKeranjang item, int hargaSatuan) async {
     final newJumlah = (int.tryParse(item.jumlah ?? '1') ?? 1) + 1;
-       updateKeranjang(
-            id: item.id!,
-            produkId: item.produkId!,
-            jumlah: newJumlah,
-            hargaTotal: newJumlah * hargaSatuan,
-          );
-      ;
-      
+    updateKeranjang(
+      id: item.id!,
+      produkId: item.produkId!,
+      jumlah: newJumlah,
+      hargaTotal: newJumlah * hargaSatuan,
+    );
+    ;
   }
 
   Future<void> decrementItem(DataKeranjang item, int hargaSatuan) async {

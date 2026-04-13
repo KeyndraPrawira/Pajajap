@@ -8,23 +8,31 @@ import 'package:get/get.dart';
 
 class ProdukController extends GetxController {
   final ProdukService _service = ProdukService();
-  final KategoriService _katService = KategoriService(); // Inisialisasi service kategori
+  final KategoriService _katService =
+      KategoriService(); // Inisialisasi service kategori
 
   // ── State ──────────────────────────────────────────────────
   final RxList<DataProduk> produkList = <DataProduk>[].obs;
-  final RxList<Datum> kategoriList = <Datum>[].obs; // List untuk menampung kategori
+  final RxList<Datum> kategoriList =
+      <Datum>[].obs; // List untuk menampung kategori
   final RxBool isLoading = false.obs;
   final RxBool isSubmitting = false.obs;
   final RxString searchQuery = ''.obs;
-    var selectedKategoriId = Rxn<int>(); // null = semua kategori
+  var selectedKategoriId = Rxn<int>(); // null = semua kategori
 
-  
+  @override
+  void onInit() {
+    super.onInit();
+    fetchKategori();
+    fetchProduk();
+  }
+
   // ── Methods ────────────────────────────────────────────────
 
   Future<void> fetchKategori() async {
     try {
       // Ganti dengan method yang sesuai di KategoriService kamu
-      final response = await _katService.getKategori(); 
+      final response = await _katService.getKategori();
       if (response?.data != null) {
         kategoriList.assignAll(response!.data!);
       }
@@ -59,11 +67,9 @@ class ProdukController extends GetxController {
     }
   }
 
-  
-
   // ... Method submitCreate, submitUpdate, deleteProduk tetap sama seperti sebelumnya ...
   // Pastikan parameter beratSatuan di submitCreate diubah menjadi int.parse jika di service minta int
-  
+
   Future<void> deleteProduk(int id) async {
     try {
       isLoading(true);

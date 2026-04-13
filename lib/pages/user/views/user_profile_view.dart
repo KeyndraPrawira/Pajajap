@@ -23,7 +23,6 @@ class UserProfileView extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-
           // ── Profile Header ──
           Obx(() {
             final profile = profileC.dataProfile.value;
@@ -42,7 +41,8 @@ class UserProfileView extends StatelessWidget {
                   CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.white,
-                    child: const Icon(Icons.person, size: 60, color: Color(0xFF0077B6)),
+                    child: const Icon(Icons.person,
+                        size: 60, color: Color(0xFF0077B6)),
                   ),
                   const SizedBox(height: 16),
 
@@ -78,12 +78,14 @@ class UserProfileView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.location_on, color: Colors.white70, size: 14),
+                        const Icon(Icons.location_on,
+                            color: Colors.white70, size: 14),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
                             profile!.alamat!.alamatLengkap!,
-                            style: const TextStyle(fontSize: 12, color: Colors.white70),
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.white70),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
@@ -95,7 +97,8 @@ class UserProfileView extends StatelessWidget {
                     const SizedBox(height: 10),
                     // Belum ada alamat
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.white24,
                         borderRadius: BorderRadius.circular(20),
@@ -103,11 +106,13 @@ class UserProfileView extends StatelessWidget {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.location_off, color: Colors.white70, size: 14),
+                          Icon(Icons.location_off,
+                              color: Colors.white70, size: 14),
                           SizedBox(width: 4),
                           Text(
                             'Alamat belum diatur',
-                            style: TextStyle(fontSize: 12, color: Colors.white70),
+                            style:
+                                TextStyle(fontSize: 12, color: Colors.white70),
                           ),
                         ],
                       ),
@@ -147,7 +152,8 @@ class UserProfileView extends StatelessWidget {
           _buildMenuItem(
             icon: Icons.lock_outline,
             title: 'Ganti Password',
-            onTap: () => Get.snackbar('Info', 'Fitur ganti password akan segera hadir'),
+            onTap: () =>
+                Get.snackbar('Info', 'Fitur ganti password akan segera hadir'),
           ),
 
           const SizedBox(height: 16),
@@ -171,8 +177,10 @@ class UserProfileView extends StatelessWidget {
                       await authService.logout();
                       Get.offAllNamed(AppRoutes.LOGIN);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text('Logout', style: TextStyle(color: Colors.white)),
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('Logout',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ));
@@ -207,8 +215,9 @@ class UserProfileView extends StatelessWidget {
           ),
         ),
         subtitle: subtitle != null
-          ? Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey))
-          : null,
+            ? Text(subtitle,
+                style: const TextStyle(fontSize: 12, color: Colors.grey))
+            : null,
         trailing: Icon(
           Icons.chevron_right,
           color: isDestructive ? Colors.red : Colors.grey,

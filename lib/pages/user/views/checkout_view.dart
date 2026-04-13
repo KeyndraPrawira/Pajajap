@@ -1,5 +1,3 @@
-// lib/pages/user/views/checkout_view.dart
-
 import 'package:e_pasar/app/data/models/keranjang_model.dart';
 import 'package:e_pasar/pages/user/controllers/checkout_controller.dart';
 import 'package:flutter/material.dart';
@@ -139,9 +137,6 @@ class CheckoutView extends GetView<CheckoutController> {
     );
   }
 
-  // ══════════════════════════════════════════════════════════
-  // HEADER
-  // ══════════════════════════════════════════════════════════
   Widget _buildHeader() {
     return Container(
       decoration: const BoxDecoration(
@@ -196,9 +191,6 @@ class CheckoutView extends GetView<CheckoutController> {
     );
   }
 
-  // ══════════════════════════════════════════════════════════
-  // SECTION BARANG
-  // ══════════════════════════════════════════════════════════
   Widget _buildSectionBarang() {
     return _buildCard(
       icon: Icons.shopping_bag_outlined,
@@ -298,9 +290,6 @@ class CheckoutView extends GetView<CheckoutController> {
     );
   }
 
-  // ══════════════════════════════════════════════════════════
-  // SECTION ALAMAT
-  // ══════════════════════════════════════════════════════════
   Widget _buildSectionAlamat() {
     final alamat = controller.alamat;
     return _buildCard(
@@ -346,14 +335,13 @@ class CheckoutView extends GetView<CheckoutController> {
     );
   }
 
-  // ══════════════════════════════════════════════════════════
-  // SECTION METODE PEMBAYARAN
-  // ══════════════════════════════════════════════════════════
   Widget _buildSectionMetodePembayaran() {
     return _buildCard(
       icon: Icons.payment_outlined,
       title: 'Metode Pembayaran',
-      child: Obx(() => GestureDetector(
+      child: Obx(() => Column(
+        children: [
+          GestureDetector(
             onTap: () => controller.pilihMetodePembayaran('cod'),
             child: Container(
               padding: const EdgeInsets.all(14),
@@ -392,6 +380,7 @@ class CheckoutView extends GetView<CheckoutController> {
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF023E58),
+                            
                           ),
                         ),
                         SizedBox(height: 2),
@@ -408,29 +397,83 @@ class CheckoutView extends GetView<CheckoutController> {
                 ],
               ),
             ),
-          )),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () => controller.pilihMetodePembayaran('midtrans'),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: controller.metodePembayaran.value == 'midtrans'
+                    ? const Color(0xFFE0F4FF)
+                    : const Color(0xFFF8F9FA),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: controller.metodePembayaran.value == 'midtrans'
+                      ? const Color(0xFF0077B6)
+                      : const Color(0xFFDEE2E6),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.credit_card,
+                        color: Colors.white, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'QRIS (Midtrans)',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF023E58),
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Midtrans - Instant & secure',
+                          style: TextStyle(fontSize: 11, color: Color(0xFF6C757D)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (controller.metodePembayaran.value == 'midtrans')
+                    const Icon(Icons.check_circle_rounded,
+                        color: Color(0xFF0077B6), size: 22),
+                ],
+              ),
+            ),
+          ),
+        ],
+      )),
     );
   }
 
-  // ══════════════════════════════════════════════════════════
-  // SECTION RINCIAN BIAYA — semua dihitung real
-  // ══════════════════════════════════════════════════════════
   Widget _buildSectionRincian() {
     return _buildCard(
       icon: Icons.receipt_long_outlined,
       title: 'Rincian Biaya',
       child: Column(
         children: [
-          // Subtotal produk
           _buildBiayaRow(
             label: 'Subtotal Produk',
             value: controller.formatRupiah(controller.subtotalProduk),
           ),
           const SizedBox(height: 10),
 
-          
-
-          // Biaya jarak
           _buildBiayaRow(
             label: 'Biaya Ongkir',
             value: controller.formatRupiah(controller.biayaJarak),
@@ -439,14 +482,12 @@ class CheckoutView extends GetView<CheckoutController> {
           ),
           const SizedBox(height: 10),
 
-          // Biaya layanan
           _buildBiayaRow(
             label: 'Biaya Layanan',
             value: controller.formatRupiah(controller.biayaLayanan),
           ),
           const SizedBox(height: 10),
 
-          // Biaya berat — hanya tampil kalau > 10kg
           if (controller.tampilkanBiayaBerat) ...[
             _buildBiayaRow(
               label: 'Biaya Berat',
@@ -458,7 +499,6 @@ class CheckoutView extends GetView<CheckoutController> {
             const SizedBox(height: 10),
           ],
 
-          // Total ongkir
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -493,7 +533,6 @@ class CheckoutView extends GetView<CheckoutController> {
             child: Divider(color: Color(0xFFE9ECEF), thickness: 1.5),
           ),
 
-          // Total bayar
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -564,9 +603,6 @@ class CheckoutView extends GetView<CheckoutController> {
     );
   }
 
-  // ══════════════════════════════════════════════════════════
-  // BOTTOM BAR
-  // ══════════════════════════════════════════════════════════
   Widget _buildBottomBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -697,9 +733,6 @@ class CheckoutView extends GetView<CheckoutController> {
     );
   }
 
-  // ══════════════════════════════════════════════════════════
-  // HELPERS
-  // ══════════════════════════════════════════════════════════
   Widget _buildCard({
     required IconData icon,
     required String title,

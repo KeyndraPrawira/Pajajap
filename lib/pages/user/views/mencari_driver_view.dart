@@ -1,11 +1,8 @@
-// lib/pages/user/views/mencari_driver_view.dart
-
-import 'dart:async';
-import 'package:e_pasar/app/routes/app_pages.dart';
-import 'package:e_pasar/app/services/order_services.dart';
+import 'package:e_pasar/app/services/order_realtime_services.dart';
+import 'package:e_pasar/pages/user/controllers/order_controller.dart';
 import 'package:flutter/material.dart';
-import 'user_delivery_view.dart';
 import 'package:get/get.dart';
+
 import 'user_delivery_view.dart';
 
 class MencariDriverView extends StatefulWidget {
@@ -31,11 +28,12 @@ class _MencariDriverViewState extends State<MencariDriverView>
   late Animation<double> _pulse3;
   late Animation<double> _rotate;
 
-  // ─── Polling state ────────────────────────────────────────
-  Timer? _pollingTimer;
-  final OrderService _orderService = OrderService();
+  // ─── Realtime state ────────────────────────────────────────
+  final OrderController orderController = Get.find<OrderController>();
+  OrderRealTimeService? _realtimeService;
   int _dotCount = 1;
   bool _isCancelling = false;
+  bool _hasHandledEvent = false;
 
   @override
   void initState() {
@@ -46,7 +44,44 @@ class _MencariDriverViewState extends State<MencariDriverView>
     kodePesanan = args?['kode_pesanan'] ?? '';
 
     _setupAnimations();
-    _startPolling();
+    _startRealtimeListener();
+  }
+
+  void _startRealtimeListener() {
+    _realtimeService = OrderRealTimeService(
+      onOrderUpdate: _handleOrderUpdate,
+      path: 'orders/$orderId',
+    );
+    _realtimeService!.connect();
+  }
+
+  void _handleOrderUpdate(Map<String, dynamic> orderData) {
+    if (_hasHandledEvent) {
+      return;
+    }
+
+    final status = orderData['status']?.toString() ?? '';
+    final driverId = orderData['driver_id'];
+
+    if (driverId != null && status == 'dalam_proses') {
+      _hasHandledEvent = true;
+      _realtimeService?.disconnect();
+      Get.offAll(() => const UserDeliveryView(), arguments: orderId);
+      return;
+    }
+
+    if (status == 'dibatalkan') {
+      _hasHandledEvent = true;
+      _realtimeService?.disconnect();
+      Get.back();
+      Get.snackbar(
+        'Order Dibatalkan',
+        'Order kamu telah dibatalkan',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    }
   }
 
   void _setupAnimations() {
@@ -99,130 +134,45 @@ class _MencariDriverViewState extends State<MencariDriverView>
     _dotController.forward();
   }
 
-  // ─── Polling — cek status order tiap 1 detik ─────────────
-  void _startPolling() {
-    _pollingTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
-      try {
-        final result = await _orderService.detailOrder(orderId);
-        final status = result['status']?.toString() ?? '';
-        final driverId = result['driver_id'];
-
-if (driverId != null && status == 'dalam_proses') {
-          _pollingTimer?.cancel();
-          // Driver accept - navigasi ke User DeliveryView
-          Get.offAll(() => const UserDeliveryView(), arguments: orderId);
-        } else if (status == 'dibatalkan') {
-          _pollingTimer?.cancel();
-          Get.back();
-          Get.snackbar(
-            'Order Dibatalkan',
-            'Order kamu telah dibatalkan',
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-            snackPosition: SnackPosition.TOP,
-          );
-        }
-      } catch (e) {
-        // Gagal poll — lanjut coba lagi
-        debugPrint('Polling error: $e');
-      }
-    });
-  }
-
-  // ─── Cancel order ─────────────────────────────────────────
   Future<void> _batalkanOrder() async {
     final confirm = await Get.dialog<bool>(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
+          AlertDialog(
+            title: const Text('Batalkan order?'),
+            content: const Text(
+              'Pesanan akan dibatalkan dan kamu akan kembali ke halaman pesanan.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Tidak'),
+              ),
+              ElevatedButton(
+                onPressed: () => Get.back(result: true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
                 ),
-                child: const Icon(Icons.cancel_outlined,
-                    color: Colors.red, size: 28),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Batalkan Order?',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF023E58),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Driver belum ditemukan. Kamu yakin ingin membatalkan order ini?',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Color(0xFF6C757D)),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Get.back(result: false),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFDEE2E6)),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      child: const Text('Tunggu Dulu',
-                          style: TextStyle(
-                              color: Color(0xFF6C757D),
-                              fontWeight: FontWeight.w700)),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Get.back(result: true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      child: const Text('Batalkan',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
-                    ),
-                  ),
-                ],
+                child: const Text('Batalkan'),
               ),
             ],
           ),
-        ),
-      ),
-    );
+        ) ??
+        false;
 
     if (confirm != true) return;
 
     setState(() => _isCancelling = true);
     try {
-      await _orderService.requestCancel(
-        orderId: orderId,
-        reason: 'Driver tidak ditemukan, dibatalkan oleh buyer',
+      await orderController.cancelOrder(
+        orderId,
+        reason: 'Dibatalkan oleh buyer',
       );
-      _pollingTimer?.cancel();
-      Get.offAllNamed(AppRoutes.USER_HOME);
-      Get.snackbar('Berhasil', 'Order berhasil dibatalkan',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP);
+      _realtimeService?.disconnect();
     } catch (e) {
-      setState(() => _isCancelling = false);
-      Get.snackbar('Gagal', 'Gagal membatalkan order',
+      if (mounted) {
+        setState(() => _isCancelling = false);
+      }
+      Get.snackbar('Gagal', e.toString().replaceAll('Exception: ', ''),
           backgroundColor: Colors.red,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP);
@@ -231,7 +181,7 @@ if (driverId != null && status == 'dalam_proses') {
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    _realtimeService?.disconnect();
     _pulseController.dispose();
     _rotateController.dispose();
     _dotController.dispose();

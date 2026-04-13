@@ -1,6 +1,7 @@
+import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/pages/user/controllers/keranjang_controller.dart';
+import 'package:e_pasar/pages/user/views/app_info_view.dart';
 import 'package:e_pasar/pages/user/views/keranjang_view.dart';
-import 'package:e_pasar/pages/user/views/pasar_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -15,25 +16,6 @@ class UserHomeView extends GetView<UserProdukController> {
   UserHomeView({super.key});
 
   final _pageController = PageController(viewportFraction: 0.92);
-  
-  IconData _iconForKategori(String? nama) {
-    final n = (nama ?? '').toLowerCase();
-    if (n.contains('sayur') || n.contains('hijau')) return Icons.eco_rounded;
-    if (n.contains('buah')) return Icons.local_florist_rounded;
-    if (n.contains('daging') || n.contains('ayam') || n.contains('ikan'))
-      return Icons.set_meal_rounded;
-    if (n.contains('bumbu') || n.contains('rempah'))
-      return Icons.soup_kitchen_rounded;
-    if (n.contains('minuman') || n.contains('minum'))
-      return Icons.local_drink_rounded;
-    if (n.contains('snack') || n.contains('camilan'))
-      return Icons.cookie_rounded;
-    if (n.contains('beras') || n.contains('biji') || n.contains('kering'))
-      return Icons.grass_rounded;
-    if (n.contains('susu') || n.contains('telur') || n.contains('olahan'))
-      return Icons.egg_alt_rounded;
-    return Icons.storefront_rounded;
-  }
 
   Color _accentForIndex(int i) {
     const List<Color> accents = [
@@ -55,9 +37,7 @@ class UserHomeView extends GetView<UserProdukController> {
   void _showAddToCartModal(BuildContext context, DataProduk produk) {
     final jumlahObs = 1.obs;
     final hargaSatuan = produk.harga ?? 0;
-    final imageUrl = produk.foto != null
-        ? 'https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${produk.foto}'
-        : null;
+    final imageUrl = Image.network('${Api.baseImageUrl}${produk.foto}').image;
 
     showModalBottomSheet(
       context: context,
@@ -73,15 +53,15 @@ class UserHomeView extends GetView<UserProdukController> {
           ),
           decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // ── Handle bar ─────────────────────────────
               Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
-                width: 40,
+                margin: const EdgeInsets.only(top: 10, bottom: 6),
+                width: 36,
                 height: 4,
                 decoration: BoxDecoration(
                   color: const Color(0xFFDEE2E6),
@@ -91,13 +71,13 @@ class UserHomeView extends GetView<UserProdukController> {
 
               // ── Header ────────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+                padding: const EdgeInsets.fromLTRB(16, 2, 16, 0),
                 child: Row(
                   children: [
                     const Text(
                       'Tambah ke Keranjang',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF023E58),
                       ),
@@ -106,50 +86,47 @@ class UserHomeView extends GetView<UserProdukController> {
                     GestureDetector(
                       onTap: () => Get.back(),
                       child: Container(
-                        width: 30,
-                        height: 30,
+                        width: 28,
+                        height: 28,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF0F7F4),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(Icons.close_rounded,
-                            size: 18, color: Color(0xFF6C757D)),
+                            size: 16, color: Color(0xFF6C757D)),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // ── Product Info Row ───────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Gambar
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                       child: SizedBox(
-                        width: 88,
-                        height: 88,
-                        child: imageUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: imageUrl,
-                                fit: BoxFit.cover,
-                                placeholder: (_, __) => Container(
-                                  color: const Color(0xFFE8F5F9),
-                                  child: const Icon(Icons.image_outlined,
-                                      color: Color(0xFF90E0EF), size: 32),
-                                ),
-                                errorWidget: (_, __, ___) =>
-                                    _modalPlaceholder(),
-                              )
-                            : _modalPlaceholder(),
+                        width: 80,
+                        height: 80,
+                        child: CachedNetworkImage(
+                          imageUrl: '${Api.baseImageUrl}${produk.foto}',
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Container(
+                            color: const Color(0xFFE8F5F9),
+                            child: const Icon(Icons.image_outlined,
+                                color: Color(0xFF90E0EF), size: 28),
+                          ),
+                          errorWidget: (_, __, ___) => _modalPlaceholder(),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 12),
                     // Info
                     Expanded(
                       child: Column(
@@ -158,7 +135,7 @@ class UserHomeView extends GetView<UserProdukController> {
                           Text(
                             produk.namaProduk ?? 'Produk',
                             style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF023E58),
                               height: 1.3,
@@ -166,24 +143,23 @@ class UserHomeView extends GetView<UserProdukController> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
                           Row(
                             children: [
                               Icon(Icons.scale_outlined,
-                                  size: 12, color: Colors.grey[400]),
-                              const SizedBox(width: 4),
+                                  size: 11, color: Colors.grey[400]),
+                              const SizedBox(width: 3),
                               Text(
                                 '${produk.beratSatuan ?? 0} gram/satuan',
                                 style: TextStyle(
-                                    fontSize: 11, color: Colors.grey[400]),
+                                    fontSize: 10, color: Colors.grey[400]),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          // Harga satuan
+                          const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: const Color(0xFFE0F4FF),
                               borderRadius: BorderRadius.circular(8),
@@ -191,7 +167,7 @@ class UserHomeView extends GetView<UserProdukController> {
                             child: Text(
                               _formatRupiah(hargaSatuan),
                               style: const TextStyle(
-                                fontSize: 15,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w900,
                                 color: Color(0xFF0077B6),
                               ),
@@ -204,15 +180,13 @@ class UserHomeView extends GetView<UserProdukController> {
                 ),
               ),
 
-              const SizedBox(height: 20),
-
-              // ── Divider ───────────────────────────────
+              const SizedBox(height: 14),
               const Divider(height: 1, color: Color(0xFFF0F0F0)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // ── Jumlah Input ──────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
                     const Text(
@@ -224,7 +198,6 @@ class UserHomeView extends GetView<UserProdukController> {
                       ),
                     ),
                     const Spacer(),
-                    // Decrement
                     _qtyButton(
                       icon: Icons.remove_rounded,
                       onTap: () {
@@ -232,19 +205,18 @@ class UserHomeView extends GetView<UserProdukController> {
                       },
                       enabled: jumlah > 1,
                     ),
-                    // Angka jumlah
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 150),
                       transitionBuilder: (child, anim) =>
                           ScaleTransition(scale: anim, child: child),
                       child: SizedBox(
                         key: ValueKey(jumlah),
-                        width: 52,
+                        width: 48,
                         child: Center(
                           child: Text(
                             '$jumlah',
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: 17,
                               fontWeight: FontWeight.w900,
                               color: Color(0xFF023E58),
                             ),
@@ -252,7 +224,6 @@ class UserHomeView extends GetView<UserProdukController> {
                         ),
                       ),
                     ),
-                    // Increment
                     _qtyButton(
                       icon: Icons.add_rounded,
                       onTap: () {
@@ -265,20 +236,20 @@ class UserHomeView extends GetView<UserProdukController> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // ── Total Harga ───────────────────────────
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFFE0F7FA), Color(0xFFE8F5E9)],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: const Color(0xFF00B4D8).withOpacity(0.2),
                   ),
@@ -313,7 +284,7 @@ class UserHomeView extends GetView<UserProdukController> {
                         _formatRupiah(totalHarga),
                         key: ValueKey(totalHarga),
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.w900,
                           color: Color(0xFF0077B6),
                           letterSpacing: -0.5,
@@ -324,32 +295,35 @@ class UserHomeView extends GetView<UserProdukController> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // ── Action Buttons ────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 child: Row(
                   children: [
                     // Cancel
                     Expanded(
                       flex: 2,
-                      child: OutlinedButton(
-                        onPressed: () => Get.back(),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF6C757D),
-                          side: const BorderSide(
-                              color: Color(0xFFDEE2E6), width: 1.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                      child: SizedBox(
+                        height: 46,
+                        child: OutlinedButton(
+                          onPressed: () => Get.back(),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF6C757D),
+                            side: const BorderSide(
+                                color: Color(0xFFDEE2E6), width: 1.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: EdgeInsets.zero,
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: const Text(
-                          'Batal',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                          child: const Text(
+                            'Batal',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -358,10 +332,13 @@ class UserHomeView extends GetView<UserProdukController> {
                     // Lanjut
                     Expanded(
                       flex: 3,
-                      child: _LanjutButton(
-                        produk: produk,
-                        jumlahObs: jumlahObs,
-                        totalHarga: totalHarga,
+                      child: SizedBox(
+                        height: 46,
+                        child: _LanjutButton(
+                          produk: produk,
+                          jumlahObs: jumlahObs,
+                          totalHarga: totalHarga,
+                        ),
                       ),
                     ),
                   ],
@@ -383,24 +360,24 @@ class UserHomeView extends GetView<UserProdukController> {
       onTap: enabled ? onTap : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        width: 36,
-        height: 36,
+        width: 34,
+        height: 34,
         decoration: BoxDecoration(
           color: enabled ? const Color(0xFF0077B6) : const Color(0xFFE9ECEF),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(9),
           boxShadow: enabled
               ? [
                   BoxShadow(
                     color: const Color(0xFF0077B6).withOpacity(0.25),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ]
               : [],
         ),
         child: Icon(
           icon,
-          size: 18,
+          size: 16,
           color: enabled ? Colors.white : const Color(0xFFADB5BD),
         ),
       ),
@@ -411,8 +388,8 @@ class UserHomeView extends GetView<UserProdukController> {
     return Container(
       color: const Color(0xFFE0F7FA),
       child: const Center(
-        child: Icon(Icons.storefront_rounded,
-            color: Color(0xFF90E0EF), size: 36),
+        child:
+            Icon(Icons.storefront_rounded, color: Color(0xFF90E0EF), size: 32),
       ),
     );
   }
@@ -435,15 +412,13 @@ class UserHomeView extends GetView<UserProdukController> {
             physics: const BouncingScrollPhysics(),
             slivers: [
               _buildSliverAppBar(context),
-              SliverToBoxAdapter(child: _buildBannerPromo()),
               SliverToBoxAdapter(
                   child: _buildSectionHeader('Kategori', onSeeAll: null)),
-              SliverToBoxAdapter(child: _buildKategoriGrid()),
+              SliverToBoxAdapter(child: _buildKategoriScroll()),
               SliverToBoxAdapter(
-                  child:
-                      _buildSectionHeader('Semua Produk', onSeeAll: null)),
+                  child: _buildSectionHeader('Semua Produk', onSeeAll: null)),
               _buildProdukGrid(context),
-              const SliverToBoxAdapter(child: SizedBox(height: 96)),
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           ),
           _buildFloatingCart(),
@@ -453,231 +428,136 @@ class UserHomeView extends GetView<UserProdukController> {
   }
 
   // ══════════════════════════════════════════════════════════
-  // SLIVER APP BAR
+  // SLIVER APP BAR — title row + search bar di bottom
   // ══════════════════════════════════════════════════════════
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 130,
-      backgroundColor: const Color(0xFF0077B6),
+      floating: true,
+      automaticallyImplyLeading: false,
+      backgroundColor: Colors.transparent,
       elevation: 0,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF0077B6), Color(0xFF00B4D8), Color(0xFF06D6A0)],
-            ),
+      toolbarHeight: 0,
+      // Semua konten masuk ke flexibleSpace, expandedHeight = tinggi total
+      expandedHeight: 100,
+      collapsedHeight: 110,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0077B6), Color(0xFF00B4D8), Color(0xFF06D6A0)],
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text(
-                        'e-Pasar',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
+        ),
+        child: SafeArea(
+          bottom: true,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 9),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── Baris e-Pasar + ikon ──
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Text(
+                          'e-Pasar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Belanja segar, langsung dari pasar 🌿',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
+                        Text(
+                          'Belanja segar, langsung dari pasar 🌿',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Get.to(() => const PasarListView());
-                    },
-                    icon: const Icon(Icons.location_on_outlined,
-                        color: Colors.white, size: 24),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.notifications_outlined,
-                        color: Colors.white, size: 24),
-                  ),
-                ],
-              ),
+                      ],
+                    ),
+                    const Spacer(),
+                    _appBarIconButton(
+                      icon: Icons.location_on_outlined,
+                      onTap: () => Get.to(() => const AppInfoView()),
+                    ),
+                    const SizedBox(width: 6),
+                    _appBarIconButton(
+                      icon: Icons.notifications_outlined,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // ── Search bar ──
+                _buildSearchBar(),
+              ],
             ),
           ),
         ),
       ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(52),
-        child: Container(
-          color: const Color(0xFF0077B6),
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-          child: _buildSearchBar(),
+    );
+  }
+
+  Widget _appBarIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(10),
         ),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }
 
   Widget _buildSearchBar() {
     return Container(
-      height: 42,
+      height: 38,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: TextField(
         onSubmitted: (value) => controller.fetchProduk(search: value),
+        style: const TextStyle(fontSize: 13),
         decoration: InputDecoration(
           hintText: 'Cari produk segar...',
-          hintStyle:
-              const TextStyle(color: Color(0xFFADB5BD), fontSize: 14),
+          hintStyle: const TextStyle(color: Color(0xFFADB5BD), fontSize: 13),
           prefixIcon: const Icon(Icons.search_rounded,
-              color: Color(0xFF00B4D8), size: 20),
+              color: Color(0xFF00B4D8), size: 18),
           suffixIcon: IconButton(
             icon: const Icon(Icons.tune_rounded,
-                color: Color(0xFF0077B6), size: 18),
+                color: Color(0xFF0077B6), size: 16),
             onPressed: () {},
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          isDense: true,
         ),
-      ),
-    );
-  }
-
-  // ══════════════════════════════════════════════════════════
-  // BANNER PROMO
-  // ══════════════════════════════════════════════════════════
-  Widget _buildBannerPromo() {
-    final List<Map<String, dynamic>> banners = [
-      {
-        'title': 'Sayur Segar\nLangsung dari Kebun',
-        'subtitle': 'Diskon s/d 30%',
-        'icon': Icons.eco_rounded,
-        'gradient': [const Color(0xFF06D6A0), const Color(0xFF0077B6)],
-      },
-      {
-        'title': 'Gratis Ongkir\nPembelian Pertama',
-        'subtitle': 'Min. belanja Rp25.000',
-        'icon': Icons.local_shipping_rounded,
-        'gradient': [const Color(0xFF00B4D8), const Color(0xFF06D6A0)],
-      },
-      {
-        'title': 'Promo Pagi\nHarga Spesial Buah',
-        'subtitle': 'Berlaku 06:00 - 10:00',
-        'icon': Icons.wb_sunny_rounded,
-        'gradient': [const Color(0xFF38B000), const Color(0xFF00B4D8)],
-      },
-    ];
-
-    return SizedBox(
-      height: 150,
-      child: PageView.builder(
-        controller: _pageController,
-        itemCount: banners.length,
-        itemBuilder: (_, i) {
-          final b = banners[i];
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: (b['gradient'] as List<Color>),
-              ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: (b['gradient'] as List<Color>)[0].withOpacity(0.35),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -20,
-                  bottom: -20,
-                  child: Container(
-                    width: 130,
-                    height: 130,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 20,
-                  top: 10,
-                  child: Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(b['icon'] as IconData,
-                        color: Colors.white, size: 36),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        b['title'] as String,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          height: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          b['subtitle'] as String,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }
@@ -687,12 +567,12 @@ class UserHomeView extends GetView<UserProdukController> {
   // ══════════════════════════════════════════════════════════
   Widget _buildSectionHeader(String title, {VoidCallback? onSeeAll}) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
       child: Row(
         children: [
           Container(
             width: 4,
-            height: 18,
+            height: 16,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF0077B6), Color(0xFF06D6A0)],
@@ -706,7 +586,7 @@ class UserHomeView extends GetView<UserProdukController> {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w800,
               color: Color(0xFF023E58),
               letterSpacing: -0.3,
@@ -731,15 +611,16 @@ class UserHomeView extends GetView<UserProdukController> {
   }
 
   // ══════════════════════════════════════════════════════════
-  // KATEGORI GRID
+  // KATEGORI — horizontal scroll yang proper
   // ══════════════════════════════════════════════════════════
-  Widget _buildKategoriGrid() {
+  Widget _buildKategoriScroll() {
     return Obx(() {
       if (controller.isLoading.value && controller.kategoriList.isEmpty) {
         return const SizedBox(
-          height: 90,
+          height: 44,
           child: Center(
-              child: CircularProgressIndicator(color: Color(0xFF00B4D8))),
+              child: CircularProgressIndicator(
+                  color: Color(0xFF00B4D8), strokeWidth: 2)),
         );
       }
 
@@ -747,7 +628,7 @@ class UserHomeView extends GetView<UserProdukController> {
       final selectedId = controller.selectedKategoriId.value;
 
       return SizedBox(
-        height: 92,
+        height: 44,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -762,17 +643,17 @@ class UserHomeView extends GetView<UserProdukController> {
               onTap: () => controller.filterByKategori(kat.id),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
+                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
                 decoration: BoxDecoration(
                   color: isSelected ? color : Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(isSelected ? 0.4 : 0.1),
-                      blurRadius: isSelected ? 10 : 6,
-                      offset: const Offset(0, 3),
+                      color: color.withOpacity(isSelected ? 0.35 : 0.1),
+                      blurRadius: isSelected ? 8 : 4,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                   border: Border.all(
@@ -780,28 +661,18 @@ class UserHomeView extends GetView<UserProdukController> {
                     width: 1.5,
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      _iconForKategori(kat.namaKategori),
-                      color: isSelected ? Colors.white : color,
-                      size: 24,
+                child: Center(
+                  child: Text(
+                    kat.namaKategori ?? '-',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color:
+                          isSelected ? Colors.white : const Color(0xFF023E58),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      kat.namaKategori ?? '-',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: isSelected
-                            ? Colors.white
-                            : const Color(0xFF023E58),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
             );
@@ -812,22 +683,22 @@ class UserHomeView extends GetView<UserProdukController> {
   }
 
   // ══════════════════════════════════════════════════════════
-  // PRODUK GRID  — now passes context for modal
+  // PRODUK GRID
   // ══════════════════════════════════════════════════════════
   Widget _buildProdukGrid(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value) {
         return SliverToBoxAdapter(
           child: SizedBox(
-            height: 500,
+            height: 300,
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
                   CircularProgressIndicator(color: Color(0xFF00B4D8)),
-                  SizedBox(height: 12),
+                  SizedBox(height: 10),
                   Text('Memuat produk...',
-                      style: TextStyle(color: Color(0xFF6C757D))),
+                      style: TextStyle(color: Color(0xFF6C757D), fontSize: 13)),
                 ],
               ),
             ),
@@ -847,13 +718,12 @@ class UserHomeView extends GetView<UserProdukController> {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         sliver: SliverGrid(
           delegate: SliverChildBuilderDelegate(
-            (_, i) =>
-                _buildProdukCard(context, controller.produkList[i]),
+            (_, i) => _buildProdukCard(context, controller.produkList[i]),
             childCount: controller.produkList.length,
           ),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            childAspectRatio: 0.72,
+            childAspectRatio: 0.78,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
           ),
@@ -863,37 +733,40 @@ class UserHomeView extends GetView<UserProdukController> {
   }
 
   Widget _buildProdukCard(BuildContext context, DataProduk produk) {
-    final imageUrl = produk.foto != null
-        ? 'https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${produk.foto}'
-        : null;
+    final imageUrl =
+        produk.foto != null ? '${Api.baseImageUrl}${produk.foto}' : null;
+
+    // Nama kios — sesuaikan dengan field model Anda (misalnya produk.kios?.namaKios)
+    // Ganti 'produk.kios?.namaKios' dengan field yang sesuai di model Anda
+    final namaKios = produk.kios?.namaKios ?? 'Kios Tidak Diketahui';
 
     return GestureDetector(
       onTap: () {
-        // Get.toNamed('/produk-detail', arguments: produk);
+        Get.toNamed(AppRoutes.produkDetail(produk.id!), arguments: produk);
       },
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0077B6).withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: const Color(0xFF0077B6).withOpacity(0.07),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Foto
+            // ── Foto ──────────────────────────────────
             ClipRRect(
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+                  const BorderRadius.vertical(top: Radius.circular(14)),
               child: Stack(
                 children: [
                   SizedBox(
-                    height: 140,
+                    height: 110,
                     width: double.infinity,
                     child: imageUrl != null
                         ? CachedNetworkImage(
@@ -903,30 +776,30 @@ class UserHomeView extends GetView<UserProdukController> {
                               color: const Color(0xFFE8F5F9),
                               child: const Center(
                                 child: Icon(Icons.image_outlined,
-                                    color: Color(0xFF90E0EF), size: 40),
+                                    color: Color(0xFF90E0EF), size: 36),
                               ),
                             ),
-                            errorWidget: (_, __, ___) =>
-                                _produkPlaceholder(),
+                            errorWidget: (_, __, ___) => _produkPlaceholder(),
                           )
                         : _produkPlaceholder(),
                   ),
+                  // Badge stok hampir habis
                   if ((produk.stok ?? 0) < 5)
                     Positioned(
-                      top: 8,
-                      left: 8,
+                      top: 7,
+                      left: 7,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
+                            horizontal: 6, vertical: 3),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFF6B6B),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
                           'Hampir habis',
                           style: TextStyle(
                               color: Colors.white,
-                              fontSize: 9,
+                              fontSize: 8,
                               fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -935,58 +808,101 @@ class UserHomeView extends GetView<UserProdukController> {
               ),
             ),
 
-            // Info
+            // ── Info produk ────────────────────────────
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.fromLTRB(9, 7, 9, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Nama produk
                     Text(
                       produk.namaProduk ?? 'Produk',
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF023E58),
-                        height: 1.3,
+                        height: 1.2,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
+
+                    // Berat
                     Row(
                       children: [
                         Icon(Icons.scale_outlined,
-                            size: 11, color: Colors.grey[400]),
-                        const SizedBox(width: 3),
+                            size: 10, color: Colors.grey[400]),
+                        const SizedBox(width: 2),
                         Text(
                           '${produk.beratSatuan ?? 0} gram/satuan',
-                          style: TextStyle(
-                              fontSize: 10, color: Colors.grey[400]),
+                          style:
+                              TextStyle(fontSize: 9, color: Colors.grey[400]),
                         ),
                       ],
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 3),
+
+                    // ── Info Kios ──────────────────────
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F7F4),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: const Color(0xFF06D6A0).withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.storefront_rounded,
+                            size: 10,
+                            color: Color(0xFF06D6A0),
+                          ),
+                          const SizedBox(width: 3),
+                          Flexible(
+                            child: Text(
+                              namaKios,
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1B9AAA),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // Harga
                     Text(
                       _formatRupiah(produk.harga ?? 0),
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w900,
                         color: Color(0xFF0077B6),
                         letterSpacing: -0.3,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    // ── Tombol + Keranjang → buka modal ──
+                    const SizedBox(height: 5),
+
+                    // ── Tombol + Keranjang ─────────────
                     SizedBox(
                       width: double.infinity,
-                      height: 22,
+                      height: 32,
                       child: ElevatedButton.icon(
-                        onPressed: () =>
-                            _showAddToCartModal(context, produk),
-                        icon: const Icon(
-                            Icons.add_shopping_cart_rounded,
-                            size: 14),
+                        onPressed: () => _showAddToCartModal(context, produk),
+                        icon: const Icon(Icons.add_shopping_cart_rounded,
+                            size: 13),
                         label: const Text(
                           '+ Keranjang',
                           style: TextStyle(
@@ -996,9 +912,9 @@ class UserHomeView extends GetView<UserProdukController> {
                           backgroundColor: const Color(0xFF0077B6),
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding: EdgeInsets.zero,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(9),
                           ),
                         ),
                       ),
@@ -1015,11 +931,11 @@ class UserHomeView extends GetView<UserProdukController> {
 
   Widget _produkPlaceholder() {
     return Container(
-      height: 140,
+      height: 110,
       color: const Color(0xFFE0F7FA),
       child: const Center(
-        child: Icon(Icons.storefront_rounded,
-            color: Color(0xFF90E0EF), size: 50),
+        child:
+            Icon(Icons.storefront_rounded, color: Color(0xFF90E0EF), size: 44),
       ),
     );
   }
@@ -1029,13 +945,13 @@ class UserHomeView extends GetView<UserProdukController> {
   // ══════════════════════════════════════════════════════════
   Widget _buildEmptyState() {
     return SizedBox(
-      height: 260,
+      height: 240,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 90,
-            height: 90,
+            width: 80,
+            height: 80,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFFE0F7FA), Color(0xFFE8F5E9)],
@@ -1043,18 +959,18 @@ class UserHomeView extends GetView<UserProdukController> {
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.search_off_rounded,
-                size: 44, color: Color(0xFF90E0EF)),
+                size: 38, color: Color(0xFF90E0EF)),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           const Text(
             'Produk tidak ditemukan',
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Color(0xFF023E58),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           const Text(
             'Coba kategori atau kata kunci lain',
             style: TextStyle(fontSize: 12, color: Color(0xFF6C757D)),
@@ -1066,31 +982,37 @@ class UserHomeView extends GetView<UserProdukController> {
 
   Widget _buildErrorState() {
     return SizedBox(
-      height: 260,
+      height: 240,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.wifi_off_rounded,
-              size: 56, color: Color(0xFFADB5BD)),
-          const SizedBox(height: 12),
+              size: 50, color: Color(0xFFADB5BD)),
+          const SizedBox(height: 10),
           const Text(
             'Gagal memuat produk',
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Color(0xFF023E58),
             ),
           ),
           const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: controller.fetchProduk,
-            icon: const Icon(Icons.refresh_rounded, size: 16),
-            label: const Text('Coba Lagi'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0077B6),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+          SizedBox(
+            height: 40,
+            child: ElevatedButton.icon(
+              onPressed: controller.fetchProduk,
+              icon: const Icon(Icons.refresh_rounded, size: 15),
+              label: const Text('Coba Lagi', style: TextStyle(fontSize: 13)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0077B6),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+              ),
             ),
           ),
         ],
@@ -1105,8 +1027,8 @@ class UserHomeView extends GetView<UserProdukController> {
     final keranjangCtrl = Get.find<KeranjangController>();
 
     return Positioned(
-      bottom: 24,
-      right: 20,
+      bottom: 20,
+      right: 16,
       child: Obx(() {
         final count = keranjangCtrl.keranjangList.length;
         final total = keranjangCtrl.totalHarga;
@@ -1120,19 +1042,19 @@ class UserHomeView extends GetView<UserProdukController> {
             duration: const Duration(milliseconds: 300),
           ),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF0077B6), Color(0xFF06D6A0)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF0077B6).withOpacity(0.45),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
+                  color: const Color(0xFF0077B6).withOpacity(0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -1143,13 +1065,13 @@ class UserHomeView extends GetView<UserProdukController> {
                   clipBehavior: Clip.none,
                   children: [
                     const Icon(Icons.shopping_basket_rounded,
-                        color: Colors.white, size: 26),
+                        color: Colors.white, size: 24),
                     Positioned(
-                      top: -6,
-                      right: -6,
+                      top: -5,
+                      right: -5,
                       child: Container(
-                        width: 20,
-                        height: 20,
+                        width: 18,
+                        height: 18,
                         decoration: const BoxDecoration(
                           color: Color(0xFFFF6B6B),
                           shape: BoxShape.circle,
@@ -1159,7 +1081,7 @@ class UserHomeView extends GetView<UserProdukController> {
                             count > 99 ? '99+' : '$count',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 10,
+                              fontSize: 9,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -1177,7 +1099,7 @@ class UserHomeView extends GetView<UserProdukController> {
                       '$count item',
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -1185,7 +1107,7 @@ class UserHomeView extends GetView<UserProdukController> {
                       _formatRupiah(total),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.3,
                       ),
@@ -1199,6 +1121,7 @@ class UserHomeView extends GetView<UserProdukController> {
       }),
     );
   }
+
   // ══════════════════════════════════════════════════════════
   // HELPERS
   // ══════════════════════════════════════════════════════════
@@ -1230,7 +1153,6 @@ class _LanjutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil KeranjangController — pastikan sudah di-register di binding
     final keranjangCtrl = Get.find<KeranjangController>();
 
     return Obx(() {
@@ -1245,11 +1167,27 @@ class _LanjutButton extends StatelessWidget {
                   jumlah: jumlahObs.value,
                   hargaTotal: totalHarga,
                 );
-                Get.back(); // tutup modal setelah berhasil
+
+                // Tampilkan snackbar sukses sebelum tutup modal
+                Get.snackbar(
+                  '✅ Berhasil!',
+                  '${produk.namaProduk ?? 'Produk'} ditambahkan ke keranjang',
+                  snackPosition: SnackPosition.TOP,
+                  backgroundColor: Color(0xFF10B981).withOpacity(0.95),
+                  colorText: Colors.white,
+                  icon: Icon(Icons.check_circle_rounded, color: Colors.white),
+                  duration: Duration(seconds: 2),
+                  margin: EdgeInsets.all(16),
+                  borderRadius: 12,
+                );
+
+                // Delay agar snackbar kelihatan sebelum modal tutup
+                await Future.delayed(Duration(milliseconds: 500));
+                Get.back();
               },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          height: 48,
+          // Tinggi tombol yang proporsional — diatur dari parent SizedBox(height: 46)
           decoration: BoxDecoration(
             gradient: isLoading
                 ? const LinearGradient(
@@ -1259,33 +1197,33 @@ class _LanjutButton extends StatelessWidget {
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             boxShadow: isLoading
                 ? []
                 : [
                     BoxShadow(
-                      color: const Color(0xFF0077B6).withOpacity(0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      color: const Color(0xFF0077B6).withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ],
           ),
           child: Center(
             child: isLoading
                 ? const SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: 18,
+                    height: 18,
                     child: CircularProgressIndicator(
                       color: Colors.white,
-                      strokeWidth: 2.5,
+                      strokeWidth: 2,
                     ),
                   )
                 : const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.shopping_cart_checkout_rounded,
-                          color: Colors.white, size: 16),
-                      SizedBox(width: 6),
+                          color: Colors.white, size: 15),
+                      SizedBox(width: 5),
                       Text(
                         'Lanjut',
                         style: TextStyle(

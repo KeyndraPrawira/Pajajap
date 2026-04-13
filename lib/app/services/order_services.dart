@@ -11,14 +11,23 @@ class OrderService {
   OrderRealTimeService? _realTimeService;
 
   String? get token => box.read('token');
-  void initRealTime(Function(Map<String, dynamic>) onOrderUpdate) {
-    _realTimeService = OrderRealTimeService(onOrderUpdate: onOrderUpdate);
+
+  void initRealTime(
+    Function(Map<String, dynamic>) onOrderUpdate, {
+    String path = 'orders',
+  }) {
+    _realTimeService = OrderRealTimeService(
+      onOrderUpdate: onOrderUpdate,
+      path: path,
+    );
   }
+
   Future<void> connectRealTime() async {
     if (_realTimeService != null) {
       await _realTimeService!.connect();
     }
   }
+
   Future<void> disconnectRealTime() async {
     await _realTimeService?.disconnect();
   }
@@ -27,7 +36,7 @@ class OrderService {
 
   // ── CHECKOUT (Buyer) ───────────────────────────────────────
   // POST /api/orders
-  Future<Map<String, dynamic>> checkout() async {
+  Future<Map<String, dynamic>> checkout(String metodePembayaran) async {
     try {
       if (token == null) throw Exception('Token tidak ditemukan');
 
@@ -37,6 +46,7 @@ class OrderService {
       final response = await http.post(
         uri,
         headers: Api.headersWithAuth(token!),
+        body: json.encode({'metode_pembayaran': metodePembayaran}),
       );
 
       print('📥 [CHECKOUT] Status: ${response.statusCode}');
@@ -61,34 +71,6 @@ class OrderService {
 
   // ── MY ORDERS (Buyer) ──────────────────────────────────────
   // GET /api/orders/my
-  Future<List<dynamic>> myOrders() async {
-    try {
-      if (token == null) throw Exception('Token tidak ditemukan');
-
-      final uri = Uri.parse('${Api.baseUrl}/orders/my');
-      print('📡 [MY ORDERS] URL: $uri');
-
-      final response = await http.get(
-        uri,
-        headers: Api.headersWithAuth(token!),
-      );
-
-      print('📥 [MY ORDERS] Status: ${response.statusCode}');
-      print('📥 [MY ORDERS] Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final decoded = json.decode(response.body);
-        return decoded['data'] as List<dynamic>;
-      } else if (response.statusCode == 401) {
-        throw Exception('Unauthorized - token tidak valid');
-      } else {
-        throw Exception('Gagal ambil data order (${response.statusCode})');
-      }
-    } catch (e) {
-      print('💥 [MY ORDERS] Exception: $e');
-      rethrow;
-    }
-  }
 
   // ── DETAIL ORDER ───────────────────────────────────────────
   // GET /api/orders/{id}
@@ -105,6 +87,7 @@ class OrderService {
       );
 
       print('📥 [DETAIL ORDER] Status: ${response.statusCode}');
+      print('📥 [DETAIL ORDER] Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
@@ -113,16 +96,9 @@ class OrderService {
         throw Exception('Order tidak ditemukan');
       } else {
         throw Exception('Gagal ambil detail order (${response.statusCode})');
-        
       }
     } catch (e) {
-            final uri = Uri.parse('${Api.baseUrl}/orders/$id');
-      final response = await http.get(
-        uri,
-        headers: Api.headersWithAuth(token!),
-      );
       print('💥 [DETAIL ORDER] Exception: $e');
-           print('📥 [MY ORDERS] Body: ${response.body}');
       rethrow;
     }
   }
@@ -159,7 +135,6 @@ class OrderService {
   // ── ACCEPT ORDER (Driver) ──────────────────────────────────
   // POST /api/orders/{id}/accept
   Future<Map<String, dynamic>> acceptOrder(int orderId) async {
-
     try {
       if (token == null) throw Exception('Token tidak ditemukan');
 
@@ -197,7 +172,7 @@ class OrderService {
     try {
       if (token == null) throw Exception('Token tidak ditemukan');
 
-      final uri = Uri.parse('${Api.baseUrl}/orders/$orderId/processed');
+      final uri = Uri.parse('${Api.baseUrl}/orders/$orderId/dalam_proses');
       print('📡 [PROCESSED ORDER] URL: $uri');
 
       final response = await http.post(
@@ -268,141 +243,156 @@ class OrderService {
   }
 
   Future<Map<String, dynamic>> requestGanti(int itemId) async {
-  try {
-    if (token == null) throw Exception('Token tidak ditemukan');
+    try {
+      if (token == null) throw Exception('Token tidak ditemukan');
 
-    final uri = Uri.parse('${Api.baseUrl}/order-item/$itemId/request-ganti');
-    print('📡 [REQUEST GANTI] URL: $uri');
+      final uri = Uri.parse('${Api.baseUrl}/order-item/$itemId/request-ganti');
+      print('📡 [REQUEST GANTI] URL: $uri');
 
-    final response = await http.patch(
-      uri,
-      headers: Api.headersWithAuth(token!),
-    );
+      final response = await http.patch(
+        uri,
+        headers: Api.headersWithAuth(token!),
+      );
 
-    print('📥 [REQUEST GANTI] Status: ${response.statusCode}');
-    print('📥 [REQUEST GANTI] Body: ${response.body}');
+      print('📥 [REQUEST GANTI] Status: ${response.statusCode}');
+      print('📥 [REQUEST GANTI] Body: ${response.body}');
 
-    final decoded = json.decode(response.body);
+      final decoded = json.decode(response.body);
 
-    if (response.statusCode == 200) {
-      return {'success': true, 'data': decoded['data']};
-    } else if (response.statusCode == 403) {
-      throw Exception('Bukan driver / bukan order kamu');
-    } else if (response.statusCode == 400) {
-      throw Exception(decoded['message'] ?? 'Item tidak bisa diproses');
-    } else if (response.statusCode == 404) {
-      throw Exception('Item tidak ditemukan');
-    } else {
-      throw Exception(decoded['message'] ?? 'Gagal request ganti');
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': decoded['data']};
+      } else if (response.statusCode == 403) {
+        throw Exception('Bukan driver / bukan order kamu');
+      } else if (response.statusCode == 400) {
+        throw Exception(decoded['message'] ?? 'Item tidak bisa diproses');
+      } else if (response.statusCode == 404) {
+        throw Exception('Item tidak ditemukan');
+      } else {
+        throw Exception(decoded['message'] ?? 'Gagal request ganti');
+      }
+    } catch (e) {
+      print('💥 [REQUEST GANTI] Exception: $e');
+      rethrow;
     }
-  } catch (e) {
-    print('💥 [REQUEST GANTI] Exception: $e');
-    rethrow;
   }
-}
 
   Future<Map<String, dynamic>> pilihPengganti(int itemId, int produkId) async {
-  try {
-    if (token == null) throw Exception('Token tidak ditemukan');
+    try {
+      if (token == null) throw Exception('Token tidak ditemukan');
 
-    final uri = Uri.parse('${Api.baseUrl}/order-item/$itemId/pilih-pengganti');
-    print('📡 [PILIH PENGGANTI] URL: $uri');
+      final uri =
+          Uri.parse('${Api.baseUrl}/order-item/$itemId/pilih-pengganti');
+      print('📡 [PILIH PENGGANTI] URL: $uri');
 
-    final response = await http.patch(
-      uri,
-      headers: {
-        ...Api.headersWithAuth(token!),
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'produk_pengganti_id': produkId,
-      }),
-    );
+      final response = await http.patch(
+        uri,
+        headers: {
+          ...Api.headersWithAuth(token!),
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'produk_pengganti_id': produkId,
+        }),
+      );
 
-    print('📥 [PILIH PENGGANTI] Status: ${response.statusCode}');
-    print('📥 [PILIH PENGGANTI] Body: ${response.body}');
+      print('📥 [PILIH PENGGANTI] Status: ${response.statusCode}');
+      print('📥 [PILIH PENGGANTI] Body: ${response.body}');
 
-    final decoded = json.decode(response.body);
+      final decoded = json.decode(response.body);
 
-    if (response.statusCode == 200) {
-      return {'success': true, 'data': decoded['data']};
-    } else if (response.statusCode == 403) {
-      throw Exception('Bukan user pemilik order');
-    } else if (response.statusCode == 400) {
-      throw Exception(decoded['message'] ?? 'Item tidak dalam kondisi menunggu');
-    } else if (response.statusCode == 422) {
-      throw Exception('Produk tidak valid');
-    } else if (response.statusCode == 404) {
-      throw Exception('Item tidak ditemukan');
-    } else {
-      throw Exception(decoded['message'] ?? 'Gagal pilih pengganti');
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': decoded['data']};
+      } else if (response.statusCode == 403) {
+        throw Exception('Bukan user pemilik order');
+      } else if (response.statusCode == 400) {
+        throw Exception(
+            decoded['message'] ?? 'Item tidak dalam kondisi menunggu');
+      } else if (response.statusCode == 422) {
+        throw Exception('Produk tidak valid');
+      } else if (response.statusCode == 404) {
+        throw Exception('Item tidak ditemukan');
+      } else {
+        throw Exception(decoded['message'] ?? 'Gagal pilih pengganti');
+      }
+    } catch (e) {
+      print('💥 [PILIH PENGGANTI] Exception: $e');
+      rethrow;
     }
-  } catch (e) {
-    print('💥 [PILIH PENGGANTI] Exception: $e');
-    rethrow;
   }
-}
 
-Future<Map<String, dynamic>> tidakJadi(int itemId) async {
-  try {
-    if (token == null) throw Exception('Token tidak ditemukan');
+  Future<Map<String, dynamic>> tidakJadi(int itemId) async {
+    try {
+      if (token == null) throw Exception('Token tidak ditemukan');
 
-    final uri = Uri.parse('${Api.baseUrl}/order-item/$itemId/tidak-jadi');
-    print('📡 [TIDAK JADI] URL: $uri');
+      final uri = Uri.parse('${Api.baseUrl}/order-item/$itemId/tidak-jadi');
+      print('📡 [TIDAK JADI] URL: $uri');
 
-    final response = await http.patch(
-      uri,
-      headers: Api.headersWithAuth(token!),
-    );
+      final response = await http.patch(
+        uri,
+        headers: Api.headersWithAuth(token!),
+      );
 
-    print('📥 [TIDAK JADI] Status: ${response.statusCode}');
-    print('📥 [TIDAK JADI] Body: ${response.body}');
+      print('📥 [TIDAK JADI] Status: ${response.statusCode}');
+      print('📥 [TIDAK JADI] Body: ${response.body}');
 
-    final decoded = json.decode(response.body);
+      final decoded = json.decode(response.body);
 
-    if (response.statusCode == 200) {
-      return {'success': true, 'data': decoded['data']};
-    } else if (response.statusCode == 403) {
-      throw Exception('Bukan user pemilik order');
-    } else if (response.statusCode == 400) {
-      throw Exception(decoded['message'] ?? 'Item tidak dalam kondisi menunggu');
-    } else if (response.statusCode == 404) {
-      throw Exception('Item tidak ditemukan');
-    } else {
-      throw Exception(decoded['message'] ?? 'Gagal membatalkan item');
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': decoded['data']};
+      } else if (response.statusCode == 403) {
+        throw Exception('Bukan user pemilik order');
+      } else if (response.statusCode == 400) {
+        throw Exception(
+            decoded['message'] ?? 'Item tidak dalam kondisi menunggu');
+      } else if (response.statusCode == 404) {
+        throw Exception('Item tidak ditemukan');
+      } else {
+        throw Exception(decoded['message'] ?? 'Gagal membatalkan item');
+      }
+    } catch (e) {
+      print('💥 [TIDAK JADI] Exception: $e');
+      rethrow;
     }
-  } catch (e) {
-    print('💥 [TIDAK JADI] Exception: $e');
-    rethrow;
   }
-}
 
   // Cek apakah driver punya active order
-Future<List<dynamic>> getActiveOrder() async {
-  try {
-    if (token == null) return [];
+// ── ACTIVE ORDERS (Driver & Buyer) ────────────────────────
+// GET /api/orders/active
+  Future<List<dynamic>> getActiveOrders() async {
+    try {
+      if (token == null) throw Exception('Token tidak ditemukan');
 
-    final uri = Uri.parse('${Api.baseUrl}/orders/active');
-    final response = await http.get(uri, headers: Api.headersWithAuth(token!));
+      final uri = Uri.parse('${Api.baseUrl}/orders/active');
+      print('📡 [ACTIVE ORDERS] URL: $uri');
 
-   
-    if (response.statusCode == 200) {
-      final decoded = json.decode(response.body);
-      return decoded['data'] as List<dynamic>;
+      final response = await http.get(
+        uri,
+        headers: Api.headersWithAuth(token!),
+      );
+
+      print('📥 [ACTIVE ORDERS] Status: ${response.statusCode}');
+      print('📥 [ACTIVE ORDERS] Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+        return decoded['data'] as List<dynamic>;
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized');
+      } else {
+        throw Exception('Gagal ambil active orders (${response.statusCode})');
+      }
+    } catch (e) {
+      print('💥 [ACTIVE ORDERS] Exception: $e');
+      return [];
     }
-    return [];
-  } catch (e) {
-    print('💥 [ACTIVE ORDER] Exception: $e');
-    return [];
   }
-}
-  
+
   // KIRIM ORDER
   Future<Map<String, dynamic>> sendDelivery(int orderId) async {
     try {
       if (token == null) throw Exception('Token tidak ditemukan');
 
-      final uri = Uri.parse('${Api.baseUrl}/orders/$orderId/send'); 
+      final uri = Uri.parse('${Api.baseUrl}/orders/$orderId/send');
       print('📡 [SEND ORDER] URL: $uri');
 
       final response = await http.post(
@@ -480,7 +470,7 @@ Future<List<dynamic>> getActiveOrder() async {
       final uri = Uri.parse('${Api.baseUrl}/orders/$orderId/cancel');
       print('📡 [REQUEST CANCEL] URL: $uri');
 
-      final response = await http.post(
+      final response = await http.put(
         uri,
         headers: Api.headersWithAuth(token!),
         body: json.encode({'reason': reason}),
@@ -508,22 +498,19 @@ Future<List<dynamic>> getActiveOrder() async {
 
   // ── CONFIRM CANCEL ─────────────────────────────────────────
   // POST /api/orders/{id}/cancel/confirm
-  Future<Map<String, dynamic>> confirmCancel({
+  Future<Map<String, dynamic>> cancel({
     required int orderId,
-    required String action, // 'approve' atau 'reject'
   }) async {
     try {
       if (token == null) throw Exception('Token tidak ditemukan');
 
-      final uri =
-          Uri.parse('${Api.baseUrl}/orders/$orderId/cancel/confirm');
+      final uri = Uri.parse('${Api.baseUrl}/orders/$orderId/cancel');
       print('📡 [CONFIRM CANCEL] URL: $uri');
-      print('📡 [CONFIRM CANCEL] Action: $action');
 
-      final response = await http.post(
+      final response = await http.put(
         uri,
         headers: Api.headersWithAuth(token!),
-        body: json.encode({'action': action}),
+        body: json.encode({'status': 'dibatalkan'}),
       );
 
       print('📥 [CONFIRM CANCEL] Status: ${response.statusCode}');
@@ -542,6 +529,70 @@ Future<List<dynamic>> getActiveOrder() async {
       }
     } catch (e) {
       print('💥 [CONFIRM CANCEL] Exception: $e');
+      rethrow;
+    }
+  }
+
+  // ── GET ALL HISTORY ───────────────────────────────────────
+  // GET /api/orders/history
+  Future<List<dynamic>> getOrderHistory() async {
+    try {
+      if (token == null) throw Exception('Token tidak ditemukan');
+
+      final uri = Uri.parse('${Api.baseUrl}/orders/history');
+      print('📡 [ORDER HISTORY] URL: $uri');
+
+      final response = await http.get(
+        uri,
+        headers: Api.headersWithAuth(token!),
+      );
+
+      print('📥 [ORDER HISTORY] Status: ${response.statusCode}');
+      print('📥 [ORDER HISTORY] Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+        return decoded['data'] as List<dynamic>;
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized');
+      } else {
+        throw Exception('Gagal ambil riwayat order (${response.statusCode})');
+      }
+    } catch (e) {
+      print('💥 [ORDER HISTORY] Exception: $e');
+      rethrow;
+    }
+  }
+
+  // ── GET DETAIL HISTORY ────────────────────────────────────
+  // GET /api/orders/history/{id}
+  Future<Map<String, dynamic>> getOrderHistoryDetail(int id) async {
+    try {
+      if (token == null) throw Exception('Token tidak ditemukan');
+
+      final uri = Uri.parse('${Api.baseUrl}/orders/history/$id');
+      print('📡 [ORDER HISTORY DETAIL] URL: $uri');
+
+      final response = await http.get(
+        uri,
+        headers: Api.headersWithAuth(token!),
+      );
+
+      print('📥 [ORDER HISTORY DETAIL] Status: ${response.statusCode}');
+      print('📥 [ORDER HISTORY DETAIL] Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+        return decoded['data'] as Map<String, dynamic>;
+      } else if (response.statusCode == 403) {
+        throw Exception('Tidak memiliki akses ke order ini');
+      } else if (response.statusCode == 404) {
+        throw Exception('Order tidak ditemukan');
+      } else {
+        throw Exception('Gagal ambil detail (${response.statusCode})');
+      }
+    } catch (e) {
+      print('💥 [ORDER HISTORY DETAIL] Exception: $e');
       rethrow;
     }
   }

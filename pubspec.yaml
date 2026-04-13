@@ -59,7 +59,10 @@ dependencies:
   google_sign_in: ^6.2.1
   flutter_launcher_icons: ^0.14.4
   fl_chart: ^0.68.0
-  pusher_channels_flutter: ^2.2.1
+  dart_pusher_channels: ^1.2.3
+  firebase_core: ^4.1.0
+  firebase_database: ^12.2.0
+  
   
 
 

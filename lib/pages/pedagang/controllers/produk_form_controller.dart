@@ -12,7 +12,7 @@ class ProdukFormController extends GetxController {
   final KategoriService _katService = KategoriService();
 
   final formKey = GlobalKey<FormState>();
-  
+
   // Input Controllers
   final namaProdukC = TextEditingController();
   final hargaC = TextEditingController();
@@ -23,7 +23,7 @@ class ProdukFormController extends GetxController {
   // Observables
   final RxList<Datum> kategoriList = <Datum>[].obs;
   final RxnInt selectedKategoriId = RxnInt();
-  final  selectedFotoBytes = Rxn<Uint8List>();
+  final selectedFotoBytes = Rxn<Uint8List>();
   final RxnString selectedFotoName = RxnString();
   final RxBool isSubmitting = false.obs;
   final RxBool isLoadingKategori = false.obs;
@@ -32,20 +32,21 @@ class ProdukFormController extends GetxController {
   void onInit() {
     super.onInit();
     // Gunakan onReady atau sedikit delay untuk memastikan controller sudah siap
-    fetchKategori(); 
+    fetchKategori();
   }
 
   Future<void> fetchKategori() async {
     try {
       isLoadingKategori(true);
       print("Memulai proses fetch kategori..."); // Debug Log
-      
+
       final response = await _katService.getKategori();
-      
+
       if (response != null && response.data != null) {
         kategoriList.assignAll(response.data!);
-        print("Berhasil mengambil ${kategoriList.length} kategori"); // Debug Log
-        
+        print(
+            "Berhasil mengambil ${kategoriList.length} kategori"); // Debug Log
+
         // Cek isi data pertama jika ada
         if (kategoriList.isNotEmpty) {
           print("Contoh kategori pertama: ${kategoriList[0].namaKategori}");
@@ -56,10 +57,8 @@ class ProdukFormController extends GetxController {
     } catch (e) {
       print("Terjadi error saat fetch kategori: $e"); // Debug Log
       Get.snackbar(
-        "Error Kategori", 
-        "Gagal memuat daftar kategori: ${e.toString()}",
-        snackPosition: SnackPosition.BOTTOM
-      );
+          "Error Kategori", "Gagal memuat daftar kategori: ${e.toString()}",
+          snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoadingKategori(false);
       // Memaksa UI untuk refresh jika perlu
@@ -89,7 +88,8 @@ class ProdukFormController extends GetxController {
   Future<void> submitCreate() async {
     if (!formKey.currentState!.validate()) return;
     if (selectedKategoriId.value == null) {
-      Get.snackbar("Peringatan", "Pilih kategori produk", backgroundColor: Colors.orange.shade100);
+      Get.snackbar("Peringatan", "Pilih kategori produk",
+          backgroundColor: Colors.orange.shade100);
       return;
     }
 
@@ -116,14 +116,15 @@ class ProdukFormController extends GetxController {
         fotoBytes: fotoBytes,
         fotoFilename: fotoName,
       );
-      
+
       // Refresh list di ProdukController utama
       if (Get.isRegistered<ProdukController>()) {
         Get.find<ProdukController>().fetchProduk();
       }
-      
+
       Get.back();
-      Get.snackbar("Sukses", "Produk berhasil ditambahkan", backgroundColor: Colors.green.shade100);
+      Get.snackbar("Sukses", "Produk berhasil ditambahkan",
+          backgroundColor: Colors.green.shade100);
     } catch (e) {
       print("Error submit create: $e");
       Get.snackbar("Error", e.toString(), backgroundColor: Colors.red.shade100);
@@ -164,13 +165,14 @@ class ProdukFormController extends GetxController {
         fotoBytes: fotoBytes,
         fotoFilename: fotoName,
       );
-      
+
       if (Get.isRegistered<ProdukController>()) {
         Get.find<ProdukController>().fetchProduk();
       }
-      
+
       Get.back();
-      Get.snackbar("Sukses", "Produk berhasil diperbarui", backgroundColor: Colors.green.shade100);
+      Get.snackbar("Sukses", "Produk berhasil diperbarui",
+          backgroundColor: Colors.green.shade100);
     } catch (e) {
       print("Error submit update: $e");
       Get.snackbar("Error", e.toString(), backgroundColor: Colors.red.shade100);

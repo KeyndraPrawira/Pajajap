@@ -28,10 +28,11 @@ class _EditProfileViewState extends State<EditProfileView> {
     super.initState();
     // Mengambil data awal dari controller secara eksplisit
     final profile = _profileC.dataProfile.value;
-    
+
     _nameController = TextEditingController(text: profile?.name ?? '');
     _phoneController = TextEditingController(text: profile?.nomorTelepon ?? '');
-    _alamatController = TextEditingController(text: profile?.alamat?.alamatLengkap ?? '');
+    _alamatController =
+        TextEditingController(text: profile?.alamat?.alamatLengkap ?? '');
     _latitude = profile?.alamat?.latitude;
     _longitude = profile?.alamat?.longitude;
   }
@@ -67,7 +68,7 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   Future<void> _simpan() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     await _profileC.updateProfile(
       _nameController.text.trim(),
       _phoneController.text.trim(),
@@ -79,10 +80,9 @@ class _EditProfileViewState extends State<EditProfileView> {
         _latitude ?? 0.0,
         _longitude ?? 0.0,
         _jarakKm ?? 0.0,
-
       );
     }
-    
+
     Get.back();
   }
 
@@ -93,7 +93,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         if (_profileC.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         // Pastikan controller terupdate jika dataProfile berubah di background
         final profile = _profileC.dataProfile.value;
         if (_nameController.text.isEmpty && profile?.name != null) {
@@ -131,11 +131,12 @@ class _EditProfileViewState extends State<EditProfileView> {
                               child: CircleAvatar(
                                 radius: 47,
                                 backgroundColor: Colors.grey[200],
-                                backgroundImage: profile?.fotoProfil != null 
-                                    ? NetworkImage(profile!.fotoProfil!) 
+                                backgroundImage: profile?.fotoProfil != null
+                                    ? NetworkImage(profile!.fotoProfil!)
                                     : null,
                                 child: profile?.fotoProfil == null
-                                    ? const Icon(Icons.person, size: 60, color: Color(0xFF0077B6))
+                                    ? const Icon(Icons.person,
+                                        size: 60, color: Color(0xFF0077B6))
                                     : null,
                               ),
                             ),
@@ -195,7 +196,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                             controller: _nameController,
                             label: 'Nama',
                             icon: Icons.badge_outlined,
-                            validator: (v) => v == null || v.isEmpty ? 'Nama tidak boleh kosong' : null,
+                            validator: (v) => v == null || v.isEmpty
+                                ? 'Nama tidak boleh kosong'
+                                : null,
                           ),
                           const SizedBox(height: 12),
                           _buildTextField(
@@ -203,8 +206,12 @@ class _EditProfileViewState extends State<EditProfileView> {
                             label: 'Nomor Telepon',
                             icon: Icons.phone_outlined,
                             keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            validator: (v) => v == null || v.isEmpty ? 'Nomor telepon tidak boleh kosong' : null,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            validator: (v) => v == null || v.isEmpty
+                                ? 'Nomor telepon tidak boleh kosong'
+                                : null,
                           ),
                         ],
                       ),
@@ -224,7 +231,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                             readOnly: false,
                           ),
                           const SizedBox(height: 12),
-
                           if (_latitude != null)
                             Container(
                               padding: const EdgeInsets.all(8),
@@ -234,27 +240,32 @@ class _EditProfileViewState extends State<EditProfileView> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.gps_fixed, size: 14, color: Color(0xFF06D6A0)),
+                                  const Icon(Icons.gps_fixed,
+                                      size: 14, color: Color(0xFF06D6A0)),
                                   const SizedBox(width: 6),
                                   Text(
                                     'Koordinat: ${_latitude!.toStringAsFixed(6)}, ${_longitude!.toStringAsFixed(6)}',
-                                    style: const TextStyle(fontSize: 11, color: Color(0xFF06D6A0)),
+                                    style: const TextStyle(
+                                        fontSize: 11, color: Color(0xFF06D6A0)),
                                   ),
                                 ],
                               ),
                             ),
                           const SizedBox(height: 12),
-
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton.icon(
                               onPressed: _pickFromMap,
                               icon: const Icon(Icons.map_outlined),
-                              label: Text(_latitude == null ? 'Pilih Lokasi dari Peta' : 'Ubah Lokasi Peta'),
+                              label: Text(_latitude == null
+                                  ? 'Pilih Lokasi dari Peta'
+                                  : 'Ubah Lokasi Peta'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: const Color(0xFF06D6A0),
-                                side: const BorderSide(color: Color(0xFF06D6A0)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                side:
+                                    const BorderSide(color: Color(0xFF06D6A0)),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
                               ),
                             ),
                           ),
@@ -277,11 +288,13 @@ class _EditProfileViewState extends State<EditProfileView> {
                             shadowColor: Colors.transparent,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                           child: const Text(
                             'Simpan Perubahan',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -306,7 +319,9 @@ class _EditProfileViewState extends State<EditProfileView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(0.05))],
+        boxShadow: [
+          BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(0.05))
+        ],
       ),
       child: Column(
         children: [
@@ -314,13 +329,16 @@ class _EditProfileViewState extends State<EditProfileView> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
                 Icon(icon, color: color, size: 20),
                 const SizedBox(width: 8),
-                Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: color)),
+                Text(title,
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, color: color)),
               ],
             ),
           ),

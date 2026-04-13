@@ -2,41 +2,49 @@ import 'package:e_pasar/pages/user/controllers/order_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class ActiveOrderView extends GetView<OrderController> {
   const ActiveOrderView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Active Orders'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFE3F2FD), Color(0xFFBBDEFB)],
-          ),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFE3F2FD), Color(0xFFBBDEFB)],
         ),
-        child: Obx(() {
-          if (controller.activeOrders.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('No Active Orders', style: TextStyle(fontSize: 18, color: Colors.grey)),
-                ],
-              ),
-            );
-          }
-          return ListView.builder(
+      ),
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.blue),
+          );
+        }
+
+        if (controller.activeOrders.isEmpty) {
+          return RefreshIndicator(
+            onRefresh: controller.fetchActiveOrders,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 160),
+                Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
+                SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    'Belum ada order aktif',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: controller.fetchActiveOrders,
+          child: ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: controller.activeOrders.length,
             itemBuilder: (context, index) {
@@ -71,9 +79,11 @@ class ActiveOrderView extends GetView<OrderController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Order code badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.9),
                             borderRadius: BorderRadius.circular(20),
@@ -94,17 +104,15 @@ class ActiveOrderView extends GetView<OrderController> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Pemesan name
                         Text(
-                          'Pemesan: ${order.buyerId?.toString()  ?? 'Nama Pemesan'}',
+                          'Driver: ${order.driver?.name ?? 'Driver belum tersedia'}',
                           style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 12),
-                        // Alamat lengkap
                         Expanded(
                           child: SingleChildScrollView(
                             child: Text(
@@ -118,24 +126,24 @@ class ActiveOrderView extends GetView<OrderController> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Lanjutkan button
                         SizedBox(
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () {
-  final id = order.id as int?;
-  final status = order.status as String?;
-  
-  if (id == null || status == null) {
-    Get.snackbar('Error', 'Data order tidak valid');
-    return;
-  }
-  
-  controller.continueToDelivery(id, status);
-},
+                              final id = order.id;
+                              final status = order.status;
+
+                              if (id == null || status == null) {
+                                Get.snackbar('Error', 'Data order tidak valid');
+                                return;
+                              }
+
+                              controller.continueToDelivery(id, status);
+                            },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2E7D32),
+                              backgroundColor:
+                                  const Color.fromARGB(255, 50, 154, 55),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
@@ -144,7 +152,7 @@ class ActiveOrderView extends GetView<OrderController> {
                               shadowColor: Colors.green.withOpacity(0.3),
                             ),
                             child: const Text(
-                              'Lanjutkan',
+                              'Lihat',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -159,9 +167,9 @@ class ActiveOrderView extends GetView<OrderController> {
                 ),
               );
             },
-          );
-        }),
-      ),
+          ),
+        );
+      }),
     );
   }
 }

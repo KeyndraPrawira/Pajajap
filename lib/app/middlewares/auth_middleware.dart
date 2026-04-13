@@ -4,7 +4,6 @@ import 'package:e_pasar/app/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class AuthMiddleware extends GetMiddleware {
   final String requiredRole;
 
@@ -16,20 +15,25 @@ class AuthMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     final authService = Get.find<AuthService>();
-    
+
     // Cek login dulu
     if (!authService.isLoggedIn) {
       return const RouteSettings(name: AppRoutes.LOGIN);
     }
-    
+
+    if (route != AppRoutes.COMPLETE_PROFILE &&
+        authService.isProfileIncomplete) {
+      return const RouteSettings(name: AppRoutes.COMPLETE_PROFILE);
+    }
+
     // Cek role cocok atau tidak
     final userRole = authService.getRole()?.toLowerCase();
-    
+
     if (userRole != requiredRole.toLowerCase()) {
       // Role tidak cocok, redirect ke home sesuai role user
       return RouteSettings(name: _getHomeRouteForRole(userRole));
     }
-    
+
     return null; // Role cocok, boleh akses
   }
 

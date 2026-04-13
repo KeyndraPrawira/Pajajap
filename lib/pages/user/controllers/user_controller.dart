@@ -1,8 +1,6 @@
-
 import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/app/services/auth_services.dart';
 import 'package:get/get.dart';
-
 
 class UserController extends GetxController {
   final AuthService _authService = Get.find();

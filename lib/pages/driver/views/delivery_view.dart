@@ -88,8 +88,7 @@ class DeliveryView extends GetView<DeliveryController> {
                                   color: Colors.green, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
-                                  child:
-                                      Text(order.alamatPengiriman ?? '')),
+                                  child: Text(order.alamatPengiriman ?? '')),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -114,8 +113,7 @@ class DeliveryView extends GetView<DeliveryController> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: order.orderDetails?.length ?? 0,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 12),
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final detail = order.orderDetails![index];
 
@@ -220,8 +218,7 @@ class DeliveryView extends GetView<DeliveryController> {
                                             builder: (ctx) => AlertDialog(
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(
-                                                        16),
+                                                    BorderRadius.circular(16),
                                               ),
                                               title: const Text(
                                                 'Konfirmasi Ambil Pesanan',
@@ -247,8 +244,8 @@ class DeliveryView extends GetView<DeliveryController> {
                                                   onPressed: () =>
                                                       Navigator.of(ctx)
                                                           .pop(true),
-                                                  style: ElevatedButton
-                                                      .styleFrom(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
                                                     backgroundColor:
                                                         Colors.green,
                                                     foregroundColor:
@@ -256,8 +253,8 @@ class DeliveryView extends GetView<DeliveryController> {
                                                     shape:
                                                         RoundedRectangleBorder(
                                                       borderRadius:
-                                                          BorderRadius
-                                                              .circular(8),
+                                                          BorderRadius.circular(
+                                                              8),
                                                     ),
                                                   ),
                                                   child: const Text('Ya'),
@@ -274,8 +271,7 @@ class DeliveryView extends GetView<DeliveryController> {
 
                                       // ❌ Tombol tidak ada — satu dialog dengan TextField
                                       IconButton(
-                                        icon: const Icon(
-                                            Icons.cancel_outlined,
+                                        icon: const Icon(Icons.cancel_outlined,
                                             color: Colors.red),
                                         onPressed: () async {
                                           if (detail.id == null) return;
@@ -321,10 +317,9 @@ class DeliveryView extends GetView<DeliveryController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Ongkir',
-                        style:
-                            TextStyle(color: Colors.white, fontSize: 16)),
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
                     Obx(() => Text(
-                          'Rp ${controller.orderData.value?.ongkir?.toStringAsFixed(0) ?? '0'}',
+                          'Rp ${controller.orderData.value?.ongkir?.toString() ?? '0'}',
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -342,7 +337,7 @@ class DeliveryView extends GetView<DeliveryController> {
                             fontSize: 20,
                             fontWeight: FontWeight.bold)),
                     Obx(() => Text(
-                          'Rp ${controller.orderData.value?.totalHarga?.toStringAsFixed(0) ?? '0'}',
+                          'Rp ${controller.orderData.value?.totalHarga?.toString() ?? '0'}',
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -353,7 +348,7 @@ class DeliveryView extends GetView<DeliveryController> {
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 30,
                   child: ElevatedButton(
                     onPressed: controller.sendDelivery,
                     style: ElevatedButton.styleFrom(
@@ -362,7 +357,7 @@ class DeliveryView extends GetView<DeliveryController> {
                           borderRadius: BorderRadius.circular(25)),
                     ),
                     child: const Text(
-                      'Selesai Ambil Produk',
+                      'Kirim Pesanan',
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -385,8 +380,7 @@ class DeliveryView extends GetView<DeliveryController> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Produk Tidak Ada',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -405,8 +399,8 @@ class DeliveryView extends GetView<DeliveryController> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
             ),
           ],
@@ -414,8 +408,7 @@ class DeliveryView extends GetView<DeliveryController> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Batal',
-                style: TextStyle(color: Colors.grey)),
+            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -435,7 +428,7 @@ class DeliveryView extends GetView<DeliveryController> {
       final alasan = alasanController.text.trim();
       controller.updateItemStatus(
         detailId,
-        'pending_request',
+        'tidak_ada',
         catatan: alasan.isEmpty ? null : alasan,
       );
     }

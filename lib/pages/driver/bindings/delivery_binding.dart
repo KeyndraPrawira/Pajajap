@@ -14,5 +14,3 @@ class DeliveryBinding extends Bindings {
     Get.lazyPut(() => OrderService(), fenix: true);
   }
 }
-
-

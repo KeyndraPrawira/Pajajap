@@ -17,15 +17,14 @@ class SplashScreenView extends GetView<SplashScreenController> {
             Container(
               width: 100,
               height: 100,
-              
-              child:  Image.asset(
+              child: Image.asset(
                 'assets/app_icon/pajajap-gradient.png',
                 width: 100,
                 height: 100,
               ),
             ),
             const SizedBox(height: 30),
-            
+
             // App Name
             const Text(
               'Pajajap',
@@ -36,7 +35,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
               ),
             ),
             const SizedBox(height: 10),
-            
+
             // Tagline
             const Text(
               'Pasar Digital Terpercaya',
@@ -46,10 +45,11 @@ class SplashScreenView extends GetView<SplashScreenController> {
               ),
             ),
             const SizedBox(height: 50),
-            
+
             // Loading Indicator
             const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 0, 163, 16)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                  Color.fromARGB(255, 0, 163, 16)),
               strokeWidth: 2,
             ),
           ],
@@ -58,4 +58,3 @@ class SplashScreenView extends GetView<SplashScreenController> {
     );
   }
 }
-

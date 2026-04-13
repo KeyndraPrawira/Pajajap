@@ -134,9 +134,8 @@ class _MapPickerViewState extends State<MapPickerView> {
         },
         options: Options(headers: {'User-Agent': 'ePasar/1.0'}),
       );
-      setState(() =>
-          _selectedAddress =
-              response.data['display_name'] ?? 'Alamat tidak ditemukan');
+      setState(() => _selectedAddress =
+          response.data['display_name'] ?? 'Alamat tidak ditemukan');
     } catch (e) {
       setState(() => _selectedAddress = 'Gagal mendapatkan alamat');
     } finally {
@@ -176,12 +175,7 @@ class _MapPickerViewState extends State<MapPickerView> {
     });
   }
 
-  String _formatRupiah(int amount) {
-    return 'Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    )}';
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -211,8 +205,7 @@ class _MapPickerViewState extends State<MapPickerView> {
             ),
             children: [
               TileLayer(
-                urlTemplate:
-                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.e_pasar',
               ),
 
@@ -292,11 +285,8 @@ class _MapPickerViewState extends State<MapPickerView> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(20)),
-                boxShadow: [
-                  BoxShadow(blurRadius: 10, color: Colors.black26)
-                ],
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -336,8 +326,8 @@ class _MapPickerViewState extends State<MapPickerView> {
                         const SizedBox(width: 4),
                         Text(
                           '${_jarakKm.toStringAsFixed(1)} km dari pasar',
-                          style: TextStyle(
-                              fontSize: 13, color: Colors.grey[700]),
+                          style:
+                              TextStyle(fontSize: 13, color: Colors.grey[700]),
                         ),
                       ]),
                       Container(
@@ -348,14 +338,7 @@ class _MapPickerViewState extends State<MapPickerView> {
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: Colors.green),
                         ),
-                        child: Text(
-                          'Ongkir: ${_formatRupiah(_totalOngkir)}',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green[700],
-                              fontSize: 13),
-                        ),
-                      ),
+                                              ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -371,21 +354,18 @@ class _MapPickerViewState extends State<MapPickerView> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ElevatedButton(
-                        onPressed:
-                            _isLoadingAddress ? null : _gunakanLokasi,
+                        onPressed: _isLoadingAddress ? null : _gunakanLokasi,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           foregroundColor: Colors.white,
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
                         ),
                         child: const Text('Gunakan Lokasi Ini',
                             style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold)),
+                                fontSize: 15, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ),

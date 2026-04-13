@@ -8,6 +8,7 @@ import 'package:e_pasar/pages/pedagang/controllers/produk_controller.dart';
 import 'package:e_pasar/pages/user/controllers/keranjang_controller.dart';
 import 'package:e_pasar/pages/user/controllers/order_controller.dart';
 import 'package:e_pasar/pages/user/controllers/pasar_controller.dart';
+import 'package:e_pasar/pages/user/controllers/payment_controller.dart';
 import 'package:e_pasar/pages/user/controllers/produk_controller.dart';
 import 'package:e_pasar/pages/user/controllers/profile_controller.dart';
 
@@ -18,6 +19,10 @@ class UserBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<OrderController>(
       () => OrderController(),
+    );
+    Get.lazyPut<PaymentController>(
+      () => PaymentController(),
+      fenix: true,
     );
     Get.lazyPut<AuthController>(
       () => AuthController(),

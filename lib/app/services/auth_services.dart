@@ -1,6 +1,10 @@
 import 'dart:convert';
+
+import 'package:e_pasar/app/data/models/register_model.dart';
 import 'package:e_pasar/app/data/models/user_model.dart';
 import 'package:e_pasar/app/utils/api.dart';
+import 'package:e_pasar/pages/auth/controllers/login_controller.dart';
+import 'package:e_pasar/pages/auth/controllers/register_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -8,20 +12,20 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService extends GetxService {
+  static const String _googleClientId =
+      '932089823808-6vf353e923aqro5drpgdfp6e0gk88f2a.apps.googleusercontent.com';
+
   final storage = GetStorage();
   final GoogleSignIn _googleSignIn = kIsWeb
-    ? GoogleSignIn(
-        // Web: pakai clientId, TANPA serverClientId
-        clientId: '1025180164382-2duj2m96kjle9aaspvato8d0m2naljc4.apps.googleusercontent.com',
-        scopes: ['email', 'profile'],
-      )
-    : GoogleSignIn(
-        // Android/iOS: pakai serverClientId, TANPA clientId
-        serverClientId: '1025180164382-2duj2m96kjle9aaspvato8d0m2naljc4.apps.googleusercontent.com',
-        scopes: ['email', 'profile'],
-      );
+      ? GoogleSignIn(
+          clientId: _googleClientId,
+          scopes: ['email', 'profile'],
+        )
+      : GoogleSignIn(
+          serverClientId: _googleClientId,
+          scopes: ['email', 'profile'],
+        );
 
-  // ==================== LOGIN ====================
   Future<Auth?> login({
     required String email,
     required String password,
@@ -43,103 +47,204 @@ class AuthService extends GetxService {
         final jsonData = jsonDecode(response.body);
         final auth = Auth.fromJson(jsonData);
 
-        // Simpan token & user info
-         await  storage.write('token', jsonData['token']);
-         await  storage.write('role', auth.user?.role);
-         await  storage.write('user_id', auth.user?.id);
-         await  storage.write('user_name', auth.user?.name);
-        
+        await storage.write('token', jsonData['token']);
+        await storage.write('role', auth.user?.role);
+        await storage.write('user_id', auth.user?.id);
+        await storage.write('user_name', auth.user?.name);
+        await storage.write('user_email', auth.user?.email);
+        await storage.write('user_phone', auth.user?.nomorTelepon);
 
         return auth;
       }
 
       return null;
     } catch (e) {
-      print('🔥 LOGIN ERROR: $e');
+      print('LOGIN ERROR: $e');
       return null;
     }
   }
 
-  // ==================== REGISTER ====================
-  Future<Map<String, dynamic>> register({
+  Future<RegisterResponse> register({
     required String nomortelepon,
     required String name,
     required String email,
     required String password,
-    
   }) async {
     try {
       final response = await http.post(
         Uri.parse('${Api.baseUrl}/register'),
         headers: Api.headers,
         body: jsonEncode({
-          'nomor_telepon':nomortelepon,
+          'nomor_telepon': nomortelepon,
           'name': name,
           'email': email,
           'password': password,
-          'password_confirmation': password, // Laravel biasanya butuh ini
+          'password_confirmation': password,
         }),
       );
 
       print('REGISTER STATUS: ${response.statusCode}');
       print('REGISTER BODY: ${response.body}');
 
-      // Status 200 atau 201 berarti berhasil
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return {
-          'success': true,
-          'message': 'Registrasi berhasil!',
-        };
+        final result = registerResponseFromJson(response.body);
+        result.success ??= true;
+        result.message ??= 'Kode OTP telah dikirim ke email Anda.';
+        result.data ??= RegisterData(email: email);
+        return result;
       }
 
-      // Handle error response dari API
-      try {
-        final errorData = jsonDecode(response.body);
-        
-        // Cek strukturnya sesuai Laravel error response
-        if (errorData is Map && errorData.containsKey('errors')) {
-          final errors = errorData['errors'] as Map<String, dynamic>;
-          String errorMessage = '';
-          
-          errors.forEach((key, value) {
-            if (value is List && value.isNotEmpty) {
-              errorMessage += '${value[0]}\n';
-            }
-          });
-          
-          return {
-            'success': false,
-            'message': errorMessage.isNotEmpty 
-              ? errorMessage.trim()
-              : (errorData['message'] ?? 'Registrasi gagal. Silakan coba lagi.'),
-          };
-        } else if (errorData is Map && errorData.containsKey('message')) {
-          return {
-            'success': false,
-            'message': errorData['message'],
-          };
-        }
-      } catch (e) {
-        // Jika parsing JSON gagal, gunakan pesan generik
-      }
-
-      return {
-        'success': false,
-        'message': 'Registrasi gagal. Status code: ${response.statusCode}',
-      };
+      return RegisterResponse(
+        success: false,
+        message: _extractErrorMessage(
+          response.body,
+          fallback: 'Registrasi gagal. Status code: ${response.statusCode}',
+        ),
+        data: RegisterData(email: email),
+      );
     } catch (e) {
-      print('🔥 REGISTER ERROR: $e');
-      return {
-        'success': false,
-        'message': 'Terjadi kesalahan: ${e.toString()}',
-      };
+      print('REGISTER ERROR: $e');
+      return RegisterResponse(
+        success: false,
+        message: 'Terjadi kesalahan: ${e.toString()}',
+        data: RegisterData(email: email),
+      );
     }
   }
 
-  // ==================== GOOGLE LOGIN ==================== ← tambah ini
+  Future<VerifyOtpResponse> verifyRegisterOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${Api.baseUrl}/register/verify-otp'),
+        headers: Api.headers,
+        body: jsonEncode({
+          'email': email,
+          'otp': otp,
+        }),
+      );
+
+      print('VERIFY OTP STATUS: ${response.statusCode}');
+      print('VERIFY OTP BODY: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final result = verifyOtpResponseFromJson(response.body);
+        result.success ??= true;
+        result.message ??= 'Registrasi berhasil. Selamat datang!';
+        final user = result.data?.user;
+        final token = result.data?.token;
+
+        if (token != null && token.isNotEmpty && user != null) {
+          await storage.write('token', token);
+          await storage.write('role', user.role);
+          await storage.write('user_id', user.id);
+          await storage.write('user_name', user.name);
+          await storage.write('user_email', user.email);
+          await storage.write('user_phone', user.nomorTelepon);
+        }
+
+        return result;
+      }
+
+      return VerifyOtpResponse(
+        success: false,
+        message: _extractErrorMessage(
+          response.body,
+          fallback: 'Verifikasi OTP gagal. Status code: ${response.statusCode}',
+        ),
+      );
+    } catch (e) {
+      print('VERIFY OTP ERROR: $e');
+      return VerifyOtpResponse(
+        success: false,
+        message: 'Terjadi kesalahan: ${e.toString()}',
+      );
+    }
+  }
+
+  Future<RegisterResponse> resendRegisterOtp({
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${Api.baseUrl}/register/resend-otp'),
+        headers: Api.headers,
+        body: jsonEncode({'email': email}),
+      );
+
+      print('RESEND OTP STATUS: ${response.statusCode}');
+      print('RESEND OTP BODY: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final result = registerResponseFromJson(response.body);
+        result.success ??= true;
+        result.message ??= 'Kode OTP baru telah dikirim ke email Anda.';
+        result.data ??= RegisterData(email: email);
+        return result;
+      }
+
+      return RegisterResponse(
+        success: false,
+        message: _extractErrorMessage(
+          response.body,
+          fallback:
+              'Gagal mengirim ulang OTP. Status code: ${response.statusCode}',
+        ),
+        data: RegisterData(email: email),
+      );
+    } catch (e) {
+      print('RESEND OTP ERROR: $e');
+      return RegisterResponse(
+        success: false,
+        message: 'Terjadi kesalahan: ${e.toString()}',
+        data: RegisterData(email: email),
+      );
+    }
+  }
+
+  Future<RegisterResponse> cancelRegistration({
+    required String email,
+  }) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('${Api.baseUrl}/register/cancel'),
+        headers: Api.headers,
+        body: jsonEncode({'email': email}),
+      );
+
+      print('CANCEL REGISTRATION STATUS: ${response.statusCode}');
+      print('CANCEL REGISTRATION BODY: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final result = registerResponseFromJson(response.body);
+        result.success ??= true;
+        result.message ??= 'Registrasi berhasil dibatalkan.';
+        return result;
+      }
+
+      return RegisterResponse(
+        success: false,
+        message: _extractErrorMessage(
+          response.body,
+          fallback:
+              'Gagal membatalkan registrasi. Status code: ${response.statusCode}',
+        ),
+      );
+    } catch (e) {
+      print('CANCEL REGISTRATION ERROR: $e');
+      return RegisterResponse(
+        success: false,
+        message: 'Terjadi kesalahan: ${e.toString()}',
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> loginWithGoogle() async {
     try {
-      // Trigger popup Google
+      await _googleSignIn.signOut();
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         return {'success': false, 'message': 'Login dibatalkan'};
@@ -153,7 +258,6 @@ class AuthService extends GetxService {
         return {'success': false, 'message': 'Gagal mendapatkan token Google'};
       }
 
-      // Kirim id_token ke Laravel
       final response = await http.post(
         Uri.parse('${Api.baseUrl}/google-login'),
         headers: Api.headers,
@@ -165,18 +269,21 @@ class AuthService extends GetxService {
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
+        final user = (jsonData['user'] as Map<String, dynamic>? ?? {});
 
-        // Simpan token & user info (sama seperti login biasa)
         await storage.write('token', jsonData['token'] ?? '');
-        await storage.write('role', jsonData['user']['role'] ?? '');
-        await storage.write('user_id', jsonData['user']['id'] ?? '');
-        await storage.write('user_name', jsonData['user']['name'] ?? '');
-        await storage.write('user_email', jsonData['user']['email'] ?? '');
+        await storage.write('role', user['role'] ?? 'user');
+        await storage.write('user_id', user['id']);
+        await storage.write('user_name', user['name'] ?? '');
+        await storage.write('user_email', user['email'] ?? '');
+        await storage.write('user_phone', user['nomor_telepon'] ?? '');
 
         return {
           'success': true,
           'is_new_user': jsonData['is_new_user'] ?? false,
           'token': jsonData['token'],
+          'user': user,
+          'message': jsonData['message'] ?? 'Login Google berhasil',
         };
       }
 
@@ -185,14 +292,12 @@ class AuthService extends GetxService {
         'success': false,
         'message': errorData['message'] ?? 'Google login gagal',
       };
-
     } catch (e) {
-      print('🔥 GOOGLE LOGIN ERROR: $e');
+      print('GOOGLE LOGIN ERROR: $e');
       return {'success': false, 'message': 'Terjadi kesalahan: $e'};
     }
   }
 
-  // ==================== COMPLETE PROFILE ==================== ← tambah ini
   Future<Map<String, dynamic>> completeProfile({
     required String name,
     required String nomorTelepon,
@@ -215,8 +320,9 @@ class AuthService extends GetxService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
 
-        // Update storage dengan data terbaru
         await storage.write('user_name', jsonData['user']['name'] ?? '');
+        await storage.write(
+            'user_phone', jsonData['user']['nomor_telepon'] ?? '');
 
         return {'success': true, 'message': 'Profil berhasil dilengkapi'};
       }
@@ -227,12 +333,11 @@ class AuthService extends GetxService {
         'message': errorData['message'] ?? 'Gagal melengkapi profil',
       };
     } catch (e) {
-      print('🔥 COMPLETE PROFILE ERROR: $e');
+      print('COMPLETE PROFILE ERROR: $e');
       return {'success': false, 'message': 'Terjadi kesalahan: $e'};
     }
   }
 
-  // ==================== LOGOUT ====================
   Future<void> logout() async {
     try {
       final token = getToken();
@@ -243,20 +348,26 @@ class AuthService extends GetxService {
         );
       }
 
-      // Sign out Google juga kalau login via Google
-      await _googleSignIn.signOut(); // ← tambah ini
+      await _googleSignIn.signOut();
     } catch (e) {
-      print('🔥 LOGOUT ERROR: $e');
+      print('LOGOUT ERROR: $e');
     } finally {
       await storage.remove('token');
       await storage.remove('role');
       await storage.remove('user_id');
       await storage.remove('user_name');
       await storage.remove('user_email');
+      await storage.remove('user_phone');
+
+      if (Get.isRegistered<LoginController>()) {
+        Get.delete<LoginController>(force: true);
+      }
+      if (Get.isRegistered<RegisterController>()) {
+        Get.delete<RegisterController>(force: true);
+      }
     }
   }
 
-  // ==================== VALIDATE TOKEN ====================
   Future<bool> validateToken() async {
     try {
       final token = storage.read('token');
@@ -265,13 +376,15 @@ class AuthService extends GetxService {
         return false;
       }
 
-      final response = await http.get(
+      final response = await http
+          .get(
         Uri.parse('${Api.baseUrl}/user'),
         headers: Api.headersWithAuth(token),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 5),
         onTimeout: () {
-          print('🔥 VALIDATE TOKEN TIMEOUT');
+          print('VALIDATE TOKEN TIMEOUT');
           return http.Response('timeout', 408);
         },
       );
@@ -280,26 +393,42 @@ class AuthService extends GetxService {
 
       if (response.statusCode == 200) {
         return true;
-      } else {
-        // Token invalid, clear storage
-        await logout();
-        return false;
       }
+
+      await logout();
+      return false;
     } catch (e) {
-      print('🔥 VALIDATE TOKEN ERROR: $e');
+      print('VALIDATE TOKEN ERROR: $e');
       return false;
     }
   }
 
+  String? _extractErrorMessage(String responseBody,
+      {required String fallback}) {
+    try {
+      final error = errorResponseFromJson(responseBody);
+      return error.allErrors;
+    } catch (_) {
+      try {
+        final jsonData = jsonDecode(responseBody) as Map<String, dynamic>;
+        return jsonData['message']?.toString() ?? fallback;
+      } catch (_) {
+        return fallback;
+      }
+    }
+  }
 
-
-  
-
-  // ==================== GETTERS ====================
   String? getToken() => storage.read('token');
   String? getRole() => storage.read('role');
   int? getUserId() => storage.read('user_id');
   String? getUserName() => storage.read('user_name');
   String? getUserEmail() => storage.read('user_email');
+  String? getUserPhone() => storage.read('user_phone');
   bool get isLoggedIn => storage.read('token') != null;
+
+  bool get isProfileIncomplete {
+    final name = (getUserName() ?? '').trim();
+    final phone = (getUserPhone() ?? '').trim();
+    return name.isEmpty || phone.isEmpty;
+  }
 }

@@ -13,9 +13,8 @@ class PedagangController extends GetxController {
   final storage = GetStorage();
   final KiosService _kiosService = Get.find<KiosService>();
 
-
   final currentIndex = 0.obs;
-  
+
   // Kios related
   var kiosList = <DataKios>[].obs;
   var myKios = Rxn<DataKios>(); // Kios milik pedagang yang login
@@ -23,19 +22,16 @@ class PedagangController extends GetxController {
   var hasKios = false.obs; // Flag apakah pedagang sudah punya kios
   var userId = 0.obs;
 
-  
-    @override
-    void onInit() {
-      super.onInit();
-      _initData();
-    }
+  @override
+  void onInit() {
+    super.onInit();
+    _initData();
+  }
 
-    Future<void> _initData() async {
-      await _loadUserData();
-      await fetchKios();
-    }
-
-
+  Future<void> _initData() async {
+    await _loadUserData();
+    await fetchKios();
+  }
 
   // Load user data from GetStorage
   Future<void> _loadUserData() async {
@@ -50,62 +46,63 @@ class PedagangController extends GetxController {
   // ==================== KIOS FUNCTIONS ====================
 
   // Get all kios (untuk pedagang hanya dapat kios miliknya)
- // Get all kios (untuk pedagang dapat kios miliknya dari /kios/me)
-Future<void> fetchKios() async {
-  try {
-    isLoading.value = true;
+  // Get all kios (untuk pedagang dapat kios miliknya dari /kios/me)
+  Future<void> fetchKios() async {
+    try {
+      isLoading.value = true;
 
-    // ✅ Panggil endpoint khusus pedagang
-    final result = await _kiosService.getMyKios();
+      // ✅ Panggil endpoint khusus pedagang
+      final result = await _kiosService.getMyKios();
 
-    print('📦 FETCH MY KIOS RESULT: ${result.length} kios');
+      print('📦 FETCH MY KIOS RESULT: ${result.length} kios');
 
-    if (result.isNotEmpty) {
-      kiosList.value = result;
-      myKios.value = result.first; // Pedagang cuma punya 1 kios
-      hasKios.value = true;
-      
-      print('✅ FOUND MY KIOS: ${myKios.value?.namaKios}');
-      print('📸 FOTO KIOS PATH: ${myKios.value?.fotoKios}');
-      print('🔗 FULL URL: https://perseveringly-coxal-chandler.ngrok-free.dev/storage/${myKios.value?.fotoKios}');
-    } else {
-      kiosList.value = [];
-      myKios.value = null;
+      if (result.isNotEmpty) {
+        kiosList.value = result;
+        myKios.value = result.first; // Pedagang cuma punya 1 kios
+        hasKios.value = true;
+
+        print('✅ FOUND MY KIOS: ${myKios.value?.namaKios}');
+        print('📸 FOTO KIOS PATH: ${myKios.value?.fotoKios}');
+        print(
+            '🔗 FULL URL: https://pajajap.web.id/storage/${myKios.value?.fotoKios}');
+      } else {
+        kiosList.value = [];
+        myKios.value = null;
+        hasKios.value = false;
+        print('❌ NO KIOS DATA FOR THIS PEDAGANG');
+      }
+
+      print('✅ HAS KIOS: ${hasKios.value}');
+    } catch (e) {
+      print('❌ FETCH KIOS ERROR: $e');
       hasKios.value = false;
-      print('❌ NO KIOS DATA FOR THIS PEDAGANG');
+    } finally {
+      isLoading.value = false;
     }
 
-    print('✅ HAS KIOS: ${hasKios.value}');
-  } catch (e) {
-    print('❌ FETCH KIOS ERROR: $e');
-    hasKios.value = false;
-  } finally {
-    isLoading.value = false;
+    // REDIRECT SETELAH FETCH SELESAI
+    if (!hasKios.value && !isLoading.value) {
+      Future.delayed(Duration.zero, () {
+        Get.offAllNamed(AppRoutes.KIOS_ADD);
+      });
+    }
   }
 
-  // REDIRECT SETELAH FETCH SELESAI
-  if (!hasKios.value && !isLoading.value) {
-    Future.delayed(Duration.zero, () {
-      Get.offAllNamed(AppRoutes.KIOS_ADD);
-    });
-  }
-}
   // Check apakah pedagang sudah punya kios
- void _checkPedagangKios() {
-  if (kiosList.isNotEmpty) {
-    myKios.value = kiosList.first;
-    hasKios.value = true;
-  } else {
-    myKios.value = null;
-    hasKios.value = false;
+  void _checkPedagangKios() {
+    if (kiosList.isNotEmpty) {
+      myKios.value = kiosList.first;
+      hasKios.value = true;
+    } else {
+      myKios.value = null;
+      hasKios.value = false;
+    }
   }
-}
-
 
   // Redirect pedagang yang belum punya kios ke form tambah kios
   void checkAndRedirectToKiosForm() {
     print('🚀 CHECK AND REDIRECT - hasKios: ${hasKios.value}'); // Debug
-    
+
     if (!hasKios.value) {
       // Redirect ke form add kios
       Future.delayed(Duration.zero, () {
@@ -128,7 +125,7 @@ Future<void> fetchKios() async {
   // Check apakah pedagang bisa akses form add kios
   bool canAccessAddKiosForm() {
     print('🔒 CAN ACCESS ADD FORM - hasKios: ${hasKios.value}'); // Debug
-    
+
     if (hasKios.value) {
       Get.snackbar(
         'Informasi',
@@ -137,7 +134,8 @@ Future<void> fetchKios() async {
         backgroundColor: Get.theme.colorScheme.primary,
         colorText: Get.theme.colorScheme.onPrimary,
       );
-      Get.offAllNamed(AppRoutes.PEDAGANG_HOME); // ✅ REDIRECT KE HOME, BUKAN Get.back()
+      Get.offAllNamed(
+          AppRoutes.PEDAGANG_HOME); // ✅ REDIRECT KE HOME, BUKAN Get.back()
       return false;
     }
     return true;
@@ -176,10 +174,10 @@ Future<void> fetchKios() async {
         fotoKiosBytes: fotoKiosBytes,
         fotoKiosFilename: fotoKiosFilename,
       );
-      
+
       if (success) {
         await fetchKios(); // Refresh data kios
-        
+
         // Pastikan data sudah di-fetch sebelum redirect
         if (hasKios.value) {
           Get.offAllNamed(AppRoutes.PEDAGANG_HOME);
@@ -216,13 +214,13 @@ Future<void> fetchKios() async {
     String? fotoKiosFilename,
   }) async {
     // Check if kios belongs to this pedagang
-        if (myKios.value == null) {
-          Get.snackbar(
-            'Error',
-            'Data kios belum dimuat',
-          );
-          return;
-        }
+    if (myKios.value == null) {
+      Get.snackbar(
+        'Error',
+        'Data kios belum dimuat',
+      );
+      return;
+    }
 
     if (myKios.value?.id != kiosId) {
       Get.snackbar(
@@ -247,7 +245,7 @@ Future<void> fetchKios() async {
         fotoKiosBytes: fotoKiosBytes,
         fotoKiosFilename: fotoKiosFilename,
       );
-      
+
       if (success) {
         await fetchKios();
         Get.back(); // Kembali ke halaman sebelumnya setelah berhasil
@@ -303,7 +301,7 @@ Future<void> fetchKios() async {
     try {
       isLoading.value = true;
       final success = await _kiosService.deleteKios(kiosId);
-      
+
       if (success) {
         await fetchKios();
         // Setelah hapus kios, redirect ke form add kios lagi
