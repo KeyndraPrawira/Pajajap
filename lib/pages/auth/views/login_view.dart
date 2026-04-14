@@ -103,33 +103,8 @@ class LoginView extends GetView<LoginController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Obx(() => Row(
-                        children: [
-                          SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: Checkbox(
-                              value: controller.rememberMe.value,
-                              activeColor: const Color(0xFF0D47A1),
-                              onChanged: controller.toggleRememberMe,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text("Ingat saya",
-                              style: TextStyle(fontSize: 13)),
-                        ],
-                      )),
-                  TextButton(
-                    onPressed: controller.forgotPassword,
-                    child: const Text(
-                      "Lupa password?",
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 13,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
+                 
+                 
                 ],
               ),
               const SizedBox(height: 32),
@@ -180,7 +155,6 @@ class LoginView extends GetView<LoginController> {
                   Expanded(child: Divider()),
                 ],
               ),
-              const SizedBox(height: 32),
 
               // Social Login
               const SizedBox(height: 32),

@@ -445,16 +445,9 @@ class OrderService {
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
         return {'success': true, 'data': decoded['data']};
-      } else if (response.statusCode == 403) {
-        throw Exception('Hanya driver yang dapat menyelesaikan delivery');
-      } else if (response.statusCode == 400) {
-        throw Exception('Order belum diterima atau sudah selesai');
-      } else if (response.statusCode == 404) {
-        throw Exception('Order tidak ditemukan');
       } else {
-        final decoded = json.decode(response.body);
-        throw Exception(decoded['message'] ?? 'Gagal complete delivery');
-      }
+        throw Exception('Gagal Menyelesaikan pesanan');
+      } 
     } catch (e) {
       print('💥 [COMPLETE DELIVERY] Exception: $e');
       rethrow;

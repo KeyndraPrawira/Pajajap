@@ -179,7 +179,7 @@ class DeliveryController extends GetxController {
 
     if (showSnackbar) {
       Get.snackbar(
-        'Order Dibatalkan',
+        'Pesanan Dibatalkan',
         'Pesanan ini telah dibatalkan.',
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade900,

@@ -16,7 +16,8 @@ class CheckoutView extends GetView<CheckoutController> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            Icon(Icons.shopping_bag_rounded, color: Color(0xFF0077B6), size: 24),
+            Icon(Icons.shopping_bag_rounded,
+                color: Color(0xFF0077B6), size: 24),
             SizedBox(width: 12),
             Text(
               'Konfirmasi Pesanan',
@@ -68,13 +69,13 @@ class CheckoutView extends GetView<CheckoutController> {
           SizedBox(
             width: 120,
             child: ElevatedButton(
-              onPressed: controller.isLoading.value 
-                ? null 
-                : controller.prosesCheckout,
+              onPressed:
+                  controller.isLoading.value ? null : controller.prosesCheckout,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
               child: Ink(
                 decoration: BoxDecoration(
@@ -109,32 +110,43 @@ class CheckoutView extends GetView<CheckoutController> {
       statusBarIconBrightness: Brightness.light,
     ));
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0F7F4),
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-              child: Column(
-                children: [
-                  _buildSectionBarang(),
-                  const SizedBox(height: 12),
-                  _buildSectionAlamat(),
-                  const SizedBox(height: 12),
-                  _buildSectionMetodePembayaran(),
-                  const SizedBox(height: 12),
-                  _buildSectionRincian(),
-                ],
+    return Obx(() {
+      if (!controller.isReady.value) {
+        return const Scaffold(
+          backgroundColor: Color(0xFFF0F7F4),
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      return Scaffold(
+        backgroundColor: const Color(0xFFF0F7F4),
+        body: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                child: Column(
+                  children: [
+                    _buildSectionBarang(),
+                    const SizedBox(height: 12),
+                    _buildSectionAlamat(),
+                    const SizedBox(height: 12),
+                    _buildSectionMetodePembayaran(),
+                    const SizedBox(height: 12),
+                    _buildSectionRincian(),
+                  ],
+                ),
               ),
             ),
-          ),
-          _buildBottomBar(),
-        ],
-      ),
-    );
+            _buildBottomBar(),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildHeader() {
@@ -169,11 +181,13 @@ class CheckoutView extends GetView<CheckoutController> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.4), width: 1),
                 ),
                 child: Text(
                   '${controller.keranjangList.length} item',
@@ -316,7 +330,8 @@ class CheckoutView extends GetView<CheckoutController> {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.straighten, size: 14, color: Color(0xFF6C757D)),
+                    const Icon(Icons.straighten,
+                        size: 14, color: Color(0xFF6C757D)),
                     const SizedBox(width: 4),
                     Text(
                       '${alamat.jarakKm?.toStringAsFixed(1) ?? '0'} km dari pasar',
@@ -340,125 +355,126 @@ class CheckoutView extends GetView<CheckoutController> {
       icon: Icons.payment_outlined,
       title: 'Metode Pembayaran',
       child: Obx(() => Column(
-        children: [
-          GestureDetector(
-            onTap: () => controller.pilihMetodePembayaran('cod'),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: controller.metodePembayaran.value == 'cod'
-                    ? const Color(0xFFE0F4FF)
-                    : const Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: controller.metodePembayaran.value == 'cod'
-                      ? const Color(0xFF0077B6)
-                      : const Color(0xFFDEE2E6),
-                  width: 1.5,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0077B6).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.money,
-                        color: Color(0xFF0077B6), size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Bayar di Tempat (COD)',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF023E58),
-                            
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Bayar saat barang tiba',
-                          style: TextStyle(fontSize: 11, color: Color(0xFF6C757D)),
-                        ),
-                      ],
+            children: [
+              GestureDetector(
+                onTap: () => controller.pilihMetodePembayaran('cod'),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: controller.metodePembayaran.value == 'cod'
+                        ? const Color(0xFFE0F4FF)
+                        : const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: controller.metodePembayaran.value == 'cod'
+                          ? const Color(0xFF0077B6)
+                          : const Color(0xFFDEE2E6),
+                      width: 1.5,
                     ),
                   ),
-                  if (controller.metodePembayaran.value == 'cod')
-                    const Icon(Icons.check_circle_rounded,
-                        color: Color(0xFF0077B6), size: 22),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => controller.pilihMetodePembayaran('midtrans'),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: controller.metodePembayaran.value == 'midtrans'
-                    ? const Color(0xFFE0F4FF)
-                    : const Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: controller.metodePembayaran.value == 'midtrans'
-                      ? const Color(0xFF0077B6)
-                      : const Color(0xFFDEE2E6),
-                  width: 1.5,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0077B6).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.money,
+                            color: Color(0xFF0077B6), size: 22),
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.credit_card,
-                        color: Colors.white, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'QRIS (Midtrans)',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF023E58),
-                          ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Bayar di Tempat (COD)',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF023E58),
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Bayar saat barang tiba',
+                              style: TextStyle(
+                                  fontSize: 11, color: Color(0xFF6C757D)),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Midtrans - Instant & secure',
-                          style: TextStyle(fontSize: 11, color: Color(0xFF6C757D)),
-                        ),
-                      ],
-                    ),
+                      ),
+                      if (controller.metodePembayaran.value == 'cod')
+                        const Icon(Icons.check_circle_rounded,
+                            color: Color(0xFF0077B6), size: 22),
+                    ],
                   ),
-                  if (controller.metodePembayaran.value == 'midtrans')
-                    const Icon(Icons.check_circle_rounded,
-                        color: Color(0xFF0077B6), size: 22),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
-      )),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () => controller.pilihMetodePembayaran('midtrans'),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: controller.metodePembayaran.value == 'midtrans'
+                        ? const Color(0xFFE0F4FF)
+                        : const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: controller.metodePembayaran.value == 'midtrans'
+                          ? const Color(0xFF0077B6)
+                          : const Color(0xFFDEE2E6),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.credit_card,
+                            color: Colors.white, size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'QRIS (Midtrans)',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF023E58),
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Midtrans - Instant & secure',
+                              style: TextStyle(
+                                  fontSize: 11, color: Color(0xFF6C757D)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (controller.metodePembayaran.value == 'midtrans')
+                        const Icon(Icons.check_circle_rounded,
+                            color: Color(0xFF0077B6), size: 22),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          )),
     );
   }
 
@@ -473,7 +489,6 @@ class CheckoutView extends GetView<CheckoutController> {
             value: controller.formatRupiah(controller.subtotalProduk),
           ),
           const SizedBox(height: 10),
-
           _buildBiayaRow(
             label: 'Biaya Ongkir',
             value: controller.formatRupiah(controller.biayaJarak),
@@ -481,13 +496,11 @@ class CheckoutView extends GetView<CheckoutController> {
                 '(${controller.alamat.jarakKm?.ceil() ?? 0} km × ${controller.formatRupiah(controller.pasar.ongkir ?? 0)})',
           ),
           const SizedBox(height: 10),
-
           _buildBiayaRow(
             label: 'Biaya Layanan',
             value: controller.formatRupiah(controller.biayaLayanan),
           ),
           const SizedBox(height: 10),
-
           if (controller.tampilkanBiayaBerat) ...[
             _buildBiayaRow(
               label: 'Biaya Berat',
@@ -498,7 +511,6 @@ class CheckoutView extends GetView<CheckoutController> {
             ),
             const SizedBox(height: 10),
           ],
-
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -527,12 +539,10 @@ class CheckoutView extends GetView<CheckoutController> {
               ],
             ),
           ),
-
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(color: Color(0xFFE9ECEF), thickness: 1.5),
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -648,7 +658,8 @@ class CheckoutView extends GetView<CheckoutController> {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE0F7F4),
                     borderRadius: BorderRadius.circular(8),
@@ -668,7 +679,9 @@ class CheckoutView extends GetView<CheckoutController> {
             Obx(() => SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: controller.isLoading.value ? null : () => _showConfirmDialog(),
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () => _showConfirmDialog(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
@@ -784,8 +797,8 @@ class CheckoutView extends GetView<CheckoutController> {
     return Container(
       color: const Color(0xFFE0F7FA),
       child: const Center(
-        child: Icon(Icons.storefront_rounded,
-            color: Color(0xFF90E0EF), size: 28),
+        child:
+            Icon(Icons.storefront_rounded, color: Color(0xFF90E0EF), size: 28),
       ),
     );
   }

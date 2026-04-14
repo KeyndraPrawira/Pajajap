@@ -14,6 +14,7 @@ import 'package:e_pasar/pages/pedagang/views/produk_add_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_edit_view.dart';
 import 'package:e_pasar/pages/pedagang/views/produk_list_view.dart';
 import 'package:e_pasar/pages/user/controllers/checkout_controller.dart';
+import 'package:e_pasar/pages/user/controllers/pasar_controller.dart';
 import 'package:e_pasar/pages/user/views/checkout_view.dart';
 import 'package:e_pasar/pages/user/views/detail_produk_view.dart';
 import 'package:e_pasar/pages/user/views/edit_profile_view.dart';
@@ -88,6 +89,9 @@ class AppPages {
         name: _Paths.CHECKOUT,
         page: () => const CheckoutView(),
         binding: BindingsBuilder(() {
+          if (!Get.isRegistered<PasarController>()) {
+            Get.put<PasarController>(PasarController());
+          }
           Get.lazyPut<CheckoutController>(() => CheckoutController());
         })),
     GetPage(

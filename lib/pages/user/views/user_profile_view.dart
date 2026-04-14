@@ -3,6 +3,7 @@ import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/app/services/auth_services.dart';
 import 'package:e_pasar/pages/user/controllers/profile_controller.dart';
 import 'package:e_pasar/pages/user/views/edit_profile_view.dart';
+import 'package:e_pasar/pages/user/views/user_order_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,7 +17,7 @@ class UserProfileView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Profil Buyer'),
         backgroundColor: const Color(0xFF0077B6),
         foregroundColor: Colors.white,
       ),
@@ -149,28 +150,19 @@ class UserProfileView extends StatelessWidget {
           _buildMenuItem(
             icon: Icons.shopping_bag_outlined,
             title: 'Pesanan Saya',
-            onTap: () {},
+            onTap: () {
+              Get.to(UserOrderView());
+            },
           ),
 
-          _buildMenuItem(
-            icon: Icons.favorite_outline,
-            title: 'Wishlist',
-            onTap: () {},
-          ),
+         
 
-          _buildMenuItem(
-            icon: Icons.lock_outline,
-            title: 'Ganti Password',
-            onTap: () =>
-                Get.snackbar('Info', 'Fitur ganti password akan segera hadir'),
-          ),
-
-          const SizedBox(height: 16),
+         
 
           // ── Logout ──
           _buildMenuItem(
             icon: Icons.logout,
-            title: 'Logout',
+            title: 'Keluar',
             isDestructive: true,
             onTap: () {
               Get.dialog(AlertDialog(
@@ -184,11 +176,11 @@ class UserProfileView extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () async {
                       await authService.logout();
-                      Get.offAllNamed(AppRoutes.LOGIN);
+                      Get.toNamed(AppRoutes.LOGIN);
                     },
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text('Logout',
+                    child: const Text('Keluar',
                         style: TextStyle(color: Colors.white)),
                   ),
                 ],

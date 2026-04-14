@@ -27,17 +27,19 @@ class RegisterOtpView extends GetView<RegisterController> {
       }
     });
 
-    return WillPopScope(
-      onWillPop: () async {
-        Get.snackbar(
-          'Registrasi Belum Selesai',
-          'Selesaikan OTP atau batalkan registrasi terlebih dahulu.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
-        return false;
-      },
+    return PopScope(
+  canPop: false,
+  onPopInvoked: (didPop) {
+    if (!didPop) {
+      Get.snackbar(
+        'Registrasi Belum Selesai',
+        'Selesaikan OTP atau batalkan registrasi terlebih dahulu.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+    }
+  },
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F8FC),
         body: SafeArea(

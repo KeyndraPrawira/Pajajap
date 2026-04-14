@@ -138,7 +138,7 @@ class DriverProfileView extends StatelessWidget {
                                 child: const Icon(Icons.logout, color: Colors.red, size: 24),
                               ),
                               title: const Text(
-                                'Logout',
+                                'Keluar',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
@@ -186,7 +186,7 @@ class DriverProfileView extends StatelessWidget {
                     },
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text('Logout',
+                    child: const Text('Keluar',
                         style: TextStyle(color: Colors.white)),
                   ),
                 ],

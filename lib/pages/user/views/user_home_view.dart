@@ -488,11 +488,7 @@ class UserHomeView extends GetView<UserProdukController> {
                       icon: Icons.info,
                       onTap: () => Get.to(() => const AppInfoView()),
                     ),
-                    const SizedBox(width: 6),
-                    _appBarIconButton(
-                      icon: Icons.notifications_outlined,
-                      onTap: () {},
-                    ),
+                    
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -546,13 +542,6 @@ class UserHomeView extends GetView<UserProdukController> {
           hintStyle: const TextStyle(color: Color(0xFFADB5BD), fontSize: 13),
           prefixIcon: const Icon(Icons.search_rounded,
               color: Color(0xFF00B4D8), size: 18),
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.tune_rounded,
-                color: Color(0xFF0077B6), size: 16),
-            onPressed: () {},
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-          ),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 10, horizontal: 4),

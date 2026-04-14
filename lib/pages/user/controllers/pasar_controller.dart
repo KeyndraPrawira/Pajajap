@@ -6,8 +6,6 @@ import 'package:get/get.dart';
 
 class PasarController extends GetxController {
   var pasarList = <DataPasar>[].obs;
-    final Rxn<DataPasar> pasarDetail = Rxn<DataPasar>();
-
   var isLoading = false.obs;
   var userLatitude = 0.0.obs;
   var userLongitude = 0.0.obs;
@@ -15,14 +13,14 @@ class PasarController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getInfo();
+    getPasarList();
   }
 
   /// Ambil daftar pasar
-  Future<void> getInfo() async {
+  Future<void> getPasarList() async {
     try {
       isLoading.value = true;
-      final result = await PasarService.getPasarDetail(1);
+      final result = await PasarService.getPasarList();
 
       if (result != null && result.data != null) {
         pasarList.value = [result.data!];

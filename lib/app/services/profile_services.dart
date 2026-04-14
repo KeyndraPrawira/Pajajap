@@ -103,7 +103,7 @@ class ProfileService {
   ) async {
     try {
       final request = http.MultipartRequest(
-        'POST',
+        'PUT',
         Uri.parse('${Api.baseUrl}/profile/foto-profil'),
       );
 

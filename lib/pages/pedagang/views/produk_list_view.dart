@@ -1,5 +1,6 @@
 import 'package:e_pasar/app/data/models/produk_model.dart';
 import 'package:e_pasar/app/routes/app_pages.dart';
+import 'package:e_pasar/app/utils/api.dart';
 import 'package:e_pasar/pages/pedagang/controllers/produk_controller.dart';
 import 'package:e_pasar/pages/pedagang/views/widgets/pedagang_ui.dart';
 import 'package:flutter/material.dart';
@@ -123,7 +124,7 @@ class _ProdukTile extends StatelessWidget {
   Widget build(BuildContext context) {
     // Jika pakai emulator Android, gunakan 10.0.2.2. Jika HP fisik, gunakan IP Laptop kamu.
     final fotoUrl = produk.foto != null
-        ? "http://10.0.2.2:8000/storage/${produk.foto}"
+        ? "${Api.baseImageUrl}${produk.foto}"
         : null;
 
     final stokHabis = (produk.stok ?? 0) <= 0;
@@ -248,7 +249,51 @@ class _ProdukTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   IconButton(
-                    onPressed: () => controller.deleteProduk(produk.id!),
+                    onPressed: () async {
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: const Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.orange),
+          SizedBox(width: 8),
+          Text('Hapus Produk'),
+        ],
+      ),
+      content: Text(
+        'Anda yakin ingin menghapus "${produk.namaProduk ?? 'produk ini'}"?',
+        style: const TextStyle(fontSize: 14),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text(
+            'Batal',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: const Text('Hapus'),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm == true) {
+    controller.deleteProduk(produk.id!);
+  }
+},
                     icon: const Icon(Icons.delete_outline, size: 18),
                     color: Colors.red.shade600,
                     style: IconButton.styleFrom(

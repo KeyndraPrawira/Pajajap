@@ -169,7 +169,7 @@ class AuthService extends GetxService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('${Api.baseUrl}/register/resend-otp'),
+        Uri.parse('${Api.baseUrl}/resend-otp'),
         headers: Api.headers,
         body: jsonEncode({'email': email}),
       );

@@ -39,6 +39,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         TextEditingController(text: profile?.alamat?.alamatLengkap ?? '');
     _latitude = profile?.alamat?.latitude;
     _longitude = profile?.alamat?.longitude;
+    _jarakKm = profile?.alamat?.jarakKm;
   }
 
   @override
@@ -90,7 +91,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                       },
                     ),
                   ),
-                  
                 ],
               ),
               const SizedBox(height: 12),
@@ -122,9 +122,11 @@ class _EditProfileViewState extends State<EditProfileView> {
     final result = await Get.to(() => const MapPickerView());
     if (result != null && result is Map) {
       setState(() {
-        _alamatController.text = result['alamat_lengkap'] ?? '';
-        _latitude = result['latitude'];
-        _longitude = result['longitude'];
+        _alamatController.text =
+            (result['alamat'] ?? result['alamat_lengkap'] ?? '').toString();
+        _latitude = (result['latitude'] as num?)?.toDouble();
+        _longitude = (result['longitude'] as num?)?.toDouble();
+        _jarakKm = (result['jarakKm'] as num?)?.toDouble();
       });
     }
   }
@@ -166,6 +168,20 @@ class _EditProfileViewState extends State<EditProfileView> {
         final profile = _profileC.dataProfile.value;
         if (_nameController.text.isEmpty && profile?.name != null) {
           _nameController.text = profile!.name!;
+        }
+        if (_phoneController.text.isEmpty && profile?.nomorTelepon != null) {
+          _phoneController.text = profile!.nomorTelepon!;
+        }
+        if (_alamatController.text.isEmpty &&
+            profile?.alamat?.alamatLengkap != null) {
+          _alamatController.text = profile!.alamat!.alamatLengkap!;
+        }
+        if (_latitude == null &&
+            _longitude == null &&
+            profile?.alamat != null) {
+          _latitude = profile!.alamat!.latitude;
+          _longitude = profile.alamat!.longitude;
+          _jarakKm ??= profile.alamat!.jarakKm;
         }
 
         return CustomScrollView(
@@ -255,7 +271,6 @@ class _EditProfileViewState extends State<EditProfileView> {
               ),
               title: const Text('Edit Profile'),
             ),
-
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(16),

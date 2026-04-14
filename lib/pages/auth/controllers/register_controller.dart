@@ -105,10 +105,10 @@ class RegisterController extends GetxController {
           isSuccess: true,
         );
 
-        Get.offNamed(
-          AppRoutes.REGISTER_OTP,
-          arguments: {'email': pendingEmail.value},
-        );
+        Get.toNamed(
+        AppRoutes.REGISTER_OTP,
+        arguments: {'email': pendingEmail.value},
+      );
       } else {
         _showSnackbar(
           'Registrasi Gagal',

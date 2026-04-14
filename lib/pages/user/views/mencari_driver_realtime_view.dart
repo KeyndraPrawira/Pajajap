@@ -121,8 +121,8 @@ class _MencariDriverRealtimeViewState extends State<MencariDriverRealtimeView>
       _orderRealtimeService?.disconnect();
       Get.back();
       Get.snackbar(
-        'Order Dibatalkan',
-        'Order kamu telah dibatalkan',
+        'Pesanan Dibatalkan',
+        'Pesanan kamu telah dibatalkan',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,

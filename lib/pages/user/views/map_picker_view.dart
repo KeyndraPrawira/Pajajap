@@ -22,6 +22,7 @@ class _MapPickerViewState extends State<MapPickerView> {
   late final MapController _mapController;
   final Dio _dio = Dio();
   late Worker _pasarWorker;
+  bool _hasPasarWorker = false;
 
   LatLng _selectedLocation = const LatLng(-6.2088, 106.8456);
   String _selectedAddress = 'Geser peta untuk memilih lokasi';
@@ -40,13 +41,16 @@ class _MapPickerViewState extends State<MapPickerView> {
     _initLocationFromProfile();
 
     if (_pasarC.pasarList.isNotEmpty) {
-      _hitungOngkir();
+      _refreshPasarState();
       _getRoute(); // ✅
     } else {
+      _hasPasarWorker = true;
       _pasarWorker = ever(_pasarC.pasarList, (_) {
-        if (mounted) {
+        if (!mounted) {
+          return;
+        } else {
           setState(() {});
-          _hitungOngkir();
+          _refreshPasarState();
           _getRoute(); // ✅
         }
       });
@@ -56,17 +60,25 @@ class _MapPickerViewState extends State<MapPickerView> {
   @override
   void dispose() {
     _mapController.dispose();
-    if (_pasarC.pasarList.isEmpty) _pasarWorker.dispose();
+    if (_hasPasarWorker) _pasarWorker.dispose();
     super.dispose();
   }
 
   void _initLocationFromProfile() {
     final alamat = _profileC.dataProfile.value?.alamat;
+    if ((alamat?.alamatLengkap ?? '').isNotEmpty) {
+      _selectedAddress = alamat!.alamatLengkap!;
+    }
     if (alamat?.latitude != null && alamat?.longitude != null) {
       _selectedLocation = LatLng(alamat!.latitude!, alamat.longitude!);
       _getAddressFromLatLng(_selectedLocation);
     }
+    _refreshPasarState();
+  }
+
+  void _refreshPasarState() {
     _hitungOngkir();
+    _getRoute();
   }
 
   void _hitungOngkir() {
@@ -98,7 +110,12 @@ class _MapPickerViewState extends State<MapPickerView> {
   // ✅ Ambil rute dari OSRM
   Future<void> _getRoute() async {
     if (_pasar == null) return;
-    if (_pasar!.latitude == null || _pasar!.longitude == null) return;
+    if (_pasar!.latitude == null || _pasar!.longitude == null) {
+      if (mounted && _routePoints.isNotEmpty) {
+        setState(() => _routePoints = []);
+      }
+      return;
+    }
 
     try {
       final response = await _dio.get(
@@ -111,6 +128,7 @@ class _MapPickerViewState extends State<MapPickerView> {
       if (response.statusCode == 200) {
         final coords =
             response.data['routes'][0]['geometry']['coordinates'] as List;
+        if (!mounted) return;
         setState(() {
           _routePoints = coords
               .map((c) => LatLng(c[1].toDouble(), c[0].toDouble()))
@@ -123,6 +141,7 @@ class _MapPickerViewState extends State<MapPickerView> {
   }
 
   Future<void> _getAddressFromLatLng(LatLng latLng) async {
+    if (!mounted) return;
     setState(() => _isLoadingAddress = true);
     try {
       final response = await _dio.get(
@@ -134,12 +153,16 @@ class _MapPickerViewState extends State<MapPickerView> {
         },
         options: Options(headers: {'User-Agent': 'ePasar/1.0'}),
       );
+      if (!mounted) return;
       setState(() => _selectedAddress =
           response.data['display_name'] ?? 'Alamat tidak ditemukan');
     } catch (e) {
+      if (!mounted) return;
       setState(() => _selectedAddress = 'Gagal mendapatkan alamat');
     } finally {
-      setState(() => _isLoadingAddress = false);
+      if (mounted) {
+        setState(() => _isLoadingAddress = false);
+      }
     }
   }
 
@@ -169,13 +192,12 @@ class _MapPickerViewState extends State<MapPickerView> {
   void _gunakanLokasi() {
     Get.back(result: {
       'alamat': _selectedAddress,
+      'alamat_lengkap': _selectedAddress,
       'latitude': _selectedLocation.latitude,
       'longitude': _selectedLocation.longitude,
       'jarakKm': _jarakKm,
     });
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +220,7 @@ class _MapPickerViewState extends State<MapPickerView> {
                 }
                 if (event is MapEventMoveEnd) {
                   _getAddressFromLatLng(event.camera.center);
-                  _hitungOngkir();
+                  _refreshPasarState();
                   _getRoute(); // ✅
                 }
               },
@@ -222,7 +244,7 @@ class _MapPickerViewState extends State<MapPickerView> {
                 ),
 
               // Marker pasar
-              if (_pasar != null)
+              if (_pasar?.latitude != null && _pasar?.longitude != null)
                 MarkerLayer(
                   markers: [
                     Marker(
@@ -338,7 +360,7 @@ class _MapPickerViewState extends State<MapPickerView> {
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: Colors.green),
                         ),
-                                              ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),

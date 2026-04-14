@@ -79,24 +79,7 @@ class PedagangHomeView extends GetView<PedagangController> {
                       const SizedBox(height: 16),
                       _buildCategoryChartCard(produkCtrl),
                       const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _sectionHeader("Katalog Produk"),
-                          GestureDetector(
-                            onTap: () => produkCtrl.fetchProduk(),
-                            child: const Text(
-                              "Muat Ulang",
-                              style: TextStyle(
-                                color: _midGreen,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                      
                     ],
                   ),
                 ),
@@ -288,7 +271,7 @@ class PedagangHomeView extends GetView<PedagangController> {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              isOpen ? "Aktif" : "Offline",
+              isOpen ? "Buka" : "Tutup",
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 11,

@@ -257,7 +257,7 @@ class PaymentController extends GetxController {
           break;
         case 'dibatalkan':
           Get.snackbar(
-            'Order Dibatalkan',
+            'Pesanan Dibatalkan',
             'Pesanan ini telah dibatalkan.',
           );
           break;

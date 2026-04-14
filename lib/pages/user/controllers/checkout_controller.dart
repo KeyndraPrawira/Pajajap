@@ -1,5 +1,7 @@
 // lib/pages/user/controllers/checkout_controller.dart
 
+import 'dart:async';
+
 import 'package:e_pasar/app/data/models/keranjang_model.dart';
 import 'package:e_pasar/app/data/models/pasar_model.dart';
 import 'package:e_pasar/app/data/models/profile_model.dart';
@@ -14,12 +16,13 @@ class CheckoutController extends GetxController {
 
   // ─── State ───────────────────────────────────────────────
   final RxBool isLoading = false.obs;
+  final RxBool isReady = false.obs;
   final RxString metodePembayaran = 'cod'.obs;
 
   // Data dari arguments
   late List<DataKeranjang> keranjangList;
   late Alamat alamat;
-  late DataPasar pasar;
+  DataPasar pasar = DataPasar();
 
   // Batas berat gratis hardcode sama dengan backend
   static const double _batasBeratGratis = 10.0;
@@ -62,7 +65,10 @@ class CheckoutController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initializeCheckout();
+  }
 
+  Future<void> _initializeCheckout() async {
     final args = Get.arguments as Map<String, dynamic>?;
     if (args == null) {
       Get.back();
@@ -77,6 +83,19 @@ class CheckoutController extends GetxController {
     // Ambil dari PasarController yang sudah di-fetch sebelumnya
     final pasarC = Get.find<PasarController>();
     if (pasarC.pasarList.isEmpty) {
+      if (!pasarC.isLoading.value) {
+        await pasarC.getPasarList();
+      } else {
+        var retry = 0;
+        while (
+            pasarC.isLoading.value && pasarC.pasarList.isEmpty && retry < 20) {
+          await Future.delayed(const Duration(milliseconds: 200));
+          retry++;
+        }
+      }
+    }
+
+    if (pasarC.pasarList.isEmpty) {
       Get.back();
       Get.snackbar('Error', 'Data pasar tidak ditemukan',
           backgroundColor: Colors.red, colorText: Colors.white);
@@ -84,6 +103,7 @@ class CheckoutController extends GetxController {
     }
 
     pasar = pasarC.pasarList.first;
+    isReady.value = true;
   }
 
   // ─── Metode Pembayaran ────────────────────────────────────
