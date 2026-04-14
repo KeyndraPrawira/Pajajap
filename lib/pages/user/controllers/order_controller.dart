@@ -12,9 +12,12 @@ class OrderController extends GetxController {
 
   final RxList<DataOrder> activeOrders = <DataOrder>[].obs;
   final RxList<DataOrder> historyOrders = <DataOrder>[].obs;
+  final Rxn<DataOrder> selectedHistoryOrder = Rxn<DataOrder>();
   final RxBool isLoading = false.obs;
   final RxBool isHistoryLoading = false.obs;
+  final RxBool isHistoryDetailLoading = false.obs;
   final RxString historyErrorMessage = ''.obs;
+  final RxString historyDetailErrorMessage = ''.obs;
   final Map<int, String> _lastStatusByOrder = {};
   final Map<int, String> _lastPaymentStatusByOrder = {};
 
@@ -44,11 +47,7 @@ class OrderController extends GetxController {
 
     try {
       final orders = await orderService.getActiveOrders();
-      activeOrders.assignAll(
-        orders
-            .map((order) => DataOrder.fromJson(order as Map<String, dynamic>))
-            .toList(),
-      );
+      activeOrders.assignAll(orders);
       _syncNotificationCache();
       _sortActiveOrders();
       print('[ACTIVE ORDERS][USER] fetched ${activeOrders.length} orders');
@@ -112,6 +111,34 @@ class OrderController extends GetxController {
     } catch (e) {
       print('Error fetching detail order $orderId: $e');
     }
+  }
+
+  Future<void> fetchHistoryDetail(int orderId) async {
+    isHistoryDetailLoading.value = true;
+    historyDetailErrorMessage.value = '';
+
+    final cachedOrder = findHistoryOrderById(orderId);
+    if (cachedOrder != null) {
+      selectedHistoryOrder.value = cachedOrder;
+    }
+
+    try {
+      final result = await orderService.getOrderHistoryDetail(orderId);
+      final order = DataOrder.fromJson(result);
+      selectedHistoryOrder.value = order;
+      _upsertHistoryOrder(order);
+    } catch (e) {
+      historyDetailErrorMessage.value =
+          e.toString().replaceAll('Exception: ', '');
+    } finally {
+      isHistoryDetailLoading.value = false;
+    }
+  }
+
+  void clearHistoryDetail() {
+    selectedHistoryOrder.value = null;
+    historyDetailErrorMessage.value = '';
+    isHistoryDetailLoading.value = false;
   }
 
   DataOrder? findActiveOrderById(int orderId) {

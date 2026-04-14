@@ -1,6 +1,7 @@
 // lib/pages/driver/views/delivery_send_view.dart
 import 'package:dio/dio.dart';
 import 'package:e_pasar/app/data/models/pasar_model.dart';
+import 'package:e_pasar/app/routes/app_pages.dart';
 import 'package:e_pasar/pages/driver/controllers/delivery_controller.dart';
 import 'package:e_pasar/pages/user/controllers/pasar_controller.dart';
 import 'package:flutter/material.dart';
@@ -115,6 +116,28 @@ class _DeliverySendViewState extends State<DeliverySendView>
     }
   }
 
+  int? _resolveOrderId() {
+    final arguments = Get.arguments;
+
+    if (arguments is int) {
+      return arguments;
+    }
+
+    if (arguments is String) {
+      return int.tryParse(arguments);
+    }
+
+    if (arguments is Map) {
+      final rawOrderId = arguments['order_id'] ?? arguments['id'];
+      if (rawOrderId is int) {
+        return rawOrderId;
+      }
+      return int.tryParse(rawOrderId?.toString() ?? '');
+    }
+
+    return int.tryParse(Get.parameters['id'] ?? '');
+  }
+
   void _onDragStart(DragStartDetails d) {
     _dragStartY = d.globalPosition.dy;
     _dragStartHeight = _sheetHeight;
@@ -166,9 +189,10 @@ class _DeliverySendViewState extends State<DeliverySendView>
   }
 
   // ── Dialog konfirmasi sebelum eksekusi ──
-  void _showConfirmDialog() {
-    showDialog(
+  Future<void> _showConfirmDialog() async {
+    final isConfirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
@@ -187,31 +211,60 @@ class _DeliverySendViewState extends State<DeliverySendView>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text(
               'Tidak',
               style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _orderC.completeDelivery();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0077B6),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            child: const Text(
-              'Lanjut',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          Obx(
+            () => ElevatedButton(
+              onPressed: _orderC.isCompletingDelivery.value
+                  ? null
+                  : () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0077B6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: _orderC.isCompletingDelivery.value
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text(
+                      'Lanjut',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ],
       ),
     );
+
+    if (isConfirmed != true || !mounted) {
+      return;
+    }
+
+    final isSuccess = await _orderC.completeDelivery();
+    if (!mounted || !isSuccess) {
+      return;
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    if (!mounted) {
+      return;
+    }
+
+    Get.offAllNamed(AppRoutes.DRIVER_HOME);
   }
 
   Widget _buildMap({BorderRadius? borderRadius}) {
@@ -321,7 +374,7 @@ class _DeliverySendViewState extends State<DeliverySendView>
 
         if (order == null) {
           if (!_orderC.isLoading.value) {
-            final orderId = Get.arguments as int?;
+            final orderId = _resolveOrderId();
             if (orderId != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _orderC.loadOrder(orderId);
@@ -339,10 +392,15 @@ class _DeliverySendViewState extends State<DeliverySendView>
         return Stack(
           children: [
             // ── MAP BACKGROUND ──
-            AnimatedOpacity(
-              opacity: isPip ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              child: Positioned.fill(child: _buildMap()),
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: isPip,
+                child: AnimatedOpacity(
+                  opacity: isPip ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: _buildMap(),
+                ),
+              ),
             ),
 
             // ── MAP PiP ──
@@ -354,20 +412,23 @@ class _DeliverySendViewState extends State<DeliverySendView>
               child: AnimatedOpacity(
                 opacity: isPip ? pipProgress : 0,
                 duration: const Duration(milliseconds: 150),
-                child: Container(
-                  width: 150,
-                  height: 110,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                child: IgnorePointer(
+                  ignoring: !isPip,
+                  child: Container(
+                    width: 150,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: _buildMap(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: _buildMap(borderRadius: BorderRadius.circular(16)),
                 ),
               ),
             ),
@@ -616,22 +677,38 @@ class _DeliverySendViewState extends State<DeliverySendView>
                         child: SizedBox(
                           width: double.infinity,
                           height: 52,
-                          child: ElevatedButton(
-                            onPressed: _showConfirmDialog,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0077B6),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                          child: Obx(
+                            () => ElevatedButton(
+                              onPressed: _orderC.isCompletingDelivery.value
+                                  ? null
+                                  : _showConfirmDialog,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0077B6),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 4,
                               ),
-                              elevation: 4,
-                            ),
-                            child: const Text(
-                              'Selesai Antar',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                              child: _orderC.isCompletingDelivery.value
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Selesai Antar',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),

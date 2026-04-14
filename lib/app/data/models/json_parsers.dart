@@ -1,3 +1,5 @@
+import 'package:e_pasar/app/utils/api.dart';
+
 int? asInt(dynamic value) {
   if (value == null) return null;
   if (value is int) return value;
@@ -30,6 +32,17 @@ bool? asBool(dynamic value) {
 String? asString(dynamic value) {
   if (value == null) return null;
   return value.toString();
+}
+
+String? asImageUrl(dynamic value) {
+  final raw = asString(value)?.trim();
+  if (raw == null || raw.isEmpty) return null;
+
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
+    return raw;
+  }
+
+  return '${Api.baseImageUrl}${raw.replaceFirst(RegExp(r'^/+'), '')}';
 }
 
 DateTime? asDateTime(dynamic value) {

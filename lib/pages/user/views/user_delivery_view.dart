@@ -6,10 +6,32 @@ import 'package:e_pasar/app/routes/app_pages.dart';
 class UserDeliveryView extends GetView<DeliveryController> {
   const UserDeliveryView({super.key});
 
+  String _formatRupiah(int? value) {
+    if (value == null) return 'Rp0';
+
+    final raw = value.toString();
+    final buffer = StringBuffer('Rp');
+    final offset = raw.length % 3;
+
+    for (int i = 0; i < raw.length; i++) {
+      if (i != 0 && (i - offset) % 3 == 0) {
+        buffer.write('.');
+      }
+      buffer.write(raw[i]);
+    }
+
+    return buffer.toString();
+  }
+
+  String _formatJarak(String? value) {
+    final jarak = double.tryParse(value ?? '');
+    if (jarak == null) return '-';
+    return '${jarak.toStringAsFixed(1)} km';
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Force user mode
-    controller.isUserMode.value = true;
+    controller.setUserMode(true);
 
     return Scaffold(
       body: Column(
@@ -105,7 +127,7 @@ class UserDeliveryView extends GetView<DeliveryController> {
                               const Icon(Icons.straighten,
                                   color: Colors.orange, size: 20),
                               const SizedBox(width: 8),
-                              Text('${order.jarakKm ?? ''} km'),
+                              Text(_formatJarak(order.jarakKm)),
                             ],
                           ),
                         ],
@@ -162,7 +184,7 @@ class UserDeliveryView extends GetView<DeliveryController> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      detail.produkId?.toString() ??
+                                      detail.produk?.namaProduk ??
                                           'Produk ${index + 1}',
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w600),
@@ -237,10 +259,25 @@ class UserDeliveryView extends GetView<DeliveryController> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      const Text('Total Belanja',
+                          style: TextStyle(color: Colors.white, fontSize: 16)),
+                      Text(
+                        _formatRupiah(order?.totalHargaBarang),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       const Text('Ongkir',
                           style: TextStyle(color: Colors.white, fontSize: 16)),
                       Text(
-                        'Rp ${order?.ongkir?.toStringAsFixed(0) ?? '0'}',
+                        _formatRupiah(order?.ongkir),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -258,7 +295,7 @@ class UserDeliveryView extends GetView<DeliveryController> {
                               fontSize: 20,
                               fontWeight: FontWeight.bold)),
                       Text(
-                        'Rp ${order?.totalHarga?.toStringAsFixed(0) ?? '0'}',
+                        _formatRupiah(order?.totalHarga),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,

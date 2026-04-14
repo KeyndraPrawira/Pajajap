@@ -40,9 +40,9 @@ class CheckoutController extends GetxController {
   int get biayaJarak {
     final jarak = alamat.jarakKm ?? 0.0;
     final perKm = pasar.ongkir ?? 0;
-    final minimalOngkir = pasar.minimalOngkir ?? 0;
-    final ongkirJarak = minimalOngkir + (jarak.ceil() * perKm);
-    return ongkirJarak;
+    if (jarak <= 1) return 0;
+    final sisaKm = jarak - 1;
+    return (sisaKm * perKm).ceil();
   }
 
   int get biayaLayanan => pasar.biayaLayanan ?? 0;

@@ -50,14 +50,10 @@ class RiwayatView extends GetView<OrderDriverController> {
           padding: const EdgeInsets.fromLTRB(8, 8, 16, 20),
           child: Row(
             children: [
-              IconButton(
-                onPressed: () => Get.back(),
-                icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white, size: 20),
-              ),
+             
               const Expanded(
                 child: Text(
-                  'Riwayat Order',
+                  'Riwayat Pesanan',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -76,7 +72,7 @@ class RiwayatView extends GetView<OrderDriverController> {
                           color: Colors.white.withOpacity(0.4), width: 1),
                     ),
                     child: Text(
-                      '${controller.orderList.length} order',
+                      '${controller.orderList.length} pesanan',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,

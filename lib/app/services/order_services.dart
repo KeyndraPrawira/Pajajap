@@ -1,6 +1,7 @@
 // lib/app/services/order_service.dart
 
 import 'dart:convert';
+import 'package:e_pasar/app/data/models/order_model.dart';
 import 'package:e_pasar/app/services/order_realtime_services.dart';
 import 'package:e_pasar/app/utils/api.dart';
 import 'package:get_storage/get_storage.dart';
@@ -154,16 +155,14 @@ class OrderService {
         return {'success': true, 'data': decoded['data']};
       } else if (response.statusCode == 403) {
         throw Exception('Hanya driver yang dapat menerima order');
-      } else if (response.statusCode == 400) {
-        throw Exception('Order sudah diambil driver lain');
-      } else if (response.statusCode == 404) {
+      }  else if (response.statusCode == 404) {
         throw Exception('Order tidak ditemukan');
       } else {
         final decoded = json.decode(response.body);
         throw Exception(decoded['message'] ?? 'Gagal accept order');
       }
     } catch (e) {
-      print('💥 [ACCEPT ORDER] Exception: $e');
+      print('💥 [ACCEPT ORDER] Error: $e');
       rethrow;
     }
   }
@@ -358,7 +357,7 @@ class OrderService {
   // Cek apakah driver punya active order
 // ── ACTIVE ORDERS (Driver & Buyer) ────────────────────────
 // GET /api/orders/active
-  Future<List<dynamic>> getActiveOrders() async {
+  Future<List<DataOrder>> getActiveOrders() async {
     try {
       if (token == null) throw Exception('Token tidak ditemukan');
 
@@ -375,7 +374,11 @@ class OrderService {
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
-        return decoded['data'] as List<dynamic>;
+        final rawOrders = decoded['data'] as List<dynamic>? ?? [];
+        return rawOrders
+            .whereType<Map<String, dynamic>>()
+            .map(DataOrder.fromJson)
+            .toList();
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized');
       } else {
@@ -383,7 +386,7 @@ class OrderService {
       }
     } catch (e) {
       print('💥 [ACTIVE ORDERS] Exception: $e');
-      return [];
+      return <DataOrder>[];
     }
   }
 

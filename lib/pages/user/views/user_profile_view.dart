@@ -41,8 +41,17 @@ class UserProfileView extends StatelessWidget {
                   CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.white,
-                    child: const Icon(Icons.person,
-                        size: 60, color: Color(0xFF0077B6)),
+                    child: CircleAvatar(
+                      radius: 47,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage: profile?.fotoProfil != null
+                          ? NetworkImage(profile!.fotoProfil.toString())
+                          : null,
+                      child: profile?.fotoProfil == null
+                          ? const Icon(Icons.person,
+                              size: 60, color: Color(0xFF0077B6))
+                          : null,
+                    ),
                   ),
                   const SizedBox(height: 16),
 

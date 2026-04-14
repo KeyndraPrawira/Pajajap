@@ -31,7 +31,7 @@ class DriverActiveOrderView extends GetView<OrderDriverController> {
                 children: [
                   Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('No Active Orders',
+                  Text('Tidak ada pesanan yang belum selesai',
                       style: TextStyle(fontSize: 18, color: Colors.grey)),
                 ],
               ),

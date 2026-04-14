@@ -1,15 +1,18 @@
 import 'package:e_pasar/app/data/models/profile_model.dart';
-import 'package:e_pasar/app/services/pasar_services.dart';
 import 'package:e_pasar/app/services/profile_services.dart';
 import 'package:e_pasar/pages/auth/controllers/auth_controller.dart';
 import 'package:e_pasar/pages/user/controllers/pasar_controller.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileController extends GetxController {
   var isLoading = false.obs;
+  var isUploadingPhoto = false.obs;
   var dataProfile = Rxn<DataProfile>();
   var profile = Rxn<Profile>();
+  var selectedProfileImage = Rxn<XFile>();
   final authC = Get.find<AuthController>();
+  final ImagePicker _imagePicker = ImagePicker();
   String get token => authC.box.read('token') ?? '';
 
   @override
@@ -118,6 +121,57 @@ class ProfileController extends GetxController {
       Get.snackbar("Error", e.toString());
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> pickProfileImage(ImageSource source) async {
+    try {
+      final image = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 1080,
+      );
+
+      if (image != null) {
+        selectedProfileImage.value = image;
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Gagal memilih gambar: $e");
+    }
+  }
+
+  void clearSelectedProfileImage() {
+    selectedProfileImage.value = null;
+  }
+
+  Future<bool> uploadSelectedProfilePhoto() async {
+    final image = selectedProfileImage.value;
+    if (image == null) return true;
+
+    try {
+      isUploadingPhoto.value = true;
+
+      final photoBytes = await image.readAsBytes();
+      final success = await ProfileService.uploadProfilePhoto(
+        token,
+        photoBytes,
+        image.name,
+      );
+
+      if (success) {
+        selectedProfileImage.value = null;
+        await getProfile();
+        Get.snackbar("Berhasil", "Foto profil berhasil diperbarui");
+        return true;
+      }
+
+      Get.snackbar("Error", "Gagal mengupload foto profil");
+      return false;
+    } catch (e) {
+      Get.snackbar("Error", "Gagal mengupload foto profil: $e");
+      return false;
+    } finally {
+      isUploadingPhoto.value = false;
     }
   }
 }

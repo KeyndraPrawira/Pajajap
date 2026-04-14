@@ -513,17 +513,7 @@ class _KiosAddViewState extends State<KiosAddView> {
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildSourceOption(
-                    icon: Icons.camera_alt,
-                    label: 'Kamera',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _pickImage(ImageSource.camera);
-                    },
-                  ),
-                ),
+                
               ],
             ),
             const SizedBox(height: 20),

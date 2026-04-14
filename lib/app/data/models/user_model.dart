@@ -72,7 +72,7 @@ class DataUser {
         googleId: json["google_id"],
         role: asString(json["role"]),
         nomorTelepon: asString(json["nomor_telepon"]),
-        fotoProfil: json["foto_profil"],
+        fotoProfil: asImageUrl(json["foto_profil"]),
         isOnline: asBool(json["is_online"]),
         rememberToken: json["remember_token"],
         createdAt: asDateTime(json["created_at"]),

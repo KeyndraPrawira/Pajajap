@@ -99,7 +99,7 @@ class OrderDriverController extends GetxController {
     try {
       final orders = await orderService
           .getActiveOrders(); // ← ganti getActiveOrder() → getActiveOrders()
-      activeOrders.value = orders.cast<DataOrder>().toList();
+      activeOrders.assignAll(orders);
       activeOrders.refresh();
     } catch (e) {
       print('Load active error: $e');

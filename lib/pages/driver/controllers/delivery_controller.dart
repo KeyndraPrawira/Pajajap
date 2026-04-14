@@ -1,5 +1,8 @@
 import 'package:e_pasar/app/routes/app_pages.dart';
+import 'package:e_pasar/app/services/auth_services.dart';
 import 'package:e_pasar/app/services/payment_realtime_services.dart';
+import 'package:e_pasar/pages/driver/controllers/driver_wallet_controller.dart';
+import 'package:e_pasar/pages/driver/controllers/order_driver_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_pasar/app/data/models/order_model.dart';
@@ -8,6 +11,9 @@ import 'package:e_pasar/app/services/order_services.dart';
 class DeliveryController extends GetxController {
   var isUserMode = false.obs;
   final OrderService orderService = Get.find();
+  final AuthService _authService = Get.isRegistered<AuthService>()
+      ? Get.find<AuthService>()
+      : Get.put(AuthService(), permanent: true);
 
   final Rxn<DataOrder> orderData = Rxn<DataOrder>();
   var isLoading = false.obs;
@@ -16,33 +22,57 @@ class DeliveryController extends GetxController {
   final RxMap<int, String> itemStatus = <int, String>{}.obs;
   var isUpdating = false.obs;
   var loadingItems = <int, bool>{}.obs;
+  var isCompletingDelivery = false.obs;
   PaymentRealtimeService? _orderRealtimeService;
   int? _listenedOrderId;
   String? _lastShownStatus;
   String? _lastShownPaymentStatus;
+  bool _hasRedirectedAfterCancellation = false;
 
   @override
   void onInit() {
     super.onInit();
-    final orderId = Get.arguments as int?;
+    isUserMode.value = (_authService.getRole() ?? '').toLowerCase() == 'user';
+    final orderId = _extractOrderId(Get.arguments);
     if (orderId != null) loadOrder(orderId);
+  }
+
+  int? _extractOrderId(dynamic arguments) {
+    if (arguments is int) {
+      return arguments;
+    }
+
+    if (arguments is String) {
+      return int.tryParse(arguments);
+    }
+
+    if (arguments is Map) {
+      final rawOrderId = arguments['order_id'] ?? arguments['id'];
+      if (rawOrderId is int) {
+        return rawOrderId;
+      }
+      return int.tryParse(rawOrderId?.toString() ?? '');
+    }
+
+    return int.tryParse(Get.parameters['id'] ?? '');
   }
 
   Future<void> loadOrder(int orderId) async {
     isLoading.value = true;
+    _hasRedirectedAfterCancellation = false;
     try {
       final response = await orderService.detailOrder(orderId);
       orderData.value = DataOrder.fromJson(response);
       _lastShownStatus = orderData.value?.status;
       _lastShownPaymentStatus = orderData.value?.paymentStatus;
-      await _startRealtime(orderId);
-      itemStatus.clear();
-      // Load item status from order details
-      for (var detail in orderData.value!.orderDetails ?? []) {
-        if (detail.id != null) {
-          itemStatus[detail.id!] = detail.status ?? 'pending';
-        }
+      _syncItemStatuses(orderData.value);
+
+      if ((orderData.value?.status ?? '').toLowerCase() == 'dibatalkan') {
+        await _handleCancelledOrderNavigation(showSnackbar: false);
+        return;
       }
+
+      await _startRealtime(orderId);
     } catch (e) {
       Get.snackbar('Error', 'Gagal load order: $e');
     } finally {
@@ -73,9 +103,15 @@ class DeliveryController extends GetxController {
     final mergedJson = currentOrder.toJson()..addAll(updatedOrder);
     final mergedOrder = DataOrder.fromJson(mergedJson);
     orderData.value = mergedOrder;
+    _syncItemStatuses(mergedOrder);
 
     final latestStatus = mergedOrder.status ?? '';
     final latestPaymentStatus = mergedOrder.paymentStatus ?? '';
+
+    if (latestStatus.toLowerCase() == 'dibatalkan') {
+      _handleCancelledOrderNavigation();
+      return;
+    }
 
     if (latestStatus != _lastShownStatus) {
       if (isUserMode.value &&
@@ -108,6 +144,63 @@ class DeliveryController extends GetxController {
       _lastShownPaymentStatus = latestPaymentStatus;
     } else if (latestPaymentStatus != _lastShownPaymentStatus) {
       _lastShownPaymentStatus = latestPaymentStatus;
+    }
+  }
+
+  void setUserMode(bool value) {
+    if (isUserMode.value != value) {
+      isUserMode.value = value;
+    }
+  }
+
+  void _syncItemStatuses(DataOrder? order) {
+    if (order == null) {
+      return;
+    }
+
+    itemStatus.clear();
+    for (final detail in order.orderDetails ?? <OrderDetail>[]) {
+      if (detail.id != null) {
+        itemStatus[detail.id!] = detail.status ?? 'pending';
+      }
+    }
+  }
+
+  Future<void> _handleCancelledOrderNavigation({
+    bool showSnackbar = true,
+  }) async {
+    if (_hasRedirectedAfterCancellation) {
+      return;
+    }
+
+    _hasRedirectedAfterCancellation = true;
+    _lastShownStatus = 'dibatalkan';
+    await _orderRealtimeService?.disconnect();
+
+    if (showSnackbar) {
+      Get.snackbar(
+        'Order Dibatalkan',
+        'Pesanan ini telah dibatalkan.',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    }
+
+    final targetRoute = _resolveHomeRoute();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.currentRoute != targetRoute) {
+        Get.offAllNamed(targetRoute);
+      }
+    });
+  }
+
+  String _resolveHomeRoute() {
+    switch ((_authService.getRole() ?? '').toLowerCase()) {
+      case 'driver':
+        return AppRoutes.DRIVER_HOME;
+      case 'user':
+      default:
+        return AppRoutes.USER_HOME;
     }
   }
 
@@ -179,15 +272,39 @@ class DeliveryController extends GetxController {
     }
   }
 
-  Future<void> completeDelivery() async {
-    if (isUserMode.value) return; // User mode: no action
-    if (orderData.value == null) return;
+  Future<bool> completeDelivery() async {
+    if (isUserMode.value) return false; // User mode: no action
+    if (orderData.value == null || isCompletingDelivery.value) return false;
+
+    isCompletingDelivery.value = true;
     try {
-      await orderService.completeDelivery(orderData.value!.id!);
-      Get.snackbar('Sukses', 'Delivery selesai!');
-      Get.offAllNamed(AppRoutes.DRIVER_HOME);
+      final orderId = orderData.value!.id!;
+      await orderService.completeDelivery(orderId);
+      _lastShownStatus = 'selesai';
+      orderData.update((order) {
+        if (order != null) {
+          order.status = 'selesai';
+        }
+      });
+      await _orderRealtimeService?.disconnect();
+
+      if (Get.isRegistered<OrderDriverController>()) {
+        final orderDriverController = Get.find<OrderDriverController>();
+        await orderDriverController.refreshData();
+        await orderDriverController.fetchHistory();
+      }
+
+      if (Get.isRegistered<DriverWalletController>()) {
+        await Get.find<DriverWalletController>().refreshAll();
+      }
+
+      Get.snackbar('Sukses', 'Pesanan selesai!');
+      return true;
     } catch (e) {
       Get.snackbar('Error', 'Gagal selesai delivery: $e');
+      return false;
+    } finally {
+      isCompletingDelivery.value = false;
     }
   }
 

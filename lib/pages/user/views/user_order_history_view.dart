@@ -1,5 +1,6 @@
 import 'package:e_pasar/app/data/models/order_model.dart';
 import 'package:e_pasar/pages/user/controllers/order_controller.dart';
+import 'package:e_pasar/pages/user/views/user_order_history_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -78,111 +79,142 @@ class UserOrderHistoryView extends GetView<OrderController> {
     final finishedAt = order.updatedAt ?? order.createdAt;
     final formattedDate = _formatDate(finishedAt);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1976D2).withOpacity(0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-        border: Border.all(
-          color: const Color(0xFFD7E9FF),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: const Text(
-                  'Selesai',
-                  style: TextStyle(
-                    color: Color(0xFF2E7D32),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                formattedDate,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF78909C),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            order.kodePesanan ?? '-',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF0D47A1),
+    return GestureDetector(
+      onTap: () {
+        final orderId = order.id;
+        if (orderId == null) {
+          Get.snackbar('Gagal', 'Data order tidak valid.');
+          return;
+        }
+
+        Get.to(() => UserOrderHistoryDetailView(orderId: orderId));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1976D2).withOpacity(0.08),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
+          ],
+          border: Border.all(
+            color: const Color(0xFFD7E9FF),
           ),
-          const SizedBox(height: 8),
-          _infoRow(
-            Icons.delivery_dining_outlined,
-            'Driver',
-            order.driver?.name ?? 'Driver tidak tersedia',
-          ),
-          const SizedBox(height: 8),
-          _infoRow(
-            Icons.location_on_outlined,
-            'Alamat',
-            order.alamatPengiriman ?? 'Alamat tidak tersedia',
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F9FF),
-                    borderRadius: BorderRadius.circular(16),
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(999),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Total Pembayaran',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF78909C),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _formatRupiah(order.totalHarga),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF1565C0),
-                        ),
-                      ),
-                    ],
+                  child: const Text(
+                    'Selesai',
+                    style: TextStyle(
+                      color: Color(0xFF2E7D32),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
+                const Spacer(),
+                Text(
+                  formattedDate,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF78909C),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Text(
+              order.kodePesanan ?? '-',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0D47A1),
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 8),
+            _infoRow(
+              Icons.delivery_dining_outlined,
+              'Driver',
+              order.driver?.name ?? 'Driver tidak tersedia',
+            ),
+            const SizedBox(height: 8),
+            _infoRow(
+              Icons.location_on_outlined,
+              'Alamat',
+              order.alamatPengiriman ?? 'Alamat tidak tersedia',
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F9FF),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Total Pembayaran',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF78909C),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatRupiah(order.totalHarga),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF1565C0),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: const [
+                Text(
+                  'Lihat detail',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1565C0),
+                  ),
+                ),
+                SizedBox(width: 6),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Color(0xFF1565C0),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

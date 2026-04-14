@@ -485,7 +485,7 @@ class UserHomeView extends GetView<UserProdukController> {
                     ),
                     const Spacer(),
                     _appBarIconButton(
-                      icon: Icons.location_on_outlined,
+                      icon: Icons.info,
                       onTap: () => Get.to(() => const AppInfoView()),
                     ),
                     const SizedBox(width: 6),

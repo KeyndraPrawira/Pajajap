@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../utils/api.dart';
 import '../data/models/profile_model.dart';
@@ -93,5 +94,42 @@ class ProfileService {
       return profileFromJson(res.body);
     }
     return null;
+  }
+
+  static Future<bool> uploadProfilePhoto(
+    String token,
+    Uint8List photoBytes,
+    String filename,
+  ) async {
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${Api.baseUrl}/profile/foto-profil'),
+      );
+
+      request.headers.addAll({
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      });
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'foto_profil',
+          photoBytes,
+          filename: filename,
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('UPLOAD PROFILE PHOTO STATUS: ${response.statusCode}');
+      print('UPLOAD PROFILE PHOTO BODY: ${response.body}');
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('UPLOAD PROFILE PHOTO ERROR: $e');
+      return false;
+    }
   }
 }

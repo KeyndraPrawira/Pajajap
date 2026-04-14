@@ -122,7 +122,7 @@ class OrdersTab extends StatelessWidget {
                         size: 64, color: Colors.grey),
                     const SizedBox(height: 16),
                     const Text(
-                      'Tidak ada order baru',
+                      'Tidak ada pesanan baru',
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                     const SizedBox(height: 8),
@@ -143,7 +143,7 @@ class OrdersTab extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      'Order Baru',
+                      'Pesanan Baru',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
@@ -355,7 +355,7 @@ class OrderCard extends StatelessWidget {
                               ),
                             )
                           : const Text(
-                              'Terima Order',
+                              'Terima Pesanan',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

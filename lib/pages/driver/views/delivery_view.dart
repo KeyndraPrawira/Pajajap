@@ -7,6 +7,8 @@ class DeliveryView extends GetView<DeliveryController> {
 
   @override
   Widget build(BuildContext context) {
+    controller.setUserMode(false);
+
     return Scaffold(
       body: Column(
         children: [
@@ -313,6 +315,21 @@ class DeliveryView extends GetView<DeliveryController> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Total Belanja',
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
+                    Obx(() => Text(
+                          'Rp ${controller.orderData.value?.totalHargaBarang?.toString() ?? '0'}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),
+                        )),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
